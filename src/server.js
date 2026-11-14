@@ -6,10 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { timingSafeEqual } from 'node:crypto';
 import { openStore } from './store.js';
 import { createX, buildQuery, parsePostUrl, XError } from './xapi.js';
-import { createMonitor } from './monitor.js';
+import { createMonitor, itemSpec } from './monitor.js';
+import { buildPlan, planCost } from './plan.js';
 import { analyze } from './analytics.js';
 import { buildBrief } from './brief.js';
-import { observe } from './journal.js';
+import { observe, retrospect } from './journal.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
@@ -41,12 +42,63 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     const users = store.getUsers(new Set(list.map((p) => p.author_id)));
     const posts = new Map(list.map((p) => [p.id, { ...p, username: users.get(p.author_id)?.username ?? null }]));
     const hourMax7d = Math.max(0, ...store.getCounts(id, 'hour', now - 7 * 24 * HOUR).filter((c) => c.ts + HOUR <= now - HOUR).map((c) => c.n));
-    const { events, state: js } = observe(store.getSetting(`jstate:${id}`, null), a, posts, { hourMax7d }, now);
+    const prevState = store.getSetting(`jstate:${id}`, null);
+    let { events, state: js } = observe(prevState, a, posts, { hourMax7d }, now);
     store.setSetting(`jstate:${id}`, js);
+    const inv = w.spec.investigation;
+    if (inv && !prevState) { // inceleme yeni bitti: açılış notu yerine geçmişe dönük seyir yazılır
+      const hours = Math.min(24, Math.max(1, Math.ceil((now - inv.plan.from) / HOUR)));
+      const ar = analysisFor(w, hours <= 1 ? '1h' : hours <= 6 ? '6h' : '24h');
+      const withF = list.map((p) => ({ ...p, username: users.get(p.author_id)?.username ?? null, followers: users.get(p.author_id)?.followers ?? 0 }));
+      const retro = retrospect(ar, withF, inv, now);
+      for (const e of retro) store.addJournal(id, e);
+      emit('journal', { watchId: id, name: w.name, entries: [{ level: 1, text: `İnceleme tamamlandı: ${retro.length} not yazıldı.` }] });
+      return;
+    }
     const entries = events.map((e) => ({ ...e, id: store.addJournal(id, { ...e, ts: now }), ts: now, watch_id: id }));
     if (entries.length) emit('journal', { watchId: id, name: w.name, entries });
   }
-  const monitor = createMonitor({ store, x, emit, isDemo, viewerSeenAt: () => (clients.size ? Date.now() : viewerSeen), onTick });
+  // İnceleme oluşturur: yalnızca sayım verisiyle plan çıkarır; gönderi çekimi onay bekler
+  async function createInvestigation(rawSpec, hours, name, { resolved = false } = {}) {
+    const spec = resolved ? rawSpec : await resolveSpec(rawSpec);
+    hours = Math.min(24, Math.max(1, Math.round(Number(hours)) || 3));
+    const now = Date.now();
+    const { q } = await previewCounts(spec); // sorguyu sınar (gönderi izlemede yedek biçime düşebilir)
+    const hourly = await x.counts(q.query, { granularity: 'hour', startMs: now - 7 * 24 * HOUR + 120_000 });
+    const minute = await x.counts(q.query, { granularity: 'minute', startMs: now - Math.max(hours + 2, 6) * HOUR });
+    const plan = buildPlan({ minute: minute.buckets.filter((b) => !b.partial).map((b) => ({ ts: b.ts, n: b.n })), hourly: hourly.buckets.map((b) => ({ ts: b.ts, n: b.n })), from: now - hours * HOUR, to: now, now });
+    spec.investigation = { hours, status: 'planned', createdAt: now, plan };
+    const w = store.createWatch({ name: String(name ?? '').trim().slice(0, 80) || spec.any?.[0] || spec.accounts?.[0] || 'İnceleme', spec, query: q.query, interval_sec: 300, posts_per_poll: 25, backfill_hours: hours, backfill_posts: 0 });
+    store.updateWatch(w.id, { status: 'paused' });
+    return store.getWatch(w.id);
+  }
+  function approveInvestigation(w, choices) {
+    const inv = w.spec.investigation;
+    if (!inv || inv.status !== 'planned') throw new XError('bad_request', 'Bu inceleme onay beklemiyor.');
+    for (const c of choices ?? []) { const s = inv.plan.segments.find((y) => y.key === c.key); if (s && ['full', 'sample', 'none'].includes(c.take)) s.take = c.take; }
+    const u = x.usageSummary(); const { cost } = planCost(inv.plan, u.prices);
+    if (!u.demo && u.today + cost > u.budget.daily) throw new XError('budget', `Bu plan yaklaşık ${cost.toFixed(2)} $ tutuyor; bugünkü harcamayla (${u.today.toFixed(2)} $) günlük tavanı (${u.budget.daily} $) aşar. Tavanı Ayarlar’dan artırın ya da bazı dilimleri “temsilî” yapın.`);
+    inv.status = 'running'; inv.approvedAt = Date.now(); inv.estimate = cost;
+    store.updateWatch(w.id, { spec: w.spec });
+    monitor.tick(w.id);
+  }
+  // Nöbetçi tarama bir hareketlenme yakaladığında: plan çıkar; üst sınırın altındaysa onaysız yürüt
+  async function onAlert({ list, item, burstStart }) {
+    const hours = Math.min(24, Math.max(3, Math.ceil((Date.now() - burstStart) / HOUR) + 1));
+    const w = await createInvestigation({ ...itemSpec(item.value, list.lang), excludeReposts: true }, hours, `${item.value} (otomatik)`);
+    const { cost } = planCost(w.spec.investigation.plan, x.usageSummary().prices);
+    let text;
+    if (cost <= list.auto_limit) {
+      try { approveInvestigation(w, []); text = `“${item.value}” için inceleme kendiliğinden başlatıldı (yaklaşık ${cost.toFixed(2)} $; üst sınır ${list.auto_limit} $).`; } catch (e) { text = `“${item.value}” için inceleme planı hazır ama başlatılamadı: ${e.message}`; }
+    } else text = `“${item.value}” için inceleme planı hazır ve onayınızı bekliyor (yaklaşık ${cost.toFixed(2)} $; onaysız üst sınır ${list.auto_limit} $).`;
+    const entry = { type: 'auto_plan', level: 1, cat: 'seyir', text };
+    entry.id = store.addJournal(w.id, { ...entry, ts: Date.now() }); entry.ts = Date.now();
+    emit('journal', { watchId: w.id, name: w.name, entries: [entry] });
+    emit('update', { watchId: w.id });
+  }
+  const monitor = createMonitor({ store, x, emit, isDemo, viewerSeenAt: () => (clients.size ? Date.now() : viewerSeen), onTick, onAlert });
+  const listsView = () => store.listLists().filter((l) => l.demo === isDemo()).map((l) => ({ ...l, scanning: monitor.isScanning(l.id), items: l.items.map(({ state: _s, ...i }) => i) }));
+  const parseItems = (v) => [...new Set((Array.isArray(v) ? v : String(v ?? '').split(',')).map((s) => String(s).trim().slice(0, 80)).filter(Boolean))].slice(0, 40);
 
   function analysisFor(w, range) {
     const key = `${w.id}|${range}`;
@@ -64,7 +116,8 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
   const watchView = (w) => {
     const base = { id: w.id, name: w.name, status: w.status, interval_sec: w.interval_sec, posts_per_poll: w.posts_per_poll, spec: w.spec, query: w.query,
       backfill_done: w.backfill_done, last_poll_at: w.last_poll_at, last_error: w.last_error, running: monitor.isRunning(w.id), created_at: w.created_at,
-      stored: store.countPosts(w.id) };
+      stored: store.countPosts(w.id), investigation: w.spec.investigation ? { ...w.spec.investigation, cost: planCost(w.spec.investigation.plan, x.usageSummary().prices) } : null };
+    if (w.spec.investigation?.status === 'planned') { base.summary = null; return base; }
     try {
       const a = analysisFor(w, '24h');
       const top = a.terms.terms.find((t) => t.rising);
@@ -78,8 +131,10 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     client: store.getSetting('client', null), autoPause: store.getSetting('autoPause', true), usage: x.usageSummary(),
     watches: store.listWatches().filter((w) => !!w.spec.demo === isDemo()).map(watchView),
     trackPosts: store.getSetting('trackPosts', true),
+    lists: listsView(),
     recent: (() => {
       const names = new Map(store.listWatches().filter((w) => !!w.spec.demo === isDemo()).map((w) => [w.id, w.name]));
+      for (const l of store.listLists()) if (l.demo === isDemo()) for (const i of l.items) names.set(-i.id, l.name);
       return store.recentJournal({ maxLevel: 1, limit: 30, since: Date.now() - 24 * HOUR }).filter((j) => names.has(j.watch_id)).slice(0, 8).map((j) => ({ ...j, watch: names.get(j.watch_id) }));
     })(),
   });
@@ -168,6 +223,32 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
         backfill_hours: int(b.backfill_hours, 1, 168, 24), backfill_posts: int(b.backfill_posts, 0, 5000, 200) });
       monitor.tick(w.id);
       return { id: w.id };
+    }],
+    ['POST', /^\/api\/investigations$/, async (_, b) => {
+      const w = await createInvestigation(b.spec ?? {}, b.hours, b.name);
+      emit('update', { watchId: w.id });
+      return { id: w.id, watch: watchView(w) };
+    }],
+    ['POST', /^\/api\/investigations\/(\d+)\/approve$/, (m, b) => { approveInvestigation(need(m[1]), b.segments); return { ok: true }; }],
+    ['POST', /^\/api\/lists$/, (_, b) => { const id = store.createList(String(b.name ?? '').trim().slice(0, 60) || 'Yeni liste', isDemo()); store.setListItems(id, parseItems(b.items)); return { id, lists: listsView() }; }],
+    ['PUT', /^\/api\/lists\/(\d+)$/, (m, b) => {
+      const id = Number(m[1]); if (!store.getList(id)) throw new XError('not_found', 'Liste bulunamadı.');
+      const patch = {};
+      if (b.name) patch.name = String(b.name).trim().slice(0, 60);
+      if (typeof b.lang === 'string') patch.lang = /^[a-z]{2}$/.test(b.lang) ? b.lang : '';
+      if (typeof b.enabled === 'boolean') patch.enabled = b.enabled;
+      if (typeof b.auto === 'boolean') patch.auto = b.auto;
+      if (b.interval_min) patch.interval_min = Math.min(1440, Math.max(5, Math.round(Number(b.interval_min)) || 60));
+      if (b.auto_limit !== undefined) patch.auto_limit = Math.min(1000, Math.max(0, Number(b.auto_limit) || 0));
+      store.updateList(id, patch);
+      if (b.items) store.setListItems(id, parseItems(b.items));
+      return { lists: listsView() };
+    }],
+    ['DELETE', /^\/api\/lists\/(\d+)$/, (m) => { store.deleteList(Number(m[1])); return { lists: listsView() }; }],
+    ['POST', /^\/api\/lists\/(\d+)\/scan$/, async (m, b) => {
+      const id = Number(m[1]); if (!store.getList(id)) throw new XError('not_found', 'Liste bulunamadı.');
+      if (b.wait) await monitor.scanList(id); else monitor.scanList(id);
+      return { lists: listsView() };
     }],
     ['PATCH', /^\/api\/watches\/(\d+)$/, (m, b) => {
       const patch = {};

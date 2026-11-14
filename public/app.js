@@ -143,15 +143,15 @@ function viewConnect() {
 // ---------------------------------------------------------------- genel bakış
 function viewOverview() {
   if (!S.connected && !S.demo) return viewConnect();
-  const head = h('div', { class: 'row spread' }, h('h1', null, 'Genel Bakış'), h('a', { href: '#/yeni' }, h('button', { class: 'primary' }, '+ Yeni izleme')));
+  const head = h('div', { class: 'row spread' }, h('h1', null, 'Genel Bakış'), h('div', { class: 'row' }, h('a', { href: '#/tarama' }, h('button', null, 'Tarama listeleri')), h('a', { href: '#/yeni' }, h('button', { class: 'primary' }, '+ İncele / İzle'))));
   if (!S.watches.length) {
-    return h('div', { class: 'stack' }, head, h('div', { class: 'card' }, h('p', null, 'Henüz bir izleme yok. İlgilendiğiniz bir konuyu ekleyin; geçmişi getirip takibe başlayalım.'), h('a', { href: '#/yeni' }, h('button', { class: 'primary' }, 'İlk izlemeyi oluştur'))));
+    return h('div', { class: 'stack' }, head, h('div', { class: 'card' }, h('p', null, 'Henüz bir inceleme ya da izleme yok. Üç adımda çalışır: ', h('b', null, '1) Tara'), ' (kelime ve hesaplarınızda hareket var mı), ', h('b', null, '2) İncele'), ' (olay nasıl gelişti; plan çıkar), ', h('b', null, '3) Çek ve izle'), ' (yalnızca planın gösterdiği veriler).'), h('div', { class: 'row' }, h('a', { href: '#/tarama' }, h('button', null, 'Tarama listesi oluştur')), h('a', { href: '#/yeni' }, h('button', { class: 'primary' }, 'Bir konuyu incele')))));
   }
   const rows = [...S.watches].sort((a, b) => (b.summary?.score ?? -1) - (a.summary?.score ?? -1)).map((w) => {
     const m = w.summary;
     return h('tr', { class: 'click', onclick: () => { location.hash = `#/izleme/${w.id}`; } },
-      h('td', null, h('b', null, w.name), h('div', { class: 'muted small' }, w.status === 'paused' ? 'Duraklatıldı' : w.running ? 'Veri çekiliyor…' : `Güncelleme: ${ago(w.last_poll_at)}`, w.last_error ? ' · ⚠ sorun var' : '')),
-      h('td', null, m ? stageBadge(m.stage, m.stageLabel) : '—'),
+      h('td', null, h('b', null, w.name), w.investigation ? h('span', { class: 'tag' }, 'İnceleme') : null, h('div', { class: 'muted small' }, w.investigation && w.status === 'paused' ? (w.investigation.status === 'done' ? `${w.investigation.hours} saat geriye bakıldı · ${ago(w.investigation.doneAt)}` : 'Plan hazır') : w.status === 'paused' ? 'Duraklatıldı' : w.running ? 'Veri çekiliyor…' : `Güncelleme: ${ago(w.last_poll_at)}`, w.last_error ? ' · ⚠ sorun var' : '')),
+      h('td', null, w.investigation?.status === 'planned' ? h('span', { class: 'tag new', style: 'margin-left:0' }, 'Plan onay bekliyor') : m ? stageBadge(m.stage, m.stageLabel) : '—'),
       h('td', { class: 'num r' }, m ? h('b', null, m.score) : '—'),
       h('td', null, spark(m?.spark)),
       h('td', { class: 'num r' }, m ? nf(m.total24) : '—'),
@@ -168,22 +168,22 @@ function viewOverview() {
 }
 
 // ---------------------------------------------------------------- yeni izleme
-function chipInput(list, placeholder) {
+function chipInput(list, placeholder, onChange = () => {}) {
   const box = h('div', { class: 'chips' });
   const input = h('input', { type: 'text', placeholder });
-  const add = (refocus) => { const had = input.value.trim(); for (const v of input.value.split(',').map((x) => x.trim()).filter(Boolean)) if (!list.includes(v)) list.push(v); input.value = ''; if (had || refocus === true) draw(); if (refocus === true) input.focus(); };
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(true); } else if (e.key === 'Backspace' && !input.value && list.length) { list.pop(); draw(); input.focus(); } });
+  const add = (refocus) => { const had = input.value.trim(); for (const v of input.value.split(',').map((x) => x.trim()).filter(Boolean)) if (!list.includes(v)) list.push(v); input.value = ''; if (had) onChange(list); if (had || refocus === true) draw(); if (refocus === true) input.focus(); };
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(true); } else if (e.key === 'Backspace' && !input.value && list.length) { list.pop(); onChange(list); draw(); input.focus(); } });
   input.addEventListener('blur', add);
-  function draw() { box.replaceChildren(...list.map((v, i) => h('span', { class: 'chip' }, v, h('button', { type: 'button', 'aria-label': 'Kaldır', onclick: () => { list.splice(i, 1); draw(); } }, '×'))), input); }
+  function draw() { box.replaceChildren(...list.map((v, i) => h('span', { class: 'chip' }, v, h('button', { type: 'button', 'aria-label': 'Kaldır', onclick: () => { list.splice(i, 1); onChange(list); draw(); } }, '×'))), input); }
   draw();
   return box;
 }
 function viewNew() {
   if (!S.connected && !S.demo) return viewConnect();
-  const f = ui.form ??= { name: '', any: [], all: [], accounts: [], exclude: [], accountMode: 'both', postUrl: '', lang: 'tr', excludeReposts: true, interval_sec: 300, backfill_hours: 24, backfill_posts: 200, posts_per_poll: 25, preview: null };
+  const f = ui.form ??= { mode: 'incele', hours: 3, name: '', any: [], all: [], accounts: [], exclude: [], accountMode: 'both', postUrl: '', lang: 'tr', excludeReposts: true, interval_sec: 300, backfill_hours: 24, backfill_posts: 200, posts_per_poll: 25, preview: null };
   const side = h('div', { class: 'card stack' });
   const spec = () => ({ any: f.any, all: f.all, accounts: f.accounts, exclude: f.exclude, accountMode: f.accountMode, postUrl: f.postUrl, lang: f.lang, excludeReposts: f.excludeReposts, ...(f.preview?.spec?.postUrl === f.postUrl ? { postId: f.preview.spec.postId, conversationId: f.preview.spec.conversationId, postPreview: f.preview.spec.postPreview, postVariant: f.preview.spec.postVariant } : {}) });
-  const sel = (key, opts) => h('select', { onchange: (e) => { f[key] = Number(e.target.value) || e.target.value; drawSide(); } }, opts.map(([v, l]) => h('option', { value: v, selected: f[key] === v }, l)));
+  const sel = (key, opts) => h('select', { onchange: (e) => { f[key] = Number(e.target.value) || e.target.value; if (f.mode !== 'incele') drawSide(); } }, opts.map(([v, l]) => h('option', { value: v, selected: f[key] === v }, l)));
   function estimate() {
     const p = S.usage.prices; const ticks = 86400 / f.interval_sec; const vol = (f.preview?.last24h ?? 0) * (f.excludeReposts ? 0.6 : 1);
     const reread = S.trackPosts ? (86400 / Math.max(900, f.interval_sec)) * 10 * p.post : 0;
@@ -214,8 +214,21 @@ function viewNew() {
     if (r) { ui.form = null; S = await api('GET', '/api/state'); location.hash = `#/izleme/${r.id}`; }
   };
   const text = (key, ph) => h('input', { type: 'text', value: f[key], placeholder: ph, oninput: (e) => { f[key] = e.target.value; } });
-  drawSide();
-  return h('div', { class: 'stack' }, h('h1', null, 'Yeni izleme'),
+  const investigate = async (btn) => {
+    btn.disabled = true; btn.textContent = 'Taranıyor…';
+    const r = await act(() => api('POST', '/api/investigations', { name: f.name, spec: spec(), hours: f.hours }));
+    btn.disabled = false; btn.textContent = 'Tara ve plan çıkar';
+    if (r) { ui.form = null; S = await api('GET', '/api/state'); location.hash = `#/izleme/${r.id}`; }
+  };
+  const inc = f.mode === 'incele';
+  if (inc) side.replaceChildren(h('h2', null, 'İnceleme nasıl ilerler?'),
+    h('div', { class: 'list' },
+      h('div', null, h('b', null, '1. Tarama'), h('div', { class: 'muted' }, 'Gönderi okunmadan, yalnızca X’in sayım verisiyle olayın ne zaman başladığı ve nasıl hızlandığı çıkarılır. Maliyeti birkaç senttir.')),
+      h('div', null, h('b', null, '2. Plan'), h('div', { class: 'muted' }, 'Dalga evrelere ayrılır (öncesi, başlangıç, büyüme, son durum). Her evreden kaç gönderi okunacağı ve tutarı size gösterilir. Başlangıç evresi eksiksiz okunur.')),
+      h('div', null, h('b', null, '3. Çekim'), h('div', { class: 'muted' }, 'Siz onaylayınca yalnızca planın gösterdiği gönderiler çekilir; olayın seyri notlar hâlinde yazılır. İsterseniz ardından canlı izlemeye alırsınız.'))));
+  else drawSide();
+  const modeSeg = h('div', { class: 'seg' }, [['incele', 'Geçmişe bak ve incele'], ['izle', 'Şimdiden itibaren canlı izle']].map(([k, l]) => h('button', { class: f.mode === k ? 'on' : '', onclick: () => { f.mode = k; render(); } }, l)));
+  return h('div', { class: 'stack' }, h('h1', null, inc ? 'Bir konuyu incele' : 'Canlı izleme başlat'), modeSeg,
     h('div', { class: 'grid g-form' },
       h('div', { class: 'card stack' },
         h('label', { class: 'f' }, h('span', null, 'Konu adı'), text('name', 'Örn. Asgari ücret tartışması'), h('small', null, 'Boş bırakırsanız ilk kelimeden üretilir.')),
@@ -231,15 +244,17 @@ function viewNew() {
             h('div', null, h('label', { class: 'f' }, h('span', null, 'Hariç tut')), chipInput(f.exclude, 'kelime ya da @hesap')))),
         h('div', { class: 'row' },
           h('label', null, 'Dil ', h('select', { onchange: (e) => { f.lang = e.target.value; } }, [['tr', 'Türkçe'], ['', 'Tümü'], ['en', 'İngilizce']].map(([v, l]) => h('option', { value: v, selected: f.lang === v }, l)))),
-          h('label', null, h('input', { type: 'checkbox', checked: f.excludeReposts, onchange: (e) => { f.excludeReposts = e.target.checked; drawSide(); } }), ' Yeniden paylaşımları çekme (önerilir, maliyeti düşürür)')),
-        h('h3', null, 'Ne kadar veri çekilsin?'),
-        h('div', { class: 'row' },
+          h('label', null, h('input', { type: 'checkbox', checked: f.excludeReposts, onchange: (e) => { f.excludeReposts = e.target.checked; if (f.mode !== 'incele') drawSide(); } }), ' Yeniden paylaşımları çekme (önerilir, maliyeti düşürür)')),
+        inc ? h('div', { class: 'row' }, h('label', null, h('b', null, 'Kaç saat geriye bakılsın? '), sel('hours', [[1, '1 saat'], [3, '3 saat'], [6, '6 saat'], [12, '12 saat'], [24, '24 saat']])), h('span', { class: 'muted small' }, 'Olay daha önce başlamışsa plan bunu söyler.')) : null,
+        inc ? null : h('h3', null, 'Ne kadar veri çekilsin?'),
+        inc ? null : h('div', { class: 'row' },
           h('label', null, 'Geriye bak ', sel('backfill_hours', [[6, '6 saat'], [24, '24 saat'], [72, '3 gün'], [168, '7 gün']])),
           h('label', null, 'Geçmişten en fazla ', sel('backfill_posts', [[0, 'gönderi çekme'], [100, '100 gönderi'], [200, '200 gönderi'], [500, '500 gönderi'], [1000, '1.000 gönderi'], [2000, '2.000 gönderi']])),
           h('label', null, 'Yenileme ', sel('interval_sec', [[60, '1 dk'], [120, '2 dk'], [300, '5 dk'], [900, '15 dk'], [1800, '30 dk']])),
           h('label', null, 'Her yenilemede en fazla ', sel('posts_per_poll', [[10, '10'], [25, '25'], [50, '50'], [100, '100']]), ' gönderi')),
-        h('p', { class: 'muted small' }, 'Hacim grafiği X’in sayım verisinden eksiksiz gelir (ucuz). Gönderi içerikleri ise örneklem olarak çekilir; örneklem büyüdükçe hesap ve terim analizleri güvenilirleşir, maliyet artar.'),
-        h('div', { class: 'row' }, h('button', { onclick: (e) => preview(e.currentTarget) }, 'Hacmi önizle'), h('button', { class: 'primary', onclick: (e) => start(e.currentTarget) }, 'İzlemeyi başlat'))),
+        inc ? null : h('p', { class: 'muted small' }, 'Hacim grafiği X’in sayım verisinden eksiksiz gelir (ucuz). Gönderi içerikleri ise örneklem olarak çekilir; örneklem büyüdükçe hesap ve terim analizleri güvenilirleşir, maliyet artar.'),
+        inc ? h('div', { class: 'row' }, h('button', { class: 'primary', onclick: (e) => investigate(e.currentTarget) }, 'Tara ve plan çıkar'))
+          : h('div', { class: 'row' }, h('button', { onclick: (e) => preview(e.currentTarget) }, 'Hacmi önizle'), h('button', { class: 'primary', onclick: (e) => start(e.currentTarget) }, 'İzlemeyi başlat'))),
       side));
 }
 function dailyBuckets(series) {
@@ -254,6 +269,11 @@ async function viewWatch(id) {
   let d;
   try { d = await api('GET', `/api/watches/${id}/analysis?range=${ui.range}`); } catch (e) { return h('div', { class: 'stack' }, h('div', { class: 'notice err' }, e.message), h('a', { href: '#/' }, '← Genel Bakış')); }
   S.usage = d.usage; renderTop();
+  if (d.watch.investigation?.status === 'planned') return viewPlan(d.watch);
+  if (d.watch.investigation && ui.rangeSet !== id) {
+    ui.rangeSet = id; const hrs = d.watch.investigation.hours; const want = hrs <= 1 ? '1h' : hrs <= 6 ? '6h' : '24h';
+    if (want !== ui.range) { ui.range = want; return viewWatch(id); }
+  }
   const { watch: w, analysis: a, pins, journal } = d; const m = a.momentum;
   const reload = () => render();
   const pin = (kind, ref_id, note) => act(async () => { await api('POST', `/api/watches/${id}/pins`, { kind, ref_id, note }); reload(); }, 'Not sepetine eklendi');
@@ -261,17 +281,17 @@ async function viewWatch(id) {
   const pinBtn = (kind, ref, note) => (pinned(kind, ref) ? h('span', { class: 'tag new' }, '✓ sepette') : h('button', { class: 'ghost small', title: 'Danışmanlık notuna ekle', onclick: () => pin(kind, ref, note) }, '＋ Nota ekle'));
 
   const header = h('div', { class: 'row spread' },
-    h('div', null, h('a', { href: '#/', class: 'small' }, '← Genel Bakış'), h('div', { class: 'row' }, h('h1', null, w.name), stageBadge(m.stage, m.stageLabel), w.status === 'paused' ? h('span', { class: 'tag' }, 'Duraklatıldı') : null)),
+    h('div', null, h('a', { href: '#/', class: 'small' }, '← Genel Bakış'), h('div', { class: 'row' }, h('h1', null, w.name), stageBadge(m.stage, m.stageLabel), w.investigation ? h('span', { class: 'tag' }, `İnceleme · ${w.investigation.hours} saat`) : null, w.status === 'paused' && !w.investigation ? h('span', { class: 'tag' }, 'Duraklatıldı') : null)),
     h('div', { class: 'row no-print' },
       h('div', { class: 'seg' }, RANGES.map(([v, l]) => h('button', { class: ui.range === v ? 'on' : '', onclick: () => { ui.range = v; reload(); } }, l))),
       h('label', { class: 'small' }, 'Yenileme ', h('select', { onchange: (e) => act(() => api('PATCH', `/api/watches/${id}`, { interval_sec: Number(e.target.value) }), 'Yenileme aralığı güncellendi') }, [[60, '1 dk'], [120, '2 dk'], [300, '5 dk'], [900, '15 dk'], [1800, '30 dk']].map(([v, l]) => h('option', { value: v, selected: w.interval_sec === v }, l)))),
       h('button', { onclick: () => act(() => api('POST', `/api/watches/${id}/refresh`), 'Yenileniyor…') }, 'Şimdi yenile'),
       w.status === 'active' ? h('button', { onclick: () => act(async () => { await api('PATCH', `/api/watches/${id}`, { status: 'paused' }); }, 'Duraklatıldı. Veri çekilmiyor, harcama yapılmıyor.') }, 'Duraklat')
-        : h('button', { onclick: () => act(async () => { await api('PATCH', `/api/watches/${id}`, { status: 'active' }); }, 'Sürdürülüyor') }, 'Sürdür'),
+        : h('button', { onclick: () => act(async () => { await api('PATCH', `/api/watches/${id}`, { status: 'active' }); }, 'Canlı izleme başladı') }, w.investigation ? 'Canlı izlemeye al' : 'Sürdür'),
       h('button', { class: 'primary', onclick: () => briefDialog(id) }, 'Danışmanlık notu')));
 
   const prog = ui.progress[id];
-  const statusLine = h('div', { class: 'muted small' }, w.running ? (prog ?? 'Veri çekiliyor…') : `Son güncelleme: ${ago(w.last_poll_at)}`, ` · Örneklem: ${nf(a.sample.n)} gönderi (dönemdeki ${nf(a.kpi.total)} gönderinin %${nf(a.sample.coverage * 100)}’i) · Analiz güveni: ${a.sample.confidence}`);
+  const statusLine = h('div', { class: 'muted small' }, w.running ? (prog ?? 'Veri çekiliyor…') : w.investigation && w.status === 'paused' ? `İnceleme ${ago(w.investigation.doneAt)} tamamlandı; canlı izleme kapalı` : `Son güncelleme: ${ago(w.last_poll_at)}`, ` · Örneklem: ${nf(a.sample.n)} gönderi (dönemdeki ${nf(a.kpi.total)} gönderinin %${nf(a.sample.coverage * 100)}’i) · Analiz güveni: ${a.sample.confidence}`);
 
   const tile = (v, l, dd) => h('div', { class: 'card tile' }, h('div', { class: 'l' }, l), h('div', { class: 'v' }, v), dd ? h('div', { class: 'd' }, dd) : null);
   const status = h('div', { class: 'status' },
@@ -293,7 +313,7 @@ async function viewWatch(id) {
     const dl = dayLabel(j.ts); if (dl !== lastDay) { jRows.push(h('div', { class: 'jday' }, dl)); lastDay = dl; }
     jRows.push(h('div', { class: `jrow l${j.level}` },
       h('div', { class: 'jt num' }, tHM(j.ts), h('div', { class: 'muted small' }, ago(j.ts))),
-      h('div', { class: 'main' }, h('div', { class: 'jx' }, j.level === 1 ? h('span', { class: 'tag new', style: 'margin-left:0' }, 'Önemli') : null, j.level === 1 ? ' ' : null, j.text),
+      h('div', { class: 'main' }, h('div', { class: 'jx' }, j.level === 1 ? h('span', { class: 'tag new', style: 'margin-left:0' }, 'Önemli') : null, j.past ? h('span', { class: 'tag', style: j.level === 1 ? '' : 'margin-left:0' }, 'Geçmişten') : null, j.level === 1 || j.past ? ' ' : null, j.text),
         j.evidence ? h('div', { class: 'muted small' }, j.evidence) : null),
       h('div', { class: 'row no-print', style: 'gap:2px' },
         j.ref_kind === 'post' ? ext(xLink(j.ref_user, j.ref_id), h('button', { class: 'ghost small' }, 'X’te aç')) : j.ref_kind === 'account' ? ext(xLink(j.ref_user), h('button', { class: 'ghost small' }, 'X’te aç')) : null,
@@ -369,6 +389,81 @@ async function viewWatch(id) {
       : [chart, cards, h('div', { class: 'grid g2' }, terms, accounts), h('div', { class: 'grid g2' }, posts, h('div', { class: 'stack' }, formats, basket))]), foot);
 }
 
+// ---------------------------------------------------------------- inceleme planı
+function viewPlan(w) {
+  const inv = w.investigation; const plan = inv.plan; const p = S.usage.prices;
+  const take = Object.fromEntries(plan.segments.map((s) => [s.key, s.take]));
+  const fetchN = (s) => (take[s.key] === 'full' ? Math.min(s.count, 5000) : take[s.key] === 'sample' ? s.quota : 0);
+  const total = h('div'); const tbody = h('tbody');
+  const span = (s) => `${tHM(s.from)}–${tHM(s.to)}`;
+  function draw() {
+    tbody.replaceChildren(...plan.segments.map((s) => h('tr', null,
+      h('td', null, h('b', null, s.label), h('div', { class: 'muted small' }, s.why)),
+      h('td', { class: 'num' }, span(s)), h('td', { class: 'num r' }, nf(s.count)),
+      h('td', null, h('select', { onchange: (e) => { take[s.key] = e.target.value; draw(); } },
+        [['full', `Tamamı (${nf(Math.min(s.count, 5000))})`], ['sample', `Temsilî, zamana eşit yayılmış (${nf(s.quota)})`], ['none', 'Okuma']].map(([v, l]) => h('option', { value: v, selected: take[s.key] === v }, l)))),
+      h('td', { class: 'num r' }, nf(fetchN(s))))));
+    const posts = plan.segments.reduce((n, s) => n + fetchN(s), 0) + (plan.top ? Math.min(100, plan.total) : 0);
+    const cost = posts * (p.post + 0.6 * p.user) + 4 * p.counts;
+    const cov = plan.total ? Math.min(1, plan.segments.reduce((n, s) => n + fetchN(s), 0) / plan.total) : 0;
+    total.replaceChildren(h('div', { class: 'notice' }, h('div', null, 'Okunacak: ', h('b', null, `≈ ${nf(posts)} gönderi`), ` (dönemdeki gönderilerin %${nf(cov * 100)}’i${plan.top ? '; ayrıca en çok etkileşim alan 100 gönderi' : ''})`),
+      h('div', null, 'Tahmini tutar: ', h('b', null, `≈ ${usd(cost)}`), h('span', { class: 'muted' }, S.demo ? ' (demo: gerçek harcama yok)' : ' (üst sınır tahmini)'))));
+  }
+  draw();
+  const approve = (btn) => act(async () => { btn.disabled = true; await api('POST', `/api/investigations/${w.id}/approve`, { segments: plan.segments.map((s) => ({ key: s.key, take: take[s.key] })) }); S = await api('GET', '/api/state'); render(); });
+  return h('div', { class: 'stack' },
+    h('div', null, h('a', { href: '#/', class: 'small' }, '← Genel Bakış'), h('div', { class: 'row' }, h('h1', null, w.name), h('span', { class: 'tag new' }, 'İnceleme planı · onay bekliyor'))),
+    h('div', { class: 'muted small' }, `Son ${inv.hours} saat tarandı (${ago(inv.createdAt)}). Henüz gönderi okunmadı; aşağıdaki tablo yalnızca sayım verisine dayanır.`),
+    h('div', { class: 'card' }, h('h2', null, 'Tarama sonucu'), volumeChart(plan.bins, 300000, { markTs: plan.wave?.start, markLabel: 'Dalga başlangıcı', height: 200 }),
+      h('ul', { style: 'margin:10px 0 0;padding-left:18px' }, plan.facts.map((t) => h('li', null, t)))),
+    h('div', { class: 'card stack' }, h('h2', null, 'İnceleme planı: hangi evreden ne kadar okunsun?'),
+      h('p', { class: 'muted small', style: 'margin:-6px 0 0' }, '“Tamamı” o evredeki bütün gönderileri okur; bilgi kaybı olmaz. “Temsilî” evreyi eşit zaman dilimlerine bölüp her dilimden aynı sayıda gönderi okur; rastgele ya da yalnızca son dakikalardan değildir.'),
+      h('div', { style: 'overflow-x:auto' }, h('table', null, h('thead', null, h('tr', null, h('th', null, 'Evre'), h('th', null, 'Zaman'), h('th', { class: 'r' }, 'Gönderi'), h('th', null, 'Kapsam'), h('th', { class: 'r' }, 'Okunacak'))), tbody)),
+      total,
+      h('div', { class: 'row' }, h('button', { class: 'primary', onclick: (e) => approve(e.currentTarget) }, 'Planı onayla ve veriyi çek'),
+        plan.suggestHours ? h('button', { onclick: async () => { await act(() => api('DELETE', `/api/watches/${w.id}`)); ui.form = { mode: 'incele', hours: plan.suggestHours >= 24 ? 24 : plan.suggestHours > 12 ? 24 : plan.suggestHours > 6 ? 12 : 6, name: w.name, any: w.spec.any ?? [], all: w.spec.all ?? [], accounts: w.spec.accounts ?? [], exclude: w.spec.exclude ?? [], accountMode: w.spec.accountMode ?? 'both', postUrl: w.spec.postUrl ?? '', lang: w.spec.lang ?? '', excludeReposts: w.spec.excludeReposts !== false, interval_sec: 300, backfill_hours: 24, backfill_posts: 200, posts_per_poll: 25, preview: null }; S = await api('GET', '/api/state'); location.hash = '#/yeni'; } }, 'Daha geriye bakarak yeniden tara') : null,
+        h('button', { class: 'danger', onclick: async () => { await act(() => api('DELETE', `/api/watches/${w.id}`)); S = await api('GET', '/api/state'); location.hash = '#/'; } }, 'Vazgeç'))),
+    h('details', { class: 'muted small' }, h('summary', null, 'Oluşan X sorgusu'), h('code', { class: 'q' }, w.query)));
+}
+
+// ---------------------------------------------------------------- tarama listeleri
+function viewScan() {
+  if (!S.connected && !S.demo) return viewConnect();
+  const p = S.usage.prices;
+  const newName = h('input', { type: 'text', placeholder: 'Liste adı (örn. Galatasaray)' }); const newItems = [];
+  const put = (id, body, msg) => act(async () => { S.lists = (await api('PUT', `/api/lists/${id}`, body)).lists; render(); }, msg);
+  const startInv = (l, i) => { const hrs = i.result?.burstStart ? Math.ceil((Date.now() - i.result.burstStart) / 3600e3) + 1 : 3; ui.form = { mode: 'incele', hours: hrs <= 1 ? 1 : hrs <= 3 ? 3 : hrs <= 6 ? 6 : hrs <= 12 ? 12 : 24, name: i.value, any: i.value.startsWith('@') ? [] : [i.value], all: [], accounts: i.value.startsWith('@') ? [i.value] : [], exclude: [], accountMode: 'both', postUrl: '', lang: l.lang, excludeReposts: true, interval_sec: 300, backfill_hours: 24, backfill_posts: 200, posts_per_poll: 25, preview: null }; location.hash = '#/yeni'; };
+  const cards = S.lists.map((l) => {
+    const items = l.items.map((i) => i.value);
+    const perDay = l.items.length * (1440 / l.interval_min) * p.counts;
+    const rows = [...l.items].filter((i) => i.result).sort((a, b) => b.result.score - a.result.score).map((i) => { const r = i.result; return h('tr', null,
+      h('td', null, h('b', null, i.value)), h('td', null, stageBadge(r.stage, r.stageLabel)), h('td', { class: 'num r' }, h('b', null, r.score)),
+      h('td', { class: 'num r' }, nf(r.lastHour)), h('td', { class: 'num r' }, r.baseline30 >= 1 ? `${nf1(r.last30 / r.baseline30)} kat` : '—'), h('td', null, spark(r.spark)),
+      h('td', { class: 'muted small' }, r.burstActive ? `dalga ${tHM(r.burstStart)}’te başladı` : ''), h('td', { class: 'r' }, h('button', { class: 'small', onclick: () => startInv(l, i) }, 'İncele'))); });
+    return h('div', { class: 'card stack' },
+      h('div', { class: 'row spread' }, h('div', null, h('h2', { style: 'margin:0' }, l.name), h('div', { class: 'muted small' }, l.scanning ? 'Taranıyor…' : `Son tarama: ${ago(l.last_scan_at)}`)),
+        h('div', { class: 'row' }, h('button', { class: 'primary', disabled: l.scanning || !l.items.length, onclick: () => act(async () => { S.lists = (await api('POST', `/api/lists/${l.id}/scan`, {})).lists; render(); }, 'Tarama başladı') }, 'Şimdi tara'),
+          h('button', { class: 'ghost danger', onclick: () => confirm(`“${l.name}” listesi silinsin mi?`) && act(async () => { S.lists = (await api('DELETE', `/api/lists/${l.id}`)).lists; render(); }) }, 'Sil'))),
+      l.last_error ? h('div', { class: 'notice err' }, l.last_error) : null,
+      h('div', null, chipInput(items, 'kelime, #etiket, "birkaç kelimelik ifade" ya da @hesap yazıp Enter’a basın', (list) => act(async () => { S.lists = (await api('PUT', `/api/lists/${l.id}`, { items: list.length ? list : [''] })).lists; }))),
+      rows.length ? h('div', { style: 'overflow-x:auto' }, h('table', null, h('thead', null, h('tr', null, h('th', null, 'Öğe'), h('th', null, 'Aşama'), h('th', { class: 'r' }, 'İvme'), h('th', { class: 'r' }, 'Son 1 saat'), h('th', { class: 'r' }, 'Olağana göre'), h('th', null, 'Son 24 saat'), h('th', null, ''), h('th', null, ''))), h('tbody', null, rows)))
+        : h('p', { class: 'muted small' }, l.items.length ? 'Henüz taranmadı. “Şimdi tara”ya basın.' : 'Listeye kelime, etiket ya da hesap ekleyin.'),
+      h('div', { class: 'notice stack' },
+        h('div', { class: 'row' }, h('label', null, h('input', { type: 'checkbox', checked: l.enabled, onchange: (e) => put(l.id, { enabled: e.target.checked }, e.target.checked ? 'Nöbetçi tarama açıldı' : 'Nöbetçi tarama kapatıldı') }), h('b', null, ' Nöbetçi tarama')),
+          h('label', null, 'Aralık ', h('select', { onchange: (e) => put(l.id, { interval_min: Number(e.target.value) }) }, [[5, '5 dk'], [15, '15 dk'], [30, '30 dk'], [60, '1 saat'], [180, '3 saat'], [360, '6 saat']].map(([v, t]) => h('option', { value: v, selected: l.interval_min === v }, t)))),
+          h('label', null, 'Dil ', h('select', { onchange: (e) => put(l.id, { lang: e.target.value }) }, [['tr', 'Türkçe'], ['', 'Tümü'], ['en', 'İngilizce']].map(([v, t]) => h('option', { value: v, selected: l.lang === v }, t)))),
+          h('span', { class: 'muted small' }, `Açıkken: ${l.items.length} öğe × günde ${nf(1440 / l.interval_min)} tarama ≈ ${usd(perDay)} / gün. Panel kapalıyken de sürer.`)),
+        h('div', { class: 'row' }, h('label', null, h('input', { type: 'checkbox', checked: l.auto, onchange: (e) => put(l.id, { auto: e.target.checked }) }), ' Başında değilken: hareketlenme olursa incelemeyi onaysız başlat, inceleme başına üst sınır '),
+          h('input', { type: 'number', min: '0', step: '0.5', value: l.auto_limit, style: 'width:80px', onchange: (e) => put(l.id, { auto_limit: Number(e.target.value) }) }), h('span', null, '$'),
+          h('span', { class: 'muted small' }, 'Üst sınırı aşan planlar onayınızı bekler.'))));
+  });
+  return h('div', { class: 'stack' }, h('h1', null, 'Tarama'),
+    h('p', { class: 'muted', style: 'margin:0' }, 'Kelime, etiket ve hesaplarınızı listeler hâlinde tutun. Tarama gönderi okumaz; yalnızca X’in sayım verisiyle hangi öğede hareket olduğunu gösterir (öğe başına tarama başına yaklaşık ', `${nf1(p.counts * 100)} sent`, '). Hareket gördüğünüz öğeyi “İncele” ile derinleştirin.'),
+    ...cards,
+    h('div', { class: 'card stack' }, h('h2', null, 'Yeni liste'), h('div', { class: 'row' }, h('div', { style: 'flex:1;min-width:200px' }, newName)), chipInput(newItems, 'kelime, #etiket ya da @hesap yazıp Enter’a basın'),
+      h('div', null, h('button', { class: 'primary', onclick: () => act(async () => { S.lists = (await api('POST', '/api/lists', { name: newName.value, items: newItems })).lists; render(); }, 'Liste oluşturuldu') }, 'Listeyi oluştur'))));
+}
+
 async function briefDialog(id) {
   const r = await act(() => api('GET', `/api/watches/${id}/brief?range=${ui.range}`));
   if (!r) return;
@@ -431,6 +526,7 @@ async function render() {
   let view;
   if (route === 'izleme') view = await viewWatch(Number(arg));
   else if (route === 'yeni') view = viewNew();
+  else if (route === 'tarama') view = viewScan();
   else if (route === 'danisan') view = viewClient();
   else if (route === 'ayarlar') view = viewSettings();
   else view = viewOverview();
@@ -463,6 +559,7 @@ function connect() {
       try { new Notification(`Nabız · ${d.name}`, { body: imp.length > 1 ? `${imp.length} yeni gelişme: ${imp[0].text}` : imp[0].text, tag: `nabiz-${d.watchId}` }); } catch { /* yoksay */ }
     }
   });
+  es.addEventListener('scan', () => liveRefresh());
   es.addEventListener('progress', (e) => { const d = JSON.parse(e.data); ui.progress[d.watchId] = d.step; liveRefresh(); });
   es.onerror = () => { document.getElementById('conn').textContent = 'Sunucuyla bağlantı koptu, yeniden deneniyor…'; document.getElementById('conn').className = 'pill bad'; };
   es.onopen = () => { if (S) renderTop(); };

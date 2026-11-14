@@ -169,3 +169,51 @@ export function observe(prev, a, posts, ctx, now = Date.now()) {
   for (const k of Object.keys(s.hot)) if (now - s.hot[k] > 24 * HOUR) delete s.hot[k];
   return { events, state: s };
 }
+
+// Geçmişe dönük seyir: bir inceleme tamamlandığında, olayın nasıl geliştiğini zaman damgalı notlarla yeniden kurar.
+// a: inceleme aralığının analizi. posts: aralıktaki gönderiler (username, followers eklenmiş). inv: inceleme kaydı.
+export function retrospect(a, posts, inv, now = Date.now()) {
+  const m = a.momentum; const out = [];
+  const add = (ts, level, cat, type, text, extra = {}) => out.push({ ts: Math.min(ts, now), level, cat, type, text, past: true, ...extra });
+  const own = posts.filter((p) => p.kind !== 'repost' && p.created_at >= inv.plan.from).sort((x, y) => x.created_at - y.created_at);
+  const snippet = (p) => String(p.text ?? '').replace(/\s+/g, ' ').slice(0, 140);
+  const postRef = (p) => ({ ref_kind: 'post', ref_id: p.id, ref_user: p.username, evidence: snippet(p) });
+  const cover = `okunan: ${fmt(a.sample.n)} gönderi · dönem toplamı: ${fmt(a.kpi.total)} (yeniden paylaşımlar dahil)`;
+  const wave = inv.plan.wave;
+  if (!wave) {
+    add(now, LEVEL.info, 'seyir', 'retro_none', `İnceleme tamamlandı: bu dönemde belirgin bir dalga saptanmadı; hacim olağan seyrinde.`, { evidence: cover });
+    return out;
+  }
+  const t0 = wave.start;
+  add(t0, LEVEL.important, 'seyir', 'retro_start', 'Konu bu sıralarda hareketlenmeye başladı.', { evidence: inv.plan.facts.slice(0, 2).join(' ') });
+  // dalganın başındaki ilk paylaşımlar (başlangıç evresi eksiksiz okunduysa güvenilirdir)
+  const onset = inv.plan.segments.find((s) => s.key === 'onset');
+  const early = own.filter((p) => p.kind !== 'reply' && p.created_at >= t0 - 30 * MIN && p.created_at <= t0 + 30 * MIN);
+  if (early.length) {
+    const firsts = []; for (const p of early) { if (!firsts.some((q) => q.username === p.username)) firsts.push(p); if (firsts.length >= 4) break; }
+    add(firsts[0].created_at, LEVEL.important, 'hesap', 'retro_first', `Dalganın başındaki ilk paylaşımlar: ${firsts.map((p) => `@${p.username} (${fmt(p.followers ?? 0)} takipçi)`).join(', ')}.`,
+      { evidence: onset?.take === 'full' ? 'Başlangıç evresi eksiksiz okundu.' : 'Başlangıç evresi örneklemle okundu; daha erken paylaşımlar olabilir.', ref_kind: 'account', ref_user: firsts[0].username });
+  }
+  const firstNames = new Set(out.filter((e) => e.type === 'retro_first').flatMap((e) => [...e.text.matchAll(/@(\w+)/g)].map((x) => x[1])));
+  // erken dönemin en çok etkileşim alan gönderisi
+  const upTo = Math.max(wave.peakTs, t0 + 30 * MIN);
+  const spark = own.filter((p) => p.created_at >= t0 - 60 * MIN && p.created_at <= upTo).sort((x, y) => E(y) - E(x))[0];
+  if (spark && E(spark) >= 30) add(spark.created_at, LEVEL.important, 'gonderi', 'retro_spark', `@${spark.username} hesabının bu gönderisi, yükseliş döneminde en çok etkileşim alan paylaşım (${fmt(E(spark))} etkileşim).`, postRef(spark));
+  // büyük hesapların konuya girişi
+  const seen = new Set(); let big = 0;
+  for (const p of own) {
+    if (p.created_at < t0 - 30 * MIN || seen.has(p.username) || (p.followers ?? 0) < 100000 || firstNames.has(p.username)) continue;
+    seen.add(p.username);
+    if (big++ < 3) add(p.created_at, LEVEL.info, 'hesap', 'retro_big', `Büyük bir hesap konuya girdi: @${p.username} (${fmt(p.followers)} takipçi).`, postRef(p));
+  }
+  // hız basamakları
+  const stepMin = a.stepMs / MIN; const base = Math.max(0.2, m.baseline30 / 30);
+  const marks = [];
+  for (const k of [3, 10, 30]) { const hit = a.series.find((s) => s.ts >= t0 - 15 * MIN && s.n / stepMin >= k * base); if (hit) marks.push([k, hit]); }
+  for (const [k, hit] of marks.slice(-2)) add(hit.ts + a.stepMs, LEVEL.info, 'seyir', 'retro_speed', `Hız, bu saat için olağan düzeyin ${k} katını aştı (dakikada ~${fmt1(hit.n / stepMin)} gönderi).`);
+  if (wave.peakTs < now - 20 * MIN) add(wave.peakTs, LEVEL.important, 'seyir', 'retro_peak', `En yoğun an: 5 dakikada ${fmt(wave.peakN)} gönderi.`);
+  const terms = a.terms.terms.filter((t) => t.rising).slice(0, 4);
+  if (terms.length) add(now - 1000, LEVEL.info, 'konu', 'retro_terms', `Son dönemde öne çıkan alt başlıklar: ${terms.map((t) => `“${t.term}”`).join(', ')}.`, { evidence: `örneklem: ${fmt(a.sample.n)} gönderi · güven: ${a.sample.confidence}` });
+  add(now, LEVEL.info, 'seyir', 'retro_done', `İnceleme tamamlandı. Konu şu an “${m.stageLabel}” aşamasında; son 1 saatte ${fmt(a.kpi.perHour)} gönderi.`, { evidence: cover, past: false });
+  return out.sort((x, y) => x.ts - y.ts);
+}

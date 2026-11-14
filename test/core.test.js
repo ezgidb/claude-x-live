@@ -107,3 +107,38 @@ test('gözlem günlüğü: açılış notu, doğrulanmış aşama değişimi, te
   assert.ok(climb); assert.match(climb.text, /100 → 500/); assert.equal(climb.level, 1);
   assert.ok(!r.events.some((e) => e.type === 'term'), 'aynı alt başlık 12 saat içinde yeniden yazılmaz');
 });
+
+test('üç aşama (demo veri): tarama listesi, inceleme planı, onay, geçmişe dönük günlük', async () => {
+  const app = createApp({ dbFile: ':memory:' });
+  await new Promise((r) => app.server.listen(0, '127.0.0.1', r));
+  const base = `http://127.0.0.1:${app.server.address().port}`;
+  const call = async (method, path, body) => (await fetch(base + path, { method, headers: { 'content-type': 'application/json' }, body: method === 'GET' ? undefined : JSON.stringify(body ?? {}) })).json();
+  try {
+    await call('POST', '/api/demo', { on: true });
+    const { id: listId } = await call('POST', '/api/lists', { name: 'Deneme', items: ['sarı torba', '@hesap', 'sarı torba'] });
+    const scanned = await call('POST', `/api/lists/${listId}/scan`, { wait: true });
+    const items = scanned.lists[0].items;
+    assert.equal(items.length, 2, 'yinelenen öğe tekilleştirilir');
+    assert.ok(items.every((i) => i.result && i.result.spark.length > 10 && i.result.burstActive));
+    assert.equal(app.store.countPosts(-items[0].id), 0, 'tarama gönderi okumaz');
+
+    const inv = await call('POST', '/api/investigations', { spec: { any: ['sarı torba'], lang: 'tr' }, hours: 3 });
+    const plan = inv.watch.investigation.plan;
+    assert.equal(inv.watch.investigation.status, 'planned');
+    assert.equal(app.store.countPosts(inv.id), 0, 'plan aşamasında gönderi okunmaz');
+    const onset = plan.segments.find((s) => s.key === 'onset');
+    assert.ok(plan.wave && onset && onset.take === 'full', 'başlangıç evresi eksiksiz okunur');
+    assert.equal(plan.segments.reduce((n, s) => n + s.count, 0), plan.total, 'evreler dönemi boşluksuz kaplar');
+
+    await call('POST', `/api/investigations/${inv.id}/approve`, {});
+    let w;
+    for (let i = 0; i < 100; i++) { w = (await call('GET', '/api/state')).watches.find((x) => x.id === inv.id); if (w.investigation.status === 'done' && !w.running) break; await new Promise((r) => setTimeout(r, 100)); }
+    assert.equal(w.last_error, null); assert.equal(w.status, 'paused', 'inceleme bitince canlı izleme kendiliğinden başlamaz');
+    const lo = onset.from; const hi = onset.to;
+    const got = app.store.getPosts(inv.id).filter((p) => p.created_at >= lo && p.created_at < hi).length;
+    assert.ok(got >= onset.count * 0.95, `başlangıç evresi: ${got}/${onset.count}`);
+    const d = await call('GET', `/api/watches/${inv.id}/analysis?range=6h`);
+    const types = d.journal.map((j) => j.type);
+    assert.ok(types.includes('retro_start') && types.includes('retro_first') && types.includes('retro_done'));
+  } finally { app.close(); }
+});

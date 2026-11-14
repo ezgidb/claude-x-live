@@ -55,6 +55,16 @@ CREATE TABLE IF NOT EXISTS journal (
   text TEXT NOT NULL, evidence TEXT, ref_kind TEXT, ref_id TEXT, ref_user TEXT, past INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS journal_time ON journal (watch_id, ts);
+CREATE TABLE IF NOT EXISTS scanlists (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, lang TEXT NOT NULL DEFAULT 'tr',
+  enabled INTEGER NOT NULL DEFAULT 0, interval_min INTEGER NOT NULL DEFAULT 60,
+  auto INTEGER NOT NULL DEFAULT 0, auto_limit REAL NOT NULL DEFAULT 2,
+  demo INTEGER NOT NULL DEFAULT 0, last_scan_at INTEGER, last_error TEXT
+);
+CREATE TABLE IF NOT EXISTS scanitems (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, list_id INTEGER NOT NULL, value TEXT NOT NULL,
+  state TEXT, result TEXT
+);
 CREATE TABLE IF NOT EXISTS pins (
   id INTEGER PRIMARY KEY AUTOINCREMENT, watch_id INTEGER NOT NULL,
   kind TEXT NOT NULL,            -- post | account | note
@@ -101,10 +111,10 @@ export function openStore(file) {
       return store.getWatch(Number(r.lastInsertRowid));
     },
     updateWatch(id, patch) {
-      const allowed = ['name', 'status', 'interval_sec', 'posts_per_poll', 'backfill_done', 'since_id', 'last_poll_at', 'last_error'];
+      const allowed = ['spec', 'query', 'name', 'status', 'interval_sec', 'posts_per_poll', 'backfill_done', 'since_id', 'last_poll_at', 'last_error'];
       const keys = Object.keys(patch).filter((k) => allowed.includes(k));
       if (!keys.length) return store.getWatch(id);
-      const vals = keys.map((k) => (typeof patch[k] === 'boolean' ? Number(patch[k]) : patch[k]));
+      const vals = keys.map((k) => (k === 'spec' ? JSON.stringify(patch[k]) : typeof patch[k] === 'boolean' ? Number(patch[k]) : patch[k]));
       q(`UPDATE watches SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`).run(...vals, id);
       return store.getWatch(id);
     },
@@ -177,6 +187,40 @@ export function openStore(file) {
     },
     usageSince(day) {
       return rows(q('SELECT day, endpoint, requests, posts FROM usage WHERE day >= ? ORDER BY day').all(day));
+    },
+
+    // --- tarama listeleri ---
+    listLists() {
+      const items = rows(q('SELECT * FROM scanitems ORDER BY id').all()).map((i) => ({ ...i, state: i.state ? JSON.parse(i.state) : null, result: i.result ? JSON.parse(i.result) : null }));
+      return rows(q('SELECT * FROM scanlists ORDER BY id').all()).map((l) => ({ ...l, enabled: !!l.enabled, auto: !!l.auto, demo: !!l.demo, items: items.filter((i) => i.list_id === l.id) }));
+    },
+    getList(id) { return store.listLists().find((l) => l.id === id) ?? null; },
+    createList(name, demo) {
+      return Number(q('INSERT INTO scanlists (name, demo) VALUES (?, ?)').run(name, demo ? 1 : 0).lastInsertRowid);
+    },
+    updateList(id, patch) {
+      const allowed = ['name', 'lang', 'enabled', 'interval_min', 'auto', 'auto_limit', 'last_scan_at', 'last_error'];
+      const keys = Object.keys(patch).filter((k) => allowed.includes(k));
+      if (keys.length) q(`UPDATE scanlists SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`).run(...keys.map((k) => (typeof patch[k] === 'boolean' ? Number(patch[k]) : patch[k])), id);
+    },
+    setListItems(id, values) {
+      const cur = store.getList(id)?.items ?? [];
+      tx(() => {
+        for (const i of cur) if (!values.includes(i.value)) store.deleteItem(i.id);
+        for (const v of values) if (!cur.some((i) => i.value === v)) q('INSERT INTO scanitems (list_id, value) VALUES (?, ?)').run(id, v);
+      });
+    },
+    updateItem(id, patch) {
+      if ('state' in patch) q('UPDATE scanitems SET state = ? WHERE id = ?').run(JSON.stringify(patch.state), id);
+      if ('result' in patch) q('UPDATE scanitems SET result = ? WHERE id = ?').run(JSON.stringify(patch.result), id);
+    },
+    deleteItem(itemId) { // sayım ve günlük kayıtları eksi kimlikle tutulur
+      for (const t of ['counts', 'journal']) q(`DELETE FROM ${t} WHERE watch_id = ?`).run(-itemId);
+      q('DELETE FROM scanitems WHERE id = ?').run(itemId);
+    },
+    deleteList(id) {
+      for (const i of store.getList(id)?.items ?? []) store.deleteItem(i.id);
+      q('DELETE FROM scanlists WHERE id = ?').run(id);
     },
 
     // --- gözlem günlüğü ---
