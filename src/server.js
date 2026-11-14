@@ -38,7 +38,8 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     if (!w || !w.backfill_done) return;
     for (const k of cache.keys()) if (k.startsWith(`${id}|`)) cache.delete(k);
     const a = analysisFor(w, '24h'); const now = Date.now();
-    const list = store.getPosts(id, now - 24 * HOUR);
+    const all = store.getPosts(id, now - 24 * HOUR);
+    const list = all.filter((p) => !p.thread);
     const users = store.getUsers(new Set(list.map((p) => p.author_id)));
     const posts = new Map(list.map((p) => [p.id, { ...p, username: users.get(p.author_id)?.username ?? null }]));
     const hourMax7d = Math.max(0, ...store.getCounts(id, 'hour', now - 7 * 24 * HOUR).filter((c) => c.ts + HOUR <= now - HOUR).map((c) => c.n));
@@ -50,7 +51,10 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
       const hours = Math.min(24, Math.max(1, Math.ceil((now - inv.plan.from) / HOUR)));
       const ar = analysisFor(w, hours <= 1 ? '1h' : hours <= 6 ? '6h' : '24h');
       const withF = list.map((p) => ({ ...p, username: users.get(p.author_id)?.username ?? null, followers: users.get(p.author_id)?.followers ?? 0 }));
-      const retro = retrospect(ar, withF, inv, now);
+      const tu = store.getUsers(new Set(all.map((p) => p.author_id)));
+      const named = (p) => ({ ...p, username: tu.get(p.author_id)?.username ?? null, followers: tu.get(p.author_id)?.followers ?? 0 });
+      const threads = (inv.threads ?? []).map((t) => ({ ...t, root: all.find((p) => p.id === t.id), replies: all.filter((p) => p.thread === t.id).map(named) })).filter((t) => t.root).map((t) => ({ ...t, root: named(t.root) }));
+      const retro = retrospect(ar, withF, inv, now, threads);
       for (const e of retro) store.addJournal(id, e);
       emit('journal', { watchId: id, name: w.name, entries: [{ level: 1, text: `İnceleme tamamlandı: ${retro.length} not yazıldı.` }] });
       return;
@@ -67,15 +71,35 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     const hourly = await x.counts(q.query, { granularity: 'hour', startMs: now - 7 * 24 * HOUR + 120_000 });
     const minute = await x.counts(q.query, { granularity: 'minute', startMs: now - Math.max(hours + 2, 6) * HOUR });
     const plan = buildPlan({ minute: minute.buckets.filter((b) => !b.partial).map((b) => ({ ts: b.ts, n: b.n })), hourly: hourly.buckets.map((b) => ({ ts: b.ts, n: b.n })), from: now - hours * HOUR, to: now, now });
+    // Yüksek etkileşimli gönderiler için ayrı süzgeç: X kabul ederse bu gönderilerin tamamı okunur.
+    // Eşik, bu dönemde en çok ~600 gönderi çıkaracak en düşük beğeni sayısıdır.
+    plan.important = null;
+    if (plan.total > 0) {
+      try {
+        for (const n of [10, 50, 200]) {
+          const c = await x.counts(`${q.query} min_faves:${n}`, { granularity: 'hour', startMs: plan.from });
+          const count = c.total || c.buckets.reduce((s, b) => s + b.n, 0);
+          plan.important = { op: `min_faves:${n}`, n, count, take: count > 0 };
+          if (count <= 600) break;
+        }
+      } catch (e) {
+        if (e.code !== 'bad_query') throw e;
+        plan.important = { unavailable: true, take: false };
+        plan.facts.push('Not: X, etkileşim eşiği süzgecini bu erişimde kabul etmedi. Yüksek etkileşimli gönderilerin kaçmaması için evreleri “tamamı” olarak okumanız önerilir.');
+      }
+    }
+    plan.threads = { take: plan.total > 0, maxPosts: 10, perThread: 100 };
     spec.investigation = { hours, status: 'planned', createdAt: now, plan };
     const w = store.createWatch({ name: String(name ?? '').trim().slice(0, 80) || spec.any?.[0] || spec.accounts?.[0] || 'İnceleme', spec, query: q.query, interval_sec: 300, posts_per_poll: 25, backfill_hours: hours, backfill_posts: 0 });
     store.updateWatch(w.id, { status: 'paused' });
     return store.getWatch(w.id);
   }
-  function approveInvestigation(w, choices) {
+  function approveInvestigation(w, choices, opts = {}) {
     const inv = w.spec.investigation;
     if (!inv || inv.status !== 'planned') throw new XError('bad_request', 'Bu inceleme onay beklemiyor.');
     for (const c of choices ?? []) { const s = inv.plan.segments.find((y) => y.key === c.key); if (s && ['full', 'sample', 'none'].includes(c.take)) s.take = c.take; }
+    if (typeof opts.important === 'boolean' && inv.plan.important && !inv.plan.important.unavailable) inv.plan.important.take = opts.important;
+    if (typeof opts.threads === 'boolean') inv.plan.threads.take = opts.threads;
     const u = x.usageSummary(); const { cost } = planCost(inv.plan, u.prices);
     if (!u.demo && u.today + cost > u.budget.daily) throw new XError('budget', `Bu plan yaklaşık ${cost.toFixed(2)} $ tutuyor; bugünkü harcamayla (${u.today.toFixed(2)} $) günlük tavanı (${u.budget.daily} $) aşar. Tavanı Ayarlar’dan artırın ya da bazı dilimleri “temsilî” yapın.`);
     inv.status = 'running'; inv.approvedAt = Date.now(); inv.estimate = cost;
@@ -106,7 +130,7 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     if (hit && Date.now() - hit.at < 60_000) return hit.data;
     const now = Date.now(); const rangeMs = RANGES[range][0] * HOUR;
     // Yükselen terim penceresi (en çok 42 saat) için aralıktan biraz geriye de bakılır
-    const posts = store.getPosts(w.id, now - Math.max(rangeMs, 42 * HOUR));
+    const posts = store.getPosts(w.id, now - Math.max(rangeMs, 42 * HOUR)).filter((p) => !p.thread); // yanıt zincirleri ayrı değerlendirilir
     const ids = new Set(); for (const p of posts) { ids.add(p.author_id); if (p.ref_author_id) ids.add(p.ref_author_id); }
     const data = analyze({ countsMin: store.getCounts(w.id, 'minute', now - 25 * HOUR), countsHour: store.getCounts(w.id, 'hour', now - 8 * 24 * HOUR),
       posts, users: store.getUsers(ids), queryWords: buildQuery(w.spec).words, now, rangeMs, client: store.getSetting('client', null) });
@@ -229,7 +253,7 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
       emit('update', { watchId: w.id });
       return { id: w.id, watch: watchView(w) };
     }],
-    ['POST', /^\/api\/investigations\/(\d+)\/approve$/, (m, b) => { approveInvestigation(need(m[1]), b.segments); return { ok: true }; }],
+    ['POST', /^\/api\/investigations\/(\d+)\/approve$/, (m, b) => { approveInvestigation(need(m[1]), b.segments, b); return { ok: true }; }],
     ['POST', /^\/api\/lists$/, (_, b) => { const id = store.createList(String(b.name ?? '').trim().slice(0, 60) || 'Yeni liste', isDemo()); store.setListItems(id, parseItems(b.items)); return { id, lists: listsView() }; }],
     ['PUT', /^\/api\/lists\/(\d+)$/, (m, b) => {
       const id = Number(m[1]); if (!store.getList(id)) throw new XError('not_found', 'Liste bulunamadı.');

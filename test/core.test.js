@@ -140,5 +140,8 @@ test('üç aşama (demo veri): tarama listesi, inceleme planı, onay, geçmişe 
     const d = await call('GET', `/api/watches/${inv.id}/analysis?range=6h`);
     const types = d.journal.map((j) => j.type);
     assert.ok(types.includes('retro_start') && types.includes('retro_first') && types.includes('retro_done'));
+    assert.ok(plan.important && plan.important.count > 0, 'yüksek etkileşim süzgeci planlanır');
+    assert.ok(w.investigation.threads.length > 0 && types.includes('retro_thread'), 'yanıt zincirleri okunur ve not edilir');
+    assert.ok(d.analysis.sample.n < app.store.countPosts(inv.id), 'yanıtlar kelime analizine karışmaz');
   } finally { app.close(); }
 });

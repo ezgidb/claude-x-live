@@ -168,13 +168,15 @@ function json(status, body, extra = {}) {
   return { status, headers: { 'x-rate-limit-limit': '450', 'x-rate-limit-remaining': '449', 'x-rate-limit-reset': String(Math.floor(Date.now() / 1000) + 900), ...extra }, body };
 }
 
+function splitQ(raw) { const m = raw.match(/\s*min_faves:(\d+)/); return { query: m ? raw.replace(m[0], '') : raw, minF: m ? Number(m[1]) : 0 }; }
+
 // url: URL nesnesi. Dönen: { status, headers, body }
 export function mockFetch(url) {
   const p = url.pathname;
   const now = Date.now();
   const sp = url.searchParams;
   if (p === '/2/tweets/search/recent') {
-    const query = sp.get('query') ?? '';
+    const { query, minF } = splitQ(sp.get('query') ?? '');
     const max = Math.min(100, Math.max(10, Number(sp.get('max_results') ?? 10)));
     const noRT = /-is:retweet/.test(query);
     const start = sp.get('start_time') ? Date.parse(sp.get('start_time')) : now - 7 * 86400e3;
@@ -194,6 +196,7 @@ export function mockFetch(url) {
         if (untilId && bid >= untilId) continue;
         if (sinceId && bid <= sinceId) break outer;
         if (noRT && post.referenced_tweets?.[0]?.type === 'retweeted') continue;
+        if (minF && (post._ref || publicView(post, now).public_metrics.like_count < minF)) continue;
         if (out.length >= max) { more = true; break outer; }
         out.push(post);
       }
@@ -210,7 +213,7 @@ export function mockFetch(url) {
     return json(200, { ...(data.length ? { data, includes: { users: [...users.values()], tweets: [...refs.values()] } } : {}), meta });
   }
   if (p === '/2/tweets/counts/recent') {
-    const query = sp.get('query') ?? '';
+    const { query, minF } = splitQ(sp.get('query') ?? '');
     const gran = sp.get('granularity') ?? 'hour';
     const step = gran === 'minute' ? MIN : gran === 'day' ? 1440 * MIN : 60 * MIN;
     const end = sp.get('end_time') ? Date.parse(sp.get('end_time')) : now - 10_000;
@@ -220,8 +223,12 @@ export function mockFetch(url) {
     for (let t = Math.floor(start / step) * step; t < end; t += step) {
       const a = Math.max(t, start); const b = Math.min(t + step, end);
       let n = 0;
-      for (let m = Math.floor(a / MIN); m * MIN < b; m++) n += minuteCount(query, m);
-      n = Math.round(n * k); total += n;
+      const exact = k < 1 && end - start <= 26 * 60 * MIN; // kısa aralıkta yeniden paylaşımlar tek tek ayıklanır
+      for (let m = Math.floor(a / MIN); m * MIN < b; m++) {
+        if (minF || exact) n += minutePosts(query, m).filter((x) => !x._ref && Date.parse(x.created_at) >= a && Date.parse(x.created_at) < b && (!minF || publicView(x, now).public_metrics.like_count >= minF)).length;
+        else n += minuteCount(query, m);
+      }
+      if (!minF && !exact) n = Math.round(n * k); total += n;
       data.push({ start: new Date(a).toISOString(), end: new Date(b).toISOString(), tweet_count: n });
     }
     return json(200, { data, meta: { total_tweet_count: total } });

@@ -348,6 +348,8 @@ export function accounts(posts, users, mom, now) {
 const ALARM = ['boykot', 'rezalet', 'skandal', 'istifa', 'utanç', 'utanmaz', 'yazıklar', 'şikayet', 'dolandır', 'yalan', 'protesto',
   'kınıyor', 'tepki', 'mağdur', 'haksız', 'sahtekar', 'kriz', 'ifşa', 'linç', 'hesap sor', 'yuh', 'ayıp', 'felaket'].map((w) => fold(w));
 
+export function alarmHit(text) { const t = fold(String(text ?? '').toLocaleLowerCase('tr-TR')); return ALARM.find((w) => t.includes(w)) ?? null; }
+
 export function content(posts, users, now) {
   const own = posts.filter((p) => p.kind !== 'repost');
   const hot = own.map((p) => ({ p, H: (engagement(p) + 1) / ((now - p.created_at) / HOUR + 2) ** 1.5 }))

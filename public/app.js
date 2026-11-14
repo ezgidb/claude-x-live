@@ -394,7 +394,8 @@ function viewPlan(w) {
   const inv = w.investigation; const plan = inv.plan; const p = S.usage.prices;
   const take = Object.fromEntries(plan.segments.map((s) => [s.key, s.take]));
   const fetchN = (s) => (take[s.key] === 'full' ? Math.min(s.count, 5000) : take[s.key] === 'sample' ? s.quota : 0);
-  const total = h('div'); const tbody = h('tbody');
+  const total = h('div'); const tbody = h('tbody'); const imp = plan.important; const thr = plan.threads ?? { take: false, maxPosts: 0, perThread: 0 };
+  const opt = { important: !!imp?.take, threads: !!thr.take };
   const span = (s) => `${tHM(s.from)}–${tHM(s.to)}`;
   function draw() {
     tbody.replaceChildren(...plan.segments.map((s) => h('tr', null,
@@ -403,22 +404,28 @@ function viewPlan(w) {
       h('td', null, h('select', { onchange: (e) => { take[s.key] = e.target.value; draw(); } },
         [['full', `Tamamı (${nf(Math.min(s.count, 5000))})`], ['sample', `Temsilî, zamana eşit yayılmış (${nf(s.quota)})`], ['none', 'Okuma']].map(([v, l]) => h('option', { value: v, selected: take[s.key] === v }, l)))),
       h('td', { class: 'num r' }, nf(fetchN(s))))));
-    const posts = plan.segments.reduce((n, s) => n + fetchN(s), 0) + (plan.top ? Math.min(100, plan.total) : 0);
-    const cost = posts * (p.post + 0.6 * p.user) + 4 * p.counts;
+    const extra = opt.important ? imp.count : plan.top ? Math.min(100, plan.total) : 0;
+    const posts = plan.segments.reduce((n, s) => n + fetchN(s), 0) + extra;
+    const per = p.post + 0.6 * p.user; const cost = posts * per + 6 * p.counts; const thrMax = opt.threads ? thr.maxPosts * thr.perThread : 0;
     const cov = plan.total ? Math.min(1, plan.segments.reduce((n, s) => n + fetchN(s), 0) / plan.total) : 0;
-    total.replaceChildren(h('div', { class: 'notice' }, h('div', null, 'Okunacak: ', h('b', null, `≈ ${nf(posts)} gönderi`), ` (dönemdeki gönderilerin %${nf(cov * 100)}’i${plan.top ? '; ayrıca en çok etkileşim alan 100 gönderi' : ''})`),
+    total.replaceChildren(h('div', { class: 'notice' }, h('div', null, 'Okunacak: ', h('b', null, `≈ ${nf(posts)} gönderi`), ` (evrelerden dönemdeki gönderilerin %${nf(cov * 100)}’i${opt.important ? `; ayrıca yüksek etkileşimli ${nf(imp.count)} gönderi (çoğu zaten evrelerin içindedir)` : ''})`),
+      opt.threads ? h('div', null, 'Yanıt zincirleri: ', h('b', null, `en çok +${nf(thrMax)} gönderi`), h('span', { class: 'muted' }, ` (en çok ≈ +${usd(thrMax * per)}; gerçek sayı gönderilere gelen yanıt sayısına bağlıdır, çoğu zaman daha azdır)`)) : null,
       h('div', null, 'Tahmini tutar: ', h('b', null, `≈ ${usd(cost)}`), h('span', { class: 'muted' }, S.demo ? ' (demo: gerçek harcama yok)' : ' (üst sınır tahmini)'))));
   }
   draw();
-  const approve = (btn) => act(async () => { btn.disabled = true; await api('POST', `/api/investigations/${w.id}/approve`, { segments: plan.segments.map((s) => ({ key: s.key, take: take[s.key] })) }); S = await api('GET', '/api/state'); render(); });
+  const approve = (btn) => act(async () => { btn.disabled = true; await api('POST', `/api/investigations/${w.id}/approve`, { segments: plan.segments.map((s) => ({ key: s.key, take: take[s.key] })), important: opt.important, threads: opt.threads }); S = await api('GET', '/api/state'); render(); });
   return h('div', { class: 'stack' },
     h('div', null, h('a', { href: '#/', class: 'small' }, '← Genel Bakış'), h('div', { class: 'row' }, h('h1', null, w.name), h('span', { class: 'tag new' }, 'İnceleme planı · onay bekliyor'))),
     h('div', { class: 'muted small' }, `Son ${inv.hours} saat tarandı (${ago(inv.createdAt)}). Henüz gönderi okunmadı; aşağıdaki tablo yalnızca sayım verisine dayanır.`),
     h('div', { class: 'card' }, h('h2', null, 'Tarama sonucu'), volumeChart(plan.bins, 300000, { markTs: plan.wave?.start, markLabel: 'Dalga başlangıcı', height: 200 }),
       h('ul', { style: 'margin:10px 0 0;padding-left:18px' }, plan.facts.map((t) => h('li', null, t)))),
     h('div', { class: 'card stack' }, h('h2', null, 'İnceleme planı: hangi evreden ne kadar okunsun?'),
-      h('p', { class: 'muted small', style: 'margin:-6px 0 0' }, '“Tamamı” o evredeki bütün gönderileri okur; bilgi kaybı olmaz. “Temsilî” evreyi eşit zaman dilimlerine bölüp her dilimden aynı sayıda gönderi okur; rastgele ya da yalnızca son dakikalardan değildir.'),
+      h('p', { class: 'muted small', style: 'margin:-6px 0 0' }, '“Tamamı” o evredeki bütün gönderileri okur; bilgi kaybı olmaz. “Temsilî” yalnızca çok kalabalık evreler için önerilir: evre 10 dakikalık dilimlere bölünür ve her dilimin en son gönderilerinden eşit sayıda okunur; dilimin başındaki gönderiler okunmayabilir. Bu boşluğu kapatmak için yüksek etkileşimli gönderiler aşağıda ayrıca eksiksiz okunur.'),
       h('div', { style: 'overflow-x:auto' }, h('table', null, h('thead', null, h('tr', null, h('th', null, 'Evre'), h('th', null, 'Zaman'), h('th', { class: 'r' }, 'Gönderi'), h('th', null, 'Kapsam'), h('th', { class: 'r' }, 'Okunacak'))), tbody)),
+      h('div', { class: 'stack' },
+        imp?.unavailable ? h('div', { class: 'notice warn' }, 'X, etkileşim eşiği süzgecini bu erişimde kabul etmedi. Yüksek etkileşimli gönderilerin kaçmaması için kalabalık evreleri de “Tamamı” olarak okumanız önerilir.')
+          : imp ? h('label', null, h('input', { type: 'checkbox', checked: opt.important, disabled: !imp.count, onchange: (e) => { opt.important = e.target.checked; draw(); } }), h('b', null, ' Yüksek etkileşimli gönderilerin tamamını oku'), ` — en az ${nf(imp.n)} beğeni almış ${nf(imp.count)} gönderi. Temsilî okunan evrelerde önemli bir gönderinin kaçmasını önler.`) : null,
+        h('label', null, h('input', { type: 'checkbox', checked: opt.threads, onchange: (e) => { opt.threads = e.target.checked; draw(); } }), h('b', null, ' Anahtar gönderilerin yanıtlarını da oku'), ` — dalganın başındaki ilk gönderiler ile en çok etkileşim alan gönderilerin (en çok ${thr.maxPosts}) yanıt zincirleri, gönderi başına en çok ${thr.perThread} yanıt. İçinde anahtar kelime geçmeyen tepkileri de görmenizi sağlar.`)),
       total,
       h('div', { class: 'row' }, h('button', { class: 'primary', onclick: (e) => approve(e.currentTarget) }, 'Planı onayla ve veriyi çek'),
         plan.suggestHours ? h('button', { onclick: async () => { await act(() => api('DELETE', `/api/watches/${w.id}`)); ui.form = { mode: 'incele', hours: plan.suggestHours >= 24 ? 24 : plan.suggestHours > 12 ? 24 : plan.suggestHours > 6 ? 12 : 6, name: w.name, any: w.spec.any ?? [], all: w.spec.all ?? [], accounts: w.spec.accounts ?? [], exclude: w.spec.exclude ?? [], accountMode: w.spec.accountMode ?? 'both', postUrl: w.spec.postUrl ?? '', lang: w.spec.lang ?? '', excludeReposts: w.spec.excludeReposts !== false, interval_sec: 300, backfill_hours: 24, backfill_posts: 200, posts_per_poll: 25, preview: null }; S = await api('GET', '/api/state'); location.hash = '#/yeni'; } }, 'Daha geriye bakarak yeniden tara') : null,

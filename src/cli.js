@@ -33,6 +33,9 @@ function printPlan(w) {
   const inv = w.investigation; const p = inv.plan;
   out(`\nİNCELEME #${w.id} “${w.name}” — son ${inv.hours} saat — durum: ${inv.status}`, `Sorgu: ${w.query}`, '', 'TARAMA SONUCU (yalnızca sayım verisi):', ...p.facts.map((f) => '  • ' + f), '', 'PLAN:');
   for (const s of p.segments) out(`  ${s.label} ${hm(s.from)}–${hm(s.to)}: ${nf(s.count)} gönderi → ${s.take === 'full' ? 'tamamı okunacak' : s.take === 'sample' ? `temsilî ${nf(s.quota)} gönderi (zamana eşit yayılmış)` : 'okunmayacak'}`);
+  if (p.important?.unavailable) out('  Yüksek etkileşimli gönderiler: X bu süzgeci kabul etmedi; kalabalık evreleri --tam ile okumak daha güvenli.');
+  else if (p.important) out(`  Yüksek etkileşimli gönderiler (en az ${p.important.n} beğeni): ${nf(p.important.count)} gönderi → ${p.important.take ? 'tamamı okunacak' : 'okunmayacak'}`);
+  if (p.threads?.take) out(`  Yanıt zincirleri: ilk ve en çok etkileşim alan en çok ${p.threads.maxPosts} gönderinin yanıtları, gönderi başına en çok ${p.threads.perThread} (en çok +${nf(inv.cost.threadsMax)} gönderi, ≈ +${inv.cost.threadsCost.toFixed(2)} $)`);
   out(`  Toplam ≈ ${nf(inv.cost.posts)} gönderi, tahmini ≈ ${inv.cost.cost.toFixed(2)} $`, '', inv.status === 'planned' ? `Onay için: node src/cli.js onayla ${w.id}   (her evrenin tamamı için: --tam)` : '');
 }
 async function report(id) {

@@ -7,7 +7,9 @@ const MIN = 60_000; const HOUR = 3_600_000;
 const fmt = (n) => Math.round(n).toLocaleString('tr-TR');
 const fmt1 = (n) => n.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
 const tHM = (ms) => new Date(ms).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' });
-const QUOTA = { pre: 100, growth: 300, after: 300, all: 400 };
+// Bir evre bu sayıya kadar gönderi içeriyorsa eksiksiz okunur; aşarsa "temsilî" önerilir (kullanıcı yine "tamamı" seçebilir).
+const FULL_UPTO = { pre: 300, growth: 1000, after: 1000, all: 1000 };
+const QUOTA = { pre: 150, growth: 500, after: 500, all: 500 };
 export const MAX_FULL = 5000;
 
 // minute/hourly: ARAMA sorgusunun (yeniden paylaşımlar hariç) sayımları. from/to: incelenecek aralık.
@@ -51,7 +53,7 @@ export function buildPlan({ minute, hourly, from, to, now = Date.now() }) {
   facts.push(`Dönem toplamı: ${fmt(total)} gönderi (yeniden paylaşımlar hariç).`);
   for (const s of segments) {
     const Q = QUOTA[s.key] ?? 300;
-    s.take = s.full || s.count <= Q * 1.2 ? 'full' : 'sample';
+    s.take = s.full || s.count <= (FULL_UPTO[s.key] ?? 1000) ? 'full' : 'sample';
     s.quota = Math.min(s.count, s.count > Q ? Q : Math.max(10, Math.ceil(s.count / 2))); // "temsilî" seçilirse okunacak sayı
     if (s.count === 0) s.take = 'none';
   }
@@ -60,6 +62,9 @@ export function buildPlan({ minute, hourly, from, to, now = Date.now() }) {
 
 export const segmentFetch = (s) => (s.take === 'full' ? Math.min(s.count, MAX_FULL) : s.take === 'sample' ? s.quota : 0);
 export function planCost(plan, prices) {
-  const posts = plan.segments.reduce((n, s) => n + segmentFetch(s), 0) + (plan.top ? Math.min(100, plan.total) : 0);
-  return { posts, cost: posts * (prices.post + 0.6 * prices.user) + 4 * prices.counts };
+  const imp = plan.important?.take ? plan.important.count : 0;
+  const posts = plan.segments.reduce((n, s) => n + segmentFetch(s), 0) + imp + (plan.top && !imp ? Math.min(100, plan.total) : 0);
+  const per = prices.post + 0.6 * prices.user;
+  const threadsMax = plan.threads?.take ? plan.threads.maxPosts * plan.threads.perThread : 0; // üst sınır; gerçek sayı yanıt sayısına bağlı
+  return { posts, cost: posts * per + 6 * prices.counts, threadsMax, threadsCost: threadsMax * per };
 }

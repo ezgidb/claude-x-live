@@ -1,3 +1,5 @@
+import { alarmHit } from './analytics.js';
+
 // Gözlem günlüğü: ardışık analiz anlık görüntülerini karşılaştırır, DEĞİŞEN şeyleri zaman damgalı not olarak üretir.
 // Deterministiktir. Gürültüyü önlemek için: aşama değişiminde iki ardışık doğrulama, olay başına bekleme süresi,
 // düşük hacim ve küçük örneklem kapıları, yenileme başına en çok 3 ve saatte en çok 12 not.
@@ -172,7 +174,7 @@ export function observe(prev, a, posts, ctx, now = Date.now()) {
 
 // Geçmişe dönük seyir: bir inceleme tamamlandığında, olayın nasıl geliştiğini zaman damgalı notlarla yeniden kurar.
 // a: inceleme aralığının analizi. posts: aralıktaki gönderiler (username, followers eklenmiş). inv: inceleme kaydı.
-export function retrospect(a, posts, inv, now = Date.now()) {
+export function retrospect(a, posts, inv, now = Date.now(), threads = []) {
   const m = a.momentum; const out = [];
   const add = (ts, level, cat, type, text, extra = {}) => out.push({ ts: Math.min(ts, now), level, cat, type, text, past: true, ...extra });
   const own = posts.filter((p) => p.kind !== 'repost' && p.created_at >= inv.plan.from).sort((x, y) => x.created_at - y.created_at);
@@ -212,6 +214,19 @@ export function retrospect(a, posts, inv, now = Date.now()) {
   for (const k of [3, 10, 30]) { const hit = a.series.find((s) => s.ts >= t0 - 15 * MIN && s.n / stepMin >= k * base); if (hit) marks.push([k, hit]); }
   for (const [k, hit] of marks.slice(-2)) add(hit.ts + a.stepMs, LEVEL.info, 'seyir', 'retro_speed', `Hız, bu saat için olağan düzeyin ${k} katını aştı (dakikada ~${fmt1(hit.n / stepMin)} gönderi).`);
   if (wave.peakTs < now - 20 * MIN) add(wave.peakTs, LEVEL.important, 'seyir', 'retro_peak', `En yoğun an: 5 dakikada ${fmt(wave.peakN)} gönderi.`);
+  // anahtar gönderilerin yanıt zincirleri
+  for (const t of [...threads].sort((x, y) => y.root.replies - x.root.replies).slice(0, 8)) {
+    if (!t.replies.length) continue;
+    const best = [...t.replies].sort((x, y) => E(y) - E(x));
+    const byUser = new Map(); for (const r of t.replies) byUser.set(r.username, (byUser.get(r.username) ?? 0) + E(r) + 1);
+    const names = [...byUser].sort((x, y) => y[1] - x[1]).slice(0, 3).map((x) => '@' + x[0]);
+    const alarm = t.replies.filter((r) => alarmHit(r.text)).length / t.replies.length;
+    let text = `@${t.root.username} hesabının gönderisine gelen yanıtlar okundu (${fmt(t.replies.length)} / ${fmt(Math.max(t.root.replies, t.replies.length))} yanıt).`;
+    if (E(best[0]) >= 5) text += ` En çok etkileşim alan yanıt: @${best[0].username} — “${snippet(best[0]).slice(0, 110)}” (${fmt(E(best[0]))} etkileşim).`;
+    text += ` Yanıtlarda öne çıkan hesaplar: ${names.join(', ')}.`;
+    if (t.replies.length >= 10 && alarm >= 0.15) text += ` Yanıtların %${fmt(alarm * 100)}’inde tepki ifadeleri geçiyor.`;
+    add(t.root.created_at + 1000, LEVEL.info, 'gonderi', 'retro_thread', text, { ...postRef(t.root), evidence: `Kök gönderi: ${snippet(t.root)}` });
+  }
   const terms = a.terms.terms.filter((t) => t.rising).slice(0, 4);
   if (terms.length) add(now - 1000, LEVEL.info, 'konu', 'retro_terms', `Son dönemde öne çıkan alt başlıklar: ${terms.map((t) => `“${t.term}”`).join(', ')}.`, { evidence: `örneklem: ${fmt(a.sample.n)} gönderi · güven: ${a.sample.confidence}` });
   add(now, LEVEL.info, 'seyir', 'retro_done', `İnceleme tamamlandı. Konu şu an “${m.stageLabel}” aşamasında; son 1 saatte ${fmt(a.kpi.perHour)} gönderi.`, { evidence: cover, past: false });

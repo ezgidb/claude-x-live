@@ -121,9 +121,36 @@ export function createMonitor({ store, x, emit, isDemo, viewerSeenAt, onTick = (
         }
       }
     }
-    if (plan.top) { // dönem boyunca en çok etkileşim alanlar
+    if (plan.important?.take) { // yüksek etkileşimli gönderilerin tamamı (temsilî okunan evrelerde önemli olanı kaçırmamak için)
+      let next;
+      for (let page = 0; page < 12; page++) {
+        step('Yüksek etkileşimli gönderiler');
+        const r = await x.search(`${q.query} ${plan.important.op}`, { ...win(plan.from, plan.to), max: 100, nextToken: next });
+        take(r); next = r.meta.next_token;
+        if (!next || !r.posts.length) break;
+      }
+    } else if (plan.top) { // dönem boyunca en çok etkileşim alanlar
       step('Öne çıkanlar');
       take(await x.search(q.query, { ...win(plan.from, plan.to), max: 100, sort: 'relevancy' }));
+    }
+    // Anahtar gönderilerin yanıt zincirleri: anahtar kelime geçmeyen tepkiler de okunur
+    if (plan.threads?.take) {
+      try {
+        const E = (p) => p.likes + 2 * p.reposts + 2 * p.quotes + 1.5 * p.replies;
+        const own = store.getPosts(w.id, plan.from).filter((p) => !p.thread && p.kind !== 'repost' && p.kind !== 'reply');
+        const onset = plan.segments.find((s) => s.key === 'onset');
+        const firsts = onset ? own.filter((p) => p.created_at >= onset.from && p.created_at < onset.to && p.replies >= 3).slice(0, 3) : [];
+        const tops = own.filter((p) => p.replies >= 5).sort((a, b) => E(b) - E(a));
+        const roots = []; for (const p of [...firsts, ...tops]) { if (!roots.some((r) => r.id === p.id)) roots.push(p); if (roots.length >= plan.threads.maxPosts) break; }
+        inv.threads = [];
+        for (const root of roots) {
+          emit('progress', { watchId: w.id, step: `Yanıt zincirleri okunuyor… ${inv.threads.length + 1} / ${roots.length}` });
+          const r = await x.search(`conversation_id:${root.id} -is:retweet`, { startMs: Math.max(root.created_at - MIN, lo), max: Math.min(plan.threads.perThread, Math.max(10, root.replies)) });
+          const replies = r.posts.filter((p) => p.id !== root.id);
+          store.upsertUsers(r.users); store.upsertPosts(w.id, replies, root.id);
+          inv.threads.push({ id: root.id, replies: root.replies, read: replies.length });
+        }
+      } catch (e) { inv.threadError = e instanceof XError ? e.message : String(e.message); }
     }
     inv.status = 'done'; inv.fetched = store.countPosts(w.id); inv.doneAt = Date.now();
     store.updateWatch(w.id, { spec: w.spec, backfill_done: true, since_id: newest });

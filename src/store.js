@@ -77,6 +77,7 @@ export function openStore(file) {
   const db = new DatabaseSync(file);
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
   db.exec(SCHEMA);
+  try { db.exec('ALTER TABLE posts ADD COLUMN thread TEXT'); } catch { /* sütun zaten var */ }
   const q = (sql) => db.prepare(sql);
   const tx = (fn) => {
     db.exec('BEGIN');
@@ -135,10 +136,10 @@ export function openStore(file) {
     },
 
     // --- gönderiler ve hesaplar ---
-    upsertPosts(watchId, posts) {
+    upsertPosts(watchId, posts, thread = null) { // thread: bu gönderi hangi kök gönderinin yanıt zincirinden okundu
       const s = q(`INSERT INTO posts (watch_id, id, author_id, created_at, text, lang, likes, reposts, replies, quotes,
-          impressions, bookmarks, kind, ref_id, ref_author_id, conversation_id, hashtags, mentions, urls, has_media, fetched_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          impressions, bookmarks, kind, ref_id, ref_author_id, conversation_id, hashtags, mentions, urls, has_media, fetched_at, thread)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT DO UPDATE SET likes = excluded.likes, reposts = excluded.reposts, replies = excluded.replies,
           quotes = excluded.quotes, impressions = excluded.impressions, bookmarks = excluded.bookmarks, fetched_at = excluded.fetched_at`);
       const now = Date.now();
@@ -147,7 +148,7 @@ export function openStore(file) {
           s.run(watchId, p.id, p.author_id ?? null, p.created_at, p.text ?? '', p.lang ?? null, p.likes | 0, p.reposts | 0,
             p.replies | 0, p.quotes | 0, p.impressions | 0, p.bookmarks | 0, p.kind ?? 'original', p.ref_id ?? null,
             p.ref_author_id ?? null, p.conversation_id ?? null, JSON.stringify(p.hashtags ?? []),
-            JSON.stringify(p.mentions ?? []), JSON.stringify(p.urls ?? []), p.has_media ? 1 : 0, now);
+            JSON.stringify(p.mentions ?? []), JSON.stringify(p.urls ?? []), p.has_media ? 1 : 0, now, thread);
         }
       });
     },
