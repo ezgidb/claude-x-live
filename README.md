@@ -25,6 +25,7 @@ Testler: `npm test`
 | X istemcisi | `src/xapi.js` | Sorgu kurma, X API v2 çağrıları, hata çevirisi, harcama defteri ve tavan denetimi |
 | İzleme döngüsü | `src/monitor.js` | Geçmişi zamana yayılmış örneklemle getirir; sonra her aralıkta sayım + yeni gönderiler |
 | Analiz | `src/analytics.js` | İvme puanı ve aşama, yükselen başlıklar, hesap sıralamaları, biçim/saat, öneri kartları |
+| Gözlem günlüğü | `src/journal.js` | Ardışık yenilemeleri karşılaştırır; değişenleri zaman damgalı not olarak yazar |
 | Not | `src/brief.js` | Danışmanlık notu metni |
 | Sunucu | `src/server.js` | Arayüz, JSON API, canlı güncelleme |
 | Veri | `src/store.js` | SQLite (Node'un yerleşik modülü) |
@@ -33,6 +34,7 @@ Testler: `npm test`
 
 - **Hacim ve ivme** X'in *sayım* ucundan gelir: eksiksizdir ve ucuzdur (istek başına ücret).
 - **İçerik ve hesap analizleri** çekilen gönderi *örnekleminden* hesaplanır; ekranda örneklem büyüklüğü ve güven düzeyi gösterilir.
+- **Gözlem günlüğü** konu ekranının varsayılan görünümüdür: "hareketlenmeye başladı", "hızlanıyor", "zirveye ulaştı", "yeni alt başlık belirdi", "şu hesap öne çıkanlar arasına girdi", "şu gönderi hızla etkileşim topluyor" gibi notlar yalnızca bir şey değiştiğinde yazılır (yenileme başına en çok 3, saatte en çok 12 not). Önemli notlar tarayıcı bildirimi olarak da gelebilir.
 - Analizlerin tamamı istatistiktir; yapay zekâ kullanılmaz (sonradan eklenebilecek biçimde ayrıdır).
 
 ## Maliyet ve güvenlik önlemleri

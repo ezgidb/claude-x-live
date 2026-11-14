@@ -6,7 +6,7 @@ const TW_EPOCH = 1288834974657n;
 const idTime = (id) => Number((BigInt(id) >> 22n) + TW_EPOCH);
 const maxId = (a, b) => (!a ? b : !b ? a : BigInt(a) > BigInt(b) ? a : b);
 
-export function createMonitor({ store, x, emit, isDemo, viewerSeenAt }) {
+export function createMonitor({ store, x, emit, isDemo, viewerSeenAt, onTick = () => {} }) {
   let busy = false; let timer = null;
   const running = new Set();
 
@@ -69,6 +69,15 @@ export function createMonitor({ store, x, emit, isDemo, viewerSeenAt }) {
       store.upsertUsers(r.users); store.upsertPosts(w.id, r.posts);
       if (r.meta.newest_id) store.updateWatch(w.id, { since_id: maxId(w.since_id, r.meta.newest_id) });
     }
+    // Gözlem günlüğünün izlediği sıcak gönderilerin etkileşimini en çok 15 dakikada bir yeniden oku
+    if (store.getSetting('trackPosts', true)) {
+      const ids = Object.keys(store.getSetting(`jstate:${w.id}`, null)?.watch ?? {});
+      if (ids.length && now - store.getSetting(`reread:${w.id}`, 0) >= 15 * MIN) {
+        store.setSetting(`reread:${w.id}`, now);
+        const r = await x.refreshPosts(ids);
+        store.upsertPosts(w.id, r.posts);
+      }
+    }
   }
 
   async function tick(id, { force = false } = {}) {
@@ -81,6 +90,7 @@ export function createMonitor({ store, x, emit, isDemo, viewerSeenAt }) {
       const now = Date.now();
       if (!w.backfill_done) await backfill(w, q, now); else await poll(w, q, now, force);
       store.updateWatch(id, { last_poll_at: Date.now(), last_error: null });
+      try { onTick(id); } catch (e) { console.error(e); }
     } catch (e) {
       const msg = e instanceof XError ? e.message : `Beklenmeyen hata: ${e.message}`;
       if (!(e instanceof XError)) console.error(e);

@@ -92,4 +92,12 @@ code.q { display: block; padding: 8px; background: var(--surface-2); border-radi
 .hero { max-width: 620px; margin: 6vh auto; }
 .bar-row { display: grid; grid-template-columns: 90px 1fr 70px; gap: 8px; align-items: center; font-size: 12px; padding: 3px 0; }
 .bar-row i { display: block; height: 10px; border-radius: 0 4px 4px 0; background: var(--accent); min-width: 2px; }
+.chart .jdot { fill: var(--st-accelerating); stroke: var(--surface); stroke-width: 2; }
+.jlist { margin-top: 6px; }
+.jday { font-size: 12px; font-weight: 600; color: var(--muted); padding: 10px 0 4px; }
+.jrow { display: flex; gap: 12px; align-items: flex-start; padding: 9px 0 9px 10px; border-left: 3px solid var(--border); border-bottom: 1px solid var(--border); }
+.jrow:last-child { border-bottom: 0; }
+.jrow.l1 { border-left-color: var(--st-accelerating); } .jrow.l3 { color: var(--text-2); }
+.jrow .jt { width: 62px; flex: none; font-weight: 600; } .jrow .main { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.jrow.l1 .jx { font-weight: 600; }
 @media print { .top, .no-print { display: none !important; } body { background: #fff; } }

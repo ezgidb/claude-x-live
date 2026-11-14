@@ -3,7 +3,8 @@ const $app = document.getElementById('app');
 const $tip = document.getElementById('tooltip');
 const NS = 'http://www.w3.org/2000/svg';
 let S = null; // sunucu durumu
-const ui = { range: '6h', accTab: 'bridges', progress: {}, form: null };
+const ui = { range: '6h', accTab: 'bridges', progress: {}, form: null, tab: 'gunluk', jfilter: 'all', unseen: 0 };
+try { ui.tab = localStorage.getItem('nabiz.tab') ?? 'gunluk'; } catch { /* yoksay */ }
 
 // ---------------------------------------------------------------- yardımcılar
 function h(tag, attrs, ...kids) {
@@ -54,8 +55,8 @@ const hideTip = () => { $tip.hidden = true; };
 
 // ---------------------------------------------------------------- grafikler
 function niceMax(v) { if (v <= 5) return 5; const p = 10 ** Math.floor(Math.log10(v)); const f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
-function volumeChart(series, stepMs, { markTs = null, markLabel = '' } = {}) {
-  const W = 900; const H = 260; const m = { l: 44, r: 14, t: 16, b: 26 };
+function volumeChart(series, stepMs, { markTs = null, markLabel = '', height = 260, dots = [] } = {}) {
+  const W = 900; const H = height; const m = { l: 44, r: 14, t: 16, b: 26 };
   const box = h('div', { class: 'chart' });
   if (series.length < 2) { box.append(h('p', { class: 'muted' }, 'Grafik için henüz yeterli veri yok.')); return box; }
   const x0 = series[0].ts; const x1 = series[series.length - 1].ts;
@@ -68,6 +69,11 @@ function volumeChart(series, stepMs, { markTs = null, markLabel = '' } = {}) {
   const pts = series.map((d) => `${X(d.ts).toFixed(1)},${Y(d.n).toFixed(1)}`);
   svg.append(s('path', { class: 'area', d: `M${X(x0)},${Y(0)} L${pts.join(' L')} L${X(x1)},${Y(0)} Z` }), s('polyline', { class: 'line', points: pts.join(' ') }));
   if (markTs && markTs > x0 && markTs < x1) svg.append(s('line', { class: 'mark', x1: X(markTs), x2: X(markTs), y1: m.t, y2: Y(0) }), s('text', { class: 'mark-t', x: X(markTs) + 5, y: m.t + 10 }, markLabel));
+  for (const d of dots) { // günlük notlarının zamanı
+    if (d.ts < x0 || d.ts > x1) continue;
+    let near = series[0]; for (const q of series) if (Math.abs(q.ts - d.ts) < Math.abs(near.ts - d.ts)) near = q;
+    svg.append(s('circle', { class: 'jdot', cx: X(d.ts), cy: Y(near.n), r: 4 }));
+  }
   const cross = s('line', { class: 'cross', y1: m.t, y2: Y(0), visibility: 'hidden' }); const dot = s('circle', { class: 'dot', r: 4.5, visibility: 'hidden' });
   const hit = s('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: 'transparent' });
   hit.addEventListener('pointermove', (e) => {
@@ -154,7 +160,8 @@ function viewOverview() {
   });
   const hot = S.watches.filter((w) => w.summary && ['emerging', 'accelerating'].includes(w.summary.stage) && w.summary.topCard);
   return h('div', { class: 'stack' }, head,
-    hot.length ? h('div', { class: 'card stack' }, h('h2', null, 'Şu an ısınanlar'), hot.slice(0, 3).map((w) => h('div', { class: 'insight p1' }, h('div', null, h('div', { class: 't' }, h('a', { href: `#/izleme/${w.id}` }, w.name), ' — ', w.summary.topCard))))) : null,
+    S.recent?.length ? h('div', { class: 'card' }, h('h2', null, 'Son gelişmeler'), h('div', { class: 'jlist' }, S.recent.map((j) => h('div', { class: 'jrow l1' }, h('div', { class: 'jt num' }, tHM(j.ts), h('div', { class: 'muted small' }, ago(j.ts))), h('div', { class: 'main' }, h('a', { class: 'tag', style: 'margin-left:0', href: `#/izleme/${j.watch_id}` }, j.watch), ' ', j.text)))))
+    : hot.length ? h('div', { class: 'card stack' }, h('h2', null, 'Şu an ısınanlar'), hot.slice(0, 3).map((w) => h('div', { class: 'insight p1' }, h('div', null, h('div', { class: 't' }, h('a', { href: `#/izleme/${w.id}` }, w.name), ' — ', w.summary.topCard))))) : null,
     h('div', { class: 'card', style: 'overflow-x:auto' }, h('table', null,
       h('thead', null, h('tr', null, h('th', null, 'Konu'), h('th', null, 'Aşama'), h('th', { class: 'r' }, 'İvme'), h('th', null, 'Son 24 saat'), h('th', { class: 'r' }, 'Gönderi'), h('th', { class: 'r' }, 'Değişim'), h('th', null, 'Yükselen başlık'))),
       h('tbody', null, rows))));
@@ -179,7 +186,8 @@ function viewNew() {
   const sel = (key, opts) => h('select', { onchange: (e) => { f[key] = Number(e.target.value) || e.target.value; drawSide(); } }, opts.map(([v, l]) => h('option', { value: v, selected: f[key] === v }, l)));
   function estimate() {
     const p = S.usage.prices; const ticks = 86400 / f.interval_sec; const vol = (f.preview?.last24h ?? 0) * (f.excludeReposts ? 0.6 : 1);
-    return { backfill: f.backfill_posts * (p.post + p.user * 0.6) + 2 * p.counts, daily: ticks * p.counts + Math.min(vol, ticks * f.posts_per_poll) * (p.post + p.user * 0.4) };
+    const reread = S.trackPosts ? (86400 / Math.max(900, f.interval_sec)) * 10 * p.post : 0;
+    return { backfill: f.backfill_posts * (p.post + p.user * 0.6) + 2 * p.counts, daily: ticks * p.counts + Math.min(vol, ticks * f.posts_per_poll) * (p.post + p.user * 0.4) + reread };
   }
   function drawSide(err) {
     const e = estimate(); const pv = f.preview;
@@ -246,7 +254,7 @@ async function viewWatch(id) {
   let d;
   try { d = await api('GET', `/api/watches/${id}/analysis?range=${ui.range}`); } catch (e) { return h('div', { class: 'stack' }, h('div', { class: 'notice err' }, e.message), h('a', { href: '#/' }, '← Genel Bakış')); }
   S.usage = d.usage; renderTop();
-  const { watch: w, analysis: a, pins } = d; const m = a.momentum;
+  const { watch: w, analysis: a, pins, journal } = d; const m = a.momentum;
   const reload = () => render();
   const pin = (kind, ref_id, note) => act(async () => { await api('POST', `/api/watches/${id}/pins`, { kind, ref_id, note }); reload(); }, 'Not sepetine eklendi');
   const pinned = (kind, ref) => pins.some((p) => p.kind === kind && p.ref_id === String(ref));
@@ -274,7 +282,33 @@ async function viewWatch(id) {
     tile(compact(a.kpi.engagement), 'Toplam etkileşim', 'örneklemde'));
 
   const chart = h('div', { class: 'card' }, h('h2', null, 'Gönderi hacmi'), h('div', { class: 'muted small', style: 'margin:-6px 0 8px' }, `${a.stepMs >= 3600e3 ? 'Saatlik' : `${a.stepMs / 60000} dakikalık`} dilimler · kaynak: X sayım verisi (yeniden paylaşımlar dahil)`),
-    volumeChart(a.series, a.stepMs, { markTs: m.burst?.start, markLabel: 'Dalga başlangıcı' }), h('div', { class: 'muted small' }, m.why));
+    volumeChart(a.series, a.stepMs, { markTs: m.burst?.start, markLabel: 'Dalga başlangıcı', height: ui.tab === 'gunluk' ? 170 : 260, dots: ui.tab === 'gunluk' ? journal.filter((j) => j.level === 1) : [] }), h('div', { class: 'muted small' }, ui.tab === 'gunluk' ? 'Noktalar, günlükteki önemli notların zamanını gösterir.' : m.why));
+
+  // --- gözlem günlüğü ---
+  const JF = [['all', 'Tümü'], ['important', 'Önemli'], ['hesap', 'Hesaplar'], ['gonderi', 'Gönderiler'], ['konu', 'Alt konular'], ['ozet', 'Saatlik özet']];
+  const jShown = journal.filter((j) => (ui.jfilter === 'all' ? true : ui.jfilter === 'important' ? j.level === 1 : j.cat === ui.jfilter));
+  const dayLabel = (ms) => { const d0 = tDay(ms); return d0 === tDay(Date.now()) ? 'Bugün' : d0 === tDay(Date.now() - 86400e3) ? 'Dün' : d0; };
+  const jRows = []; let lastDay = null;
+  for (const j of jShown.slice(0, 120)) {
+    const dl = dayLabel(j.ts); if (dl !== lastDay) { jRows.push(h('div', { class: 'jday' }, dl)); lastDay = dl; }
+    jRows.push(h('div', { class: `jrow l${j.level}` },
+      h('div', { class: 'jt num' }, tHM(j.ts), h('div', { class: 'muted small' }, ago(j.ts))),
+      h('div', { class: 'main' }, h('div', { class: 'jx' }, j.level === 1 ? h('span', { class: 'tag new', style: 'margin-left:0' }, 'Önemli') : null, j.level === 1 ? ' ' : null, j.text),
+        j.evidence ? h('div', { class: 'muted small' }, j.evidence) : null),
+      h('div', { class: 'row no-print', style: 'gap:2px' },
+        j.ref_kind === 'post' ? ext(xLink(j.ref_user, j.ref_id), h('button', { class: 'ghost small' }, 'X’te aç')) : j.ref_kind === 'account' ? ext(xLink(j.ref_user), h('button', { class: 'ghost small' }, 'X’te aç')) : null,
+        j.level < 3 ? pinBtn('note', `j${j.id}`, `${tHM(j.ts)} — ${j.text}`) : null)));
+  }
+  const canNotify = 'Notification' in window && Notification.permission === 'default';
+  const quiet = journal.length && Date.now() - journal[0].ts > 3 * 3600e3;
+  const journalCard = h('div', { class: 'card' },
+    h('div', { class: 'row spread' }, h('div', null, h('h2', { style: 'margin-bottom:2px' }, 'Gözlem günlüğü'), h('div', { class: 'muted small' }, 'Sistem bu konuyu izliyor ve değişiklikleri buraya not ediyor.')),
+      canNotify ? h('button', { class: 'small no-print', onclick: async () => { await Notification.requestPermission(); reload(); } }, '🔔 Önemli gelişmelerde haber ver') : null),
+    h('div', { class: 'tabs no-print', style: 'margin-top:10px' }, JF.map(([k, l]) => h('button', { class: ui.jfilter === k ? 'on' : '', onclick: () => { ui.jfilter = k; reload(); } }, l))),
+    quiet ? h('p', { class: 'muted small' }, 'Son 3 saatte kayda değer bir değişiklik olmadı.') : null,
+    jRows.length ? h('div', { class: 'jlist' }, jRows)
+      : h('p', { class: 'muted' }, journal.length ? 'Bu süzgece uyan not yok.' : 'Henüz not yok. İzleme yeni başladı; ilk gözlem birkaç dakika içinde burada görünecek.'));
+  const viewTabs = h('div', { class: 'seg no-print' }, [['gunluk', 'Günlük'], ['veriler', 'Veriler']].map(([k, l]) => h('button', { class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; try { localStorage.setItem('nabiz.tab', k); } catch { /* yoksay */ } reload(); } }, l)));
 
   const cards = h('div', { class: 'card stack' }, h('h2', null, 'Öne çıkan içgörüler ve öneriler'),
     a.cards.length ? a.cards.slice(0, 8).map((c) => h('div', { class: `insight p${c.priority} ${c.kind === 'risk' ? 'risk' : ''}` }, h('div', null, h('div', { class: 't' }, c.title), h('div', { class: 'a' }, '→ ', c.action)), pinBtn('note', c.id, `${c.title} ${c.action}`)))
@@ -330,7 +364,9 @@ async function viewWatch(id) {
   return h('div', { class: 'stack' }, header, statusLine,
     w.last_error ? h('div', { class: 'notice err' }, w.last_error, ' ', h('span', { class: 'muted' }, '(Ekrandaki veriler son başarılı çekime aittir.)')) : null,
     !w.backfill_done && !w.last_error ? h('div', { class: 'notice' }, prog ?? 'Geçmiş getiriliyor…') : null,
-    status, chart, cards, h('div', { class: 'grid g2' }, terms, accounts), h('div', { class: 'grid g2' }, posts, h('div', { class: 'stack' }, formats, basket)), foot);
+    status, viewTabs,
+    ...(ui.tab === 'gunluk' ? [chart, h('div', { class: 'grid g-form' }, journalCard, basket)]
+      : [chart, cards, h('div', { class: 'grid g2' }, terms, accounts), h('div', { class: 'grid g2' }, posts, h('div', { class: 'stack' }, formats, basket))]), foot);
 }
 
 async function briefDialog(id) {
@@ -380,8 +416,9 @@ function viewSettings() {
       h('div', { class: 'row' }, h('label', null, 'Günlük tavan ($) ', daily), h('label', null, 'Aylık tavan ($) ', monthly)),
       h('p', { class: 'muted small' }, 'Tavana ulaşıldığında izlemeler veri çekmeyi kendiliğinden bırakır. Rakamlar bu uygulamanın kendi tuttuğu tahmindir; kesin tutar için X Geliştirici Konsolu’na bakın. Günler UTC’ye göredir.'),
       h('label', null, h('input', { type: 'checkbox', checked: S.autoPause, id: 'ap' }), ' Panel 30 dakikadır hiçbir tarayıcıda açık değilse veri çekmeyi beklet (önerilir)'),
+      h('label', null, h('input', { type: 'checkbox', checked: S.trackPosts, id: 'tp' }), ' Öne çıkan gönderilerin etkileşimini 15 dakikada bir yeniden oku (günlükteki “etkileşimi artıyor” notları için; izleme başına saatte en çok 40 gönderi okur)'),
       h('details', null, h('summary', { class: 'muted small' }, 'Birim fiyatlar (X fiyat değiştirirse güncelleyin)'), h('div', { class: 'row', style: 'margin-top:8px' }, h('label', null, 'Gönderi ', pp), h('label', null, 'Hesap ', pu), h('label', null, 'Sayım isteği ', pc))),
-      h('div', null, h('button', { class: 'primary', onclick: () => act(async () => { S = await api('PUT', '/api/settings', { budget: { daily: daily.value, monthly: monthly.value }, prices: { post: pp.value, user: pu.value, counts: pc.value }, autoPause: document.getElementById('ap').checked }); render(); }, 'Kaydedildi') }, 'Kaydet'))));
+      h('div', null, h('button', { class: 'primary', onclick: () => act(async () => { S = await api('PUT', '/api/settings', { budget: { daily: daily.value, monthly: monthly.value }, prices: { post: pp.value, user: pu.value, counts: pc.value }, autoPause: document.getElementById('ap').checked, trackPosts: document.getElementById('tp').checked }); render(); }, 'Kaydedildi') }, 'Kaydet'))));
 }
 
 // ---------------------------------------------------------------- yönlendirme ve canlı güncelleme
@@ -417,10 +454,20 @@ function liveRefresh() {
 function connect() {
   const es = new EventSource('/api/events');
   es.addEventListener('update', (e) => { const d = JSON.parse(e.data); delete ui.progress[d.watchId]; liveRefresh(); });
+  es.addEventListener('journal', (e) => {
+    const d = JSON.parse(e.data); const imp = d.entries.filter((j) => j.level === 1);
+    if (!imp.length) return;
+    toast(`${d.name}: ${imp[0].text}`);
+    if (document.hidden) { ui.unseen += imp.length; document.title = `(${ui.unseen}) Nabız · X konu izleme`; }
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+      try { new Notification(`Nabız · ${d.name}`, { body: imp.length > 1 ? `${imp.length} yeni gelişme: ${imp[0].text}` : imp[0].text, tag: `nabiz-${d.watchId}` }); } catch { /* yoksay */ }
+    }
+  });
   es.addEventListener('progress', (e) => { const d = JSON.parse(e.data); ui.progress[d.watchId] = d.step; liveRefresh(); });
   es.onerror = () => { document.getElementById('conn').textContent = 'Sunucuyla bağlantı koptu, yeniden deneniyor…'; document.getElementById('conn').className = 'pill bad'; };
   es.onopen = () => { if (S) renderTop(); };
 }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { ui.unseen = 0; document.title = 'Nabız · X konu izleme'; } });
 setInterval(liveRefresh, 60_000);
 render().catch((e) => { $app.replaceChildren(h('div', { class: 'notice err' }, `Sunucuya ulaşılamadı: ${e.message}`)); });
 connect();

@@ -77,3 +77,33 @@ test('uçtan uca (demo veri): izleme oluştur, analiz ve not üret', async () =>
     assert.equal(bad.status, 415);
   } finally { app.close(); }
 });
+
+test('gözlem günlüğü: açılış notu, doğrulanmış aşama değişimi, tekrar etmeme, gönderi tırmanışı', async () => {
+  const { observe } = await import('../src/journal.js');
+  const now = Date.UTC(2026, 10, 14, 12, 0, 0); const MINUTE = 60000;
+  const snap = (stage, over = {}) => ({
+    momentum: { stage, stageLabel: stage, score: 50, velocity: over.v ?? 2, ratio: over.R ?? 1.6, z: 4, last30: 120, prev30: 60, baseline30: 20, burst: stage === 'quiet' ? null : { start: now - 30 * MINUTE, peakVelocity: 6, active: true }, projection: { low: 100, high: 200 }, why: 'neden' },
+    kpi: { total: 2000, perHour: over.perHour ?? 200 }, sample: { n: 300, confidence: 'Orta' },
+    terms: { terms: over.terms ?? [] }, accounts: { influencers: over.infl ?? [], inorganicShare: 0 },
+    content: { topPosts: over.top ?? [], reaction: { nNow: 0, alarmNow: 0, alarmBefore: 0 } },
+  });
+  const none = new Map();
+  let r = observe(null, snap('quiet'), none, { hourMax7d: 500 }, now);
+  assert.deepEqual(r.events.map((e) => e.type), ['watch_started']);
+  r = observe(r.state, snap('accelerating'), none, { hourMax7d: 500 }, now + 5 * MINUTE);
+  assert.equal(r.events.length, 0, 'tek ölçümle aşama notu yazılmaz');
+  r = observe(r.state, snap('accelerating'), none, { hourMax7d: 500 }, now + 10 * MINUTE);
+  assert.deepEqual(r.events.map((e) => [e.type, e.level]), [['started', 1]]);
+  r = observe(r.state, snap('accelerating'), none, { hourMax7d: 500 }, now + 15 * MINUTE);
+  assert.equal(r.events.length, 0, 'aynı durum yeniden not edilmez');
+  const term = { key: 'kampan', term: 'kampanya', rising: true, zeta: 4.2, y1: 20, y0: 2, lift: 5, hashtag: false, isNew: false };
+  const top = [{ id: '7', username: 'biri', engagement: 100, created_at: now, text: 'metin' }];
+  r = observe(r.state, snap('accelerating', { terms: [term], top, v: 3.5 }), none, { hourMax7d: 500 }, now + 20 * MINUTE);
+  assert.ok(r.events.some((e) => e.type === 'term' && e.level === 1)); assert.ok(r.events.some((e) => e.type === 'speed'));
+  assert.ok(r.state.watch['7']);
+  const posts = new Map([['7', { id: '7', username: 'biri', text: 'metin', likes: 400, reposts: 50, quotes: 0, replies: 0 }]]);
+  r = observe(r.state, snap('accelerating', { terms: [term], top, v: 3.5 }), posts, { hourMax7d: 500 }, now + 35 * MINUTE);
+  const climb = r.events.find((e) => e.type === 'post_climbing');
+  assert.ok(climb); assert.match(climb.text, /100 → 500/); assert.equal(climb.level, 1);
+  assert.ok(!r.events.some((e) => e.type === 'term'), 'aynı alt başlık 12 saat içinde yeniden yazılmaz');
+});

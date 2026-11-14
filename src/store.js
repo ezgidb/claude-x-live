@@ -47,6 +47,14 @@ CREATE TABLE IF NOT EXISTS usage (
   day TEXT NOT NULL, endpoint TEXT NOT NULL, requests INTEGER NOT NULL DEFAULT 0,
   posts INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, endpoint)
 ) WITHOUT ROWID;
+CREATE TABLE IF NOT EXISTS journal (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, watch_id INTEGER NOT NULL, ts INTEGER NOT NULL,
+  type TEXT NOT NULL,            -- olay türü
+  level INTEGER NOT NULL,        -- 1 önemli | 2 bilgi | 3 özet
+  cat TEXT NOT NULL,             -- seyir | hesap | gonderi | konu | ozet
+  text TEXT NOT NULL, evidence TEXT, ref_kind TEXT, ref_id TEXT, ref_user TEXT, past INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS journal_time ON journal (watch_id, ts);
 CREATE TABLE IF NOT EXISTS pins (
   id INTEGER PRIMARY KEY AUTOINCREMENT, watch_id INTEGER NOT NULL,
   kind TEXT NOT NULL,            -- post | account | note
@@ -102,7 +110,7 @@ export function openStore(file) {
     },
     deleteWatch(id) {
       tx(() => {
-        for (const t of ['counts', 'posts', 'pins']) q(`DELETE FROM ${t} WHERE watch_id = ?`).run(id);
+        for (const t of ['counts', 'posts', 'pins', 'journal']) q(`DELETE FROM ${t} WHERE watch_id = ?`).run(id);
         q('DELETE FROM watches WHERE id = ?').run(id);
       });
     },
@@ -169,6 +177,20 @@ export function openStore(file) {
     },
     usageSince(day) {
       return rows(q('SELECT day, endpoint, requests, posts FROM usage WHERE day >= ? ORDER BY day').all(day));
+    },
+
+    // --- gözlem günlüğü ---
+    addJournal(watchId, e) {
+      const r = q(`INSERT INTO journal (watch_id, ts, type, level, cat, text, evidence, ref_kind, ref_id, ref_user, past)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run(watchId, e.ts ?? Date.now(), e.type, e.level, e.cat, e.text, e.evidence ?? null, e.ref_kind ?? null, e.ref_id ?? null, e.ref_user ?? null, e.past ? 1 : 0);
+      return Number(r.lastInsertRowid);
+    },
+    listJournal(watchId, { since = 0, limit = 200 } = {}) {
+      return rows(q('SELECT * FROM journal WHERE watch_id = ? AND ts >= ? ORDER BY ts DESC, id DESC LIMIT ?').all(watchId, since, limit)).map((j) => ({ ...j, past: !!j.past }));
+    },
+    recentJournal({ maxLevel = 1, limit = 8, since = 0 } = {}) {
+      return rows(q('SELECT * FROM journal WHERE level <= ? AND ts >= ? AND past = 0 ORDER BY ts DESC, id DESC LIMIT ?').all(maxLevel, since, limit));
     },
 
     // --- sabitlenenler ve notlar ---

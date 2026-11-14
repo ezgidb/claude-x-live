@@ -9,6 +9,7 @@ import { createX, buildQuery, parsePostUrl, XError } from './xapi.js';
 import { createMonitor } from './monitor.js';
 import { analyze } from './analytics.js';
 import { buildBrief } from './brief.js';
+import { observe } from './journal.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
@@ -30,7 +31,22 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
     for (const res of clients) res.write(msg);
   };
-  const monitor = createMonitor({ store, x, emit, isDemo, viewerSeenAt: () => (clients.size ? Date.now() : viewerSeen) });
+  // Her başarılı yenilemeden sonra: önceki durumla karşılaştır, değişenleri günlüğe yaz
+  function onTick(id) {
+    const w = store.getWatch(id);
+    if (!w || !w.backfill_done) return;
+    for (const k of cache.keys()) if (k.startsWith(`${id}|`)) cache.delete(k);
+    const a = analysisFor(w, '24h'); const now = Date.now();
+    const list = store.getPosts(id, now - 24 * HOUR);
+    const users = store.getUsers(new Set(list.map((p) => p.author_id)));
+    const posts = new Map(list.map((p) => [p.id, { ...p, username: users.get(p.author_id)?.username ?? null }]));
+    const hourMax7d = Math.max(0, ...store.getCounts(id, 'hour', now - 7 * 24 * HOUR).filter((c) => c.ts + HOUR <= now - HOUR).map((c) => c.n));
+    const { events, state: js } = observe(store.getSetting(`jstate:${id}`, null), a, posts, { hourMax7d }, now);
+    store.setSetting(`jstate:${id}`, js);
+    const entries = events.map((e) => ({ ...e, id: store.addJournal(id, { ...e, ts: now }), ts: now, watch_id: id }));
+    if (entries.length) emit('journal', { watchId: id, name: w.name, entries });
+  }
+  const monitor = createMonitor({ store, x, emit, isDemo, viewerSeenAt: () => (clients.size ? Date.now() : viewerSeen), onTick });
 
   function analysisFor(w, range) {
     const key = `${w.id}|${range}`;
@@ -61,6 +77,11 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     connected: !!getToken(), demo: isDemo(), tokenFromEnv: !!envToken, capabilities: store.getSetting('capabilities', null),
     client: store.getSetting('client', null), autoPause: store.getSetting('autoPause', true), usage: x.usageSummary(),
     watches: store.listWatches().filter((w) => !!w.spec.demo === isDemo()).map(watchView),
+    trackPosts: store.getSetting('trackPosts', true),
+    recent: (() => {
+      const names = new Map(store.listWatches().filter((w) => !!w.spec.demo === isDemo()).map((w) => [w.id, w.name]));
+      return store.recentJournal({ maxLevel: 1, limit: 30, since: Date.now() - 24 * HOUR }).filter((j) => names.has(j.watch_id)).slice(0, 8).map((j) => ({ ...j, watch: names.get(j.watch_id) }));
+    })(),
   });
   const pinsView = (watchId) => {
     const posts = new Map(store.getPosts(watchId).map((p) => [p.id, p]));
@@ -127,6 +148,7 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
       if (b.budget) store.setSetting('budget', { daily: num(b.budget.daily, 0, 10000) || 0, monthly: num(b.budget.monthly, 0, 100000) || 0 });
       if (b.prices) store.setSetting('prices', { post: num(b.prices.post, 0, 10) || 0, user: num(b.prices.user, 0, 10) || 0, counts: num(b.prices.counts, 0, 10) || 0 });
       if (typeof b.autoPause === 'boolean') store.setSetting('autoPause', b.autoPause);
+      if (typeof b.trackPosts === 'boolean') store.setSetting('trackPosts', b.trackPosts);
       return state();
     }],
     ['POST', /^\/api\/preview$/, async (_, b) => {
@@ -157,7 +179,7 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
       emit('update', { watchId: Number(m[1]) });
       return { ok: true };
     }],
-    ['DELETE', /^\/api\/watches\/(\d+)$/, (m) => { store.deleteWatch(Number(m[1])); emit('update', { watchId: Number(m[1]) }); return { ok: true }; }],
+    ['DELETE', /^\/api\/watches\/(\d+)$/, (m) => { store.deleteWatch(Number(m[1])); store.delSetting(`jstate:${m[1]}`); store.delSetting(`reread:${m[1]}`); emit('update', { watchId: Number(m[1]) }); return { ok: true }; }],
     ['POST', /^\/api\/watches\/(\d+)\/refresh$/, (m) => { monitor.tick(Number(m[1]), { force: true }); return { ok: true }; }],
     ['POST', /^\/api\/watches\/(\d+)\/refresh-metrics$/, async (m) => {
       const w = need(m[1]);
@@ -172,11 +194,12 @@ export function createApp({ dbFile = process.env.DB_FILE ?? join(ROOT, 'data', '
     }],
     ['GET', /^\/api\/watches\/(\d+)\/analysis$/, (m, _, url) => {
       const w = need(m[1]); const range = RANGES[url.searchParams.get('range')] ? url.searchParams.get('range') : '24h';
-      return { watch: watchView(w), range, analysis: analysisFor(w, range), pins: pinsView(w.id), usage: x.usageSummary() };
+      return { watch: watchView(w), range, analysis: analysisFor(w, range), pins: pinsView(w.id), usage: x.usageSummary(), journal: store.listJournal(w.id, { since: Date.now() - 7 * 24 * HOUR, limit: 300 }) };
     }],
     ['GET', /^\/api\/watches\/(\d+)\/brief$/, (m, _, url) => {
       const w = need(m[1]); const range = RANGES[url.searchParams.get('range')] ? url.searchParams.get('range') : '24h';
-      return { text: buildBrief({ watch: w, analysis: analysisFor(w, range), client: store.getSetting('client', null), pins: pinsView(w.id), rangeLabel: RANGES[range][1] }) };
+      return { text: buildBrief({ watch: w, analysis: analysisFor(w, range), client: store.getSetting('client', null), pins: pinsView(w.id), rangeLabel: RANGES[range][1],
+        journal: store.listJournal(w.id, { since: Date.now() - RANGES[range][0] * HOUR, limit: 300 }) }) };
     }],
     ['POST', /^\/api\/watches\/(\d+)\/pins$/, (m, b) => {
       const w = need(m[1]);

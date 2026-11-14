@@ -4,7 +4,7 @@ const fmt1 = (n) => n.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
 const dt = (ms) => new Date(ms).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
 const link = (p) => `https://x.com/${p.username ?? 'i'}/status/${p.id}`;
 
-export function buildBrief({ watch, analysis: a, client, pins, rangeLabel }) {
+export function buildBrief({ watch, analysis: a, client, pins, rangeLabel, journal = [] }) {
   const m = a.momentum; const L = [];
   const who = client?.name ? client.name : 'Danışan';
   L.push(`DANIŞMANLIK NOTU — ${watch.name}`);
@@ -16,6 +16,14 @@ export function buildBrief({ watch, analysis: a, client, pins, rangeLabel }) {
     + `Son 30 dakikada ${fmt(m.last30)} gönderi görüldü (önceki 30 dakika: ${fmt(m.prev30)}).`);
   if (m.projection && m.last30 >= 10) L.push(`Mevcut eğilim sürerse önümüzdeki 1 saatte ${fmt(m.projection.low)}–${fmt(m.projection.high)} gönderi bekleniyor.`);
   L.push('');
+
+  // Günlükten: önemli notlar, eskiden yeniye (en çok 8)
+  const course = journal.filter((j) => j.level === 1 || j.type === 'watch_started').slice(0, 8).reverse();
+  if (course.length) {
+    L.push('GELİŞMELERİN SEYRİ');
+    for (const j of course) L.push(`• ${new Date(j.ts).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} — ${j.text}`);
+    L.push('');
+  }
 
   const rising = a.terms.terms.filter((t) => t.rising).slice(0, 5);
   L.push('NE OLUYOR');
