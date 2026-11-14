@@ -1,0 +1,12 @@
+{
+  "name": "nabiz",
+  "version": "0.1.0",
+  "private": true,
+  "description": "X konu izleme ve danışmanlık paneli",
+  "type": "module",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  }
+}
