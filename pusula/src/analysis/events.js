@@ -1,8 +1,19 @@
 // Anlık görüntü farkından olay üretimi: yalnızca anlamlı değişim, deterministik id.
 import { fmtNum, fmtTime, handleOf } from './util.js';
 import { levelIdx } from './risk.js';
+import { stemOf, trLower } from './text.js';
 
-const NEW_NARR = 8, COUNTER_MIN = 3;
+// Kimlik değişse bile aynı konu mu? (köken, öne çıkan gönderiler ya da terimler örtüşüyorsa evet)
+const tstems = (n) => new Set((n.terms || []).map((t) => stemOf(trLower(t))));
+function sameNarr(p, n, ns) {
+  if (p.id === n.id || (p.originItemId && p.originItemId === n.originItemId)) return true;
+  if ((p.topItemIds || []).some((id) => n.topItemIds.includes(id))) return true;
+  let c = 0;
+  for (const s of tstems(p)) if (ns.has(s)) c++;
+  return c >= 2;
+}
+
+const NEW_NARR = 8;
 const MILESTONES = [50, 100, 250, 500, 1000, 2500, 5000, 10000];
 const milestone = (n) => { let m = 0; for (const x of MILESTONES) if (n >= x) m = x; return m; };
 
@@ -35,23 +46,28 @@ export function diffEvents(prev, next, { client, items } = {}) {
   if (!prev) return out;
 
   // Anlatılar
-  const pN = new Map((prev.narratives || []).map((n) => [n.id, n]));
-  const attackOn = next.narratives.some((n) => n.kind === 'saldırı' && n.count >= NEW_NARR) || !!nInc;
+  const pList = prev.narratives || [];
+  const pN = new Map(pList.map((n) => [n.id, n]));
   for (const n of next.narratives) {
-    const p = pN.get(n.id);
-    if (n.kind === 'savunma' && attackOn) {
-      if (n.count >= COUNTER_MIN && !(p && p.kind === 'savunma' && p.count >= COUNTER_MIN)) {
-        ev('karşı-anlatı', n.id, 'bilgi', 'Karşı görüş belirdi', `“${n.label}” başlığında danışanı savunan ${n.count} gönderi var.`, { narrativeId: n.id, itemId: n.originItemId });
-      }
-      continue;
-    }
-    if (n.count >= NEW_NARR && (!p || p.count < NEW_NARR)) {
+    if (n.kind === 'savunma') continue;
+    const ns = tstems(n);
+    const p = pN.get(n.id) || pList.find((q) => sameNarr(q, n, ns));
+    // Sözcüksel (adsız) kümeler oynak olabilir: yalnızca gerçekten yeni ve eleştirel olanı haber ver
+    const min = n.lexical ? 15 : NEW_NARR;
+    const fresh = !n.lexical || (n.kind === 'saldırı' && at - n.firstSeen <= 3 * 3_600_000);
+    if (n.count >= min && fresh && (!p || p.count < min)) {
       ev('yeni-anlatı', n.id, n.kind === 'saldırı' ? 'dikkat' : 'bilgi', n.kind === 'saldırı' ? 'Yeni eleştirel konu' : 'Yeni konu',
         `“${n.label}”: ${n.count} gönderi, ilk görülme ${fmtTime(n.firstSeen)}.`, { narrativeId: n.id, itemId: n.originItemId });
-    } else if (p && n.kind !== 'savunma' && n.status === 'büyüyor' && n.velocity >= 1.3 && milestone(n.count) > milestone(p.count)) {
+    } else if (p && (n.kind === 'saldırı' || !n.lexical) && n.status === 'büyüyor' && n.velocity >= 1.3 && milestone(n.count) > milestone(p.count)) {
       const m = milestone(n.count);
       ev('anlatı-büyüyor', `${n.id}:${m}`, n.kind === 'saldırı' ? 'dikkat' : 'bilgi', 'Konu büyüyor', `“${n.label}” ${m} gönderiyi geçti; son 1 saatte hız ${String(n.velocity).replace('.', ',')} kat.`, { narrativeId: n.id });
     }
+  }
+  // Karşı-anlatı: yayılım zincirinde ilk kez belirdiğinde
+  const cs = next.cascade.steps.find((x) => x.kind === 'karşı-anlatı');
+  if (cs && !(prev.cascade?.steps || []).some((x) => x.kind === 'karşı-anlatı')) {
+    const n = next.narratives.find((x) => x.originItemId === cs.itemId);
+    ev('karşı-anlatı', n?.id ?? cs.itemId, 'bilgi', 'Karşı görüş belirdi', n ? `“${n.label}” başlığında danışanı savunan ya da iddiayı sorgulayan ${n.count} gönderi var.` : cs.note, { narrativeId: n?.id, itemId: cs.itemId });
   }
   // Büyük hesap ve medya girişi (önceki anlık görüntüden sonra ilk kez görünenler)
   const pA = new Set((prev.actors || []).map((a) => a.id));
@@ -92,5 +108,7 @@ export function diffEvents(prev, next, { client, items } = {}) {
     ev('zirve', `${nInc.id}:${nInc.peakAt}`, 'bilgi', `${name}: zirve geride kalmış görünüyor`, `En yoğun an saat ${fmtTime(nInc.peakAt)} civarıydı (saatte ${nInc.peakRate} gönderi); şimdi saatte ${next.pulse.rate1h}.`);
   }
   const rank = { alarm: 0, dikkat: 1, bilgi: 2 };
-  return out.sort((a, b) => rank[a.level] - rank[b.level]);
+  const seen = new Set();
+  return out.filter((e) => { const k = `${e.kind}|${e.detail}`; if (seen.has(e.id) || seen.has(k)) return false; seen.add(e.id); seen.add(k); return true; })
+    .sort((a, b) => rank[a.level] - rank[b.level]);
 }

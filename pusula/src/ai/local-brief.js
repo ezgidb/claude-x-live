@@ -121,7 +121,7 @@ function eventBrief(r) {
   let started;
   if (r.source && srcName) {
     const f = r.source.followers;
-    const size = f == null ? '' : f < 5000 ? ` Küçük bir hesap (${fmtBig(f)} takipçi); gönderi asıl etkileşimini başkaları alıntıladıktan sonra aldı.`
+    const size = f == null ? '' : f < 5000 ? ` Küçük bir hesap (${fmtBig(f)} takipçi)${steps.some((x) => x.kind === 'sıçrama' || x.kind === 'büyük-hesap') ? '; konu geniş kitleye bu hesabın kendi takipçileriyle değil, sonradan paylaşan daha büyük hesaplarla ulaştı' : ''}.`
       : ` ${fmtBig(f)} takipçili${r.source.verified ? ', onaylı' : ''} bir hesap.`;
     started = `Verideki en erken paylaşım ${srcName} hesabına ait.${size} Daha önce paylaşılmış ama taramaya girmemiş bir gönderi olabilir; “ilk” derken elimizdeki veriyi kastediyoruz.`;
   } else {
@@ -156,7 +156,7 @@ function eventBrief(r) {
   const mean = [`Risk düzeyi ${risk.level} (${risk.score}/100).`];
   const drv = (risk.drivers || []).slice().sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 3).map((d) => d.note).filter(Boolean);
   if (drv.length) mean.push(`Puanı en çok yükseltenler: ${drv.join('; ')}.`);
-  if (r.sensitivities.length) mean.push(`Konu, ${client.name} için hassas sayılan ${joinTr(r.sensitivities.map((x) => `“${x}”`))} alanına dokunuyor.`);
+  if (r.sensitivities.length && !drv.some((d) => d.includes(r.sensitivities[0]))) mean.push(`Konu, ${client.name} için hassas sayılan ${joinTr(r.sensitivities.map((x) => `“${x}”`))} alanına dokunuyor.`);
   if (r.nature === 'iddia') mean.push('Baskın başlık doğrulanabilir bir iddia. Doğru olup olmadığı bu verilerden anlaşılamaz; ancak yanıtsız kaldığı sürece dolaşımdaki tek anlatı o oluyor.');
   else if (r.nature === 'alay') mean.push('Baskın ton alay. Alay dalgaları genellikle kısa sürer ama markanın adını bir espriyle eşleştirip kalıcı hâle getirebilir.');
   else if (r.nature === 'şikâyet') mean.push('Baskın başlık bir hizmet şikâyeti; gerçeğini en iyi danışanın kendisi bilir ve insanlar çoğunlukla açıklamadan çok çözüm bekler.');

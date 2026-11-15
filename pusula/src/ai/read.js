@@ -69,7 +69,7 @@ export function readSnapshot({ client, snapshot, items }) {
   const allHay = norm(narratives.slice(0, 5).map((n) => hay(n)).join(' ') + ' ' + (risk.drivers || []).map((d) => `${d.key} ${d.note}`).join(' '));
   const sensitivities = (client?.sensitivities || []).filter((x) => {
     const parts = norm(x).split(' ').filter((p) => p.length > 3);
-    return parts.some((p) => allHay.includes(p.slice(0, 5)));
+    return parts.length > 0 && parts.every((p) => allHay.includes(p.slice(0, 5)));
   });
 
   const series = pulse.series || [];

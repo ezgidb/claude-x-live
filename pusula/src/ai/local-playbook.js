@@ -152,9 +152,9 @@ function buildQna(r, v, posture) {
   }
   q.push({ q: 'İncelemenin sonucunu ne zaman açıklayacaksınız?', a: v.p('[Tarih/saat] itibarıyla. Erken ama eksik bir açıklama yerine doğru bilgiyi paylaşmak istiyoruz.', '[Tarih/saat] itibarıyla; eksik bilgiyle konuşmak istemiyorum.') });
   if (r.boycott) q.push({ q: 'Boykot çağrıları hakkında ne diyorsunuz?', a: 'Tüketicilerimizin kaygısını anlıyoruz. Güveni sözle değil, incelemenin sonucunu açıkça paylaşarak kazanmamız gerektiğinin farkındayız.' });
-  if (r.counter) q.push({ q: `“${r.counter.label}” deniyor; doğru mu?`, a: 'Bu bilgiyi biz de gördük ve kendi kayıtlarımızla karşılaştırıyoruz. Doğrulamadan sahiplenmek istemeyiz.' });
+  if (r.counter) q.push({ q: `“${r.counter.label}” başlığıyla dolaşan paylaşımlar doğru mu?`, a: 'Bu bilgiyi biz de gördük ve kendi kayıtlarımızla karşılaştırıyoruz. Doğrulamadan sahiplenmek istemeyiz.' });
   if (r.coordination.some((c) => (c.score || 0) >= 0.5)) q.push({ q: 'Paylaşımların organize olduğunu düşünüyor musunuz?', a: v.p('Bu konuda bir değerlendirme yapmıyoruz. Önceliğimiz, soru soran herkese doğru bilgiyi vermek.', 'Bu konuda bir değerlendirme yapmıyorum; önceliğim soruları yanıtlamak.') });
-  return q.slice(0, 5);
+  return q.slice(0, 6);
 }
 
 function nextCheck(r, posture, rising) {

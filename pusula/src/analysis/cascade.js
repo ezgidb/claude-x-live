@@ -57,7 +57,7 @@ export function buildCascade(ctx, narrs) {
     seenSrc.add(d.it.source);
     steps.push({ t: d.t, itemId: d.it.id, kind: 'platform-geçişi', note: `Konu ${SRC[d.it.source] || d.it.source} tarafına da geçti (${handleOf(d.it.author)}).` });
   }
-  const counter = narrs.filter((n) => n.kind === 'savunma' && n.count >= 3 && n.firstSeen > originDoc.t).sort((a, b) => a.firstSeen - b.firstSeen)[0];
+  const counter = narrs.filter((n) => n.kind === 'savunma' && n.count >= 3 && n.bursty && n.firstSeen > originDoc.t + 20 * MIN).sort((a, b) => a.firstSeen - b.firstSeen)[0];
   if (counter) steps.push({ t: counter.origin.t, itemId: counter.origin.it.id, kind: 'karşı-anlatı', note: `Karşı görüş belirdi: “${counter.label}” (${counter.count} gönderi).` });
   steps.sort((a, b) => a.t - b.t);
   return { cascade: { originItemId: originDoc.it.id, steps: steps.slice(0, 12) }, focus, eventIds, times, originDoc, counter: counter || null };

@@ -163,7 +163,12 @@ function stats(ctx, r) {
   let peakHour = 0;
   for (let i = 1; i < NS; i++) peakHour = Math.max(peakHour, series[i].n + series[i - 1].n);
   const neg = (st.elestiri + st.alay) / count, pos = st.destek / count;
-  const kind = neg >= 0.45 && neg > pos * 1.5 ? 'saldırı' : pos >= 0.45 && pos > neg * 1.5 ? 'savunma' : 'nötr';
+  // Düşmanca ton: eleştiri + alay, yarı ağırlıkla soru ve çağrı (yerel zenginleştirme temkinli etiketler)
+  const hostile = Math.min(1, neg + 0.5 * (st.soru / count) + 0.5 * (cta / count));
+  let deb = 0;
+  for (const u of r.units) if (u.debunk) deb += u.docs.length;
+  const debunk = deb / count >= 0.35 && neg < 0.4;
+  const kind = (pos >= 0.4 && pos > hostile * 1.5) || debunk ? 'savunma' : hostile >= 0.35 && hostile > pos * 1.5 ? 'saldırı' : 'nötr';
   const velocity = Math.round((last1h / Math.max(1, prev1h)) * 100) / 100;
   const first = docs[0].t, last = docs[count - 1].t;
   let status;
@@ -178,7 +183,7 @@ function stats(ctx, r) {
   const termStems = [...cnt].map(([s, c]) => [s, c * ctx.idf(s)]).filter(([s]) => cnt.get(s) >= Math.min(2, r.units.length))
     .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)).slice(0, 6).map(([s]) => s);
   const top = docs.filter((d) => !d.isRepost).sort((a, b) => b.eng - a.eng || a.t - b.t).slice(0, 5);
-  Object.assign(r, { docs, count, reach, stance, negShare: neg, ctaShare: cta / count, claimShare: claim / count, authors: authors.size,
+  Object.assign(r, { docs, count, reach, stance, negShare: neg, hostile, ctaShare: cta / count, claimShare: claim / count, authors: authors.size,
     firstSeen: first, lastSeen: last, last1h, prev1h, velocity, status, kind, series, peakHour,
     bursty: peakHour >= 5 && peakHour >= 3 * (count / 24), origin, top, termStems });
   return r;
@@ -191,7 +196,7 @@ export function sensitivityStems(client) {
 }
 
 function narrativeRisk(r, sens) {
-  const negW = clamp((r.negShare - 0.2) / 0.5);
+  const negW = r.kind === 'savunma' ? 0 : clamp((r.hostile - 0.15) / 0.4);
   const size = clamp(Math.log10(1 + r.count) / 3);
   const recent = clamp(r.last1h / 30);
   const reachF = clamp((Math.log10(r.reach + 1) - 4) / 3);
@@ -230,7 +235,9 @@ export function buildNarratives(ctx, prev) {
       if (hit && r.keys.has(hit.key)) r.label = hit.p.label;
     } else {
       const ts = new Set(r.termStems);
+      const tops = new Set(r.top.map((d) => d.it.id));
       hit = prevN.find((q) => !q.used && q.p.originItemId && q.p.originItemId === r.origin.it.id && (q.p.lexical || jaccard(q.termStems, ts) >= 0.2))
+        || prevN.filter((q) => !q.used).map((q) => [q, (q.p.topItemIds || []).filter((id) => tops.has(id)).length]).filter(([, c]) => c >= 2).sort((a, b) => b[1] - a[1])[0]?.[0]
         || prevN.filter((q) => !q.used).map((q) => [q, jaccard(q.termStems, ts)]).filter(([, j]) => j >= 0.4).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
       if (hit) {
         r.label = hit.p.label;

@@ -16,12 +16,12 @@ export function buildStance(ctx) {
     c[d.stance]++; n++;
   }
   const out = {};
-  if (!n) { for (const k of STANCES) out[k] = k === 'notr' ? 1 : 0; return { stance: out, n: 0, neg: 0, negShare: 0 }; }
+  if (!n) { for (const k of STANCES) out[k] = k === 'notr' ? 1 : 0; return { stance: out, n: 0, neg: 0, negShare: 0, hostile: 0, destek: 0 }; }
   let acc = 0;
   for (const k of STANCES) { out[k] = Math.round((c[k] / n) * 1000) / 1000; acc += out[k]; }
   out.notr = Math.round((out.notr + 1 - acc) * 1000) / 1000;
   const neg = c.elestiri + c.alay;
-  return { stance: out, n, neg, negShare: neg / n };
+  return { stance: out, n, neg, negShare: neg / n, hostile: Math.min(1, (neg + 0.5 * c.soru) / n), destek: c.destek / n };
 }
 
 export function buildRisk(ctx, { pulse, st, narrs, coord, forecast, prev }) {
@@ -32,7 +32,7 @@ export function buildRisk(ctx, { pulse, st, narrs, coord, forecast, prev }) {
     const d = ctx.docs[i], age = now - d.t;
     if (age >= 6 * HOUR) break;
     const hostile = d.stance !== 'destek';
-    if (hostile && !d.isMedia && d.followers >= 100_000 && (d.neg || d.stance === 'soru' || narrKind(narrs, d.nid) === 'saldırı') && (!big || d.followers > big.followers)) big = d;
+    if (hostile && !d.isMedia && d.followers >= 100_000 && (d.neg || d.stance === 'soru' || narrKind(narrs, d.nid) === 'saldırı' || pulse.z >= 4) && (!big || d.followers > big.followers)) big = d;
     if (hostile && d.isMedia && (d.neg || narrKind(narrs, d.nid) === 'saldırı')) media = media || d;
     if (age >= 3 * HOUR) continue;
     n3++;
@@ -42,19 +42,21 @@ export function buildRisk(ctx, { pulse, st, narrs, coord, forecast, prev }) {
     }
     if (d.cta && hostile) cta++;
   }
-  const negTone = clamp((st.negShare - 0.1) / 0.3);          // olumlu dalga risk sayılmaz
+  const negTone = clamp((st.hostile - 0.1) / 0.25);          // olumlu dalga risk sayılmaz
+  // Mutlak büyüklük: son 3 saatte birkaç düzine gönderilik dalga, binlik dalgayla aynı puanı almaz
+  const mag = 0.6 + 0.4 * clamp(Math.log10(Math.max(n3, 1) / 50) / Math.log10(20));
   const drivers = [];
-  const add = (key, weight, note) => { weight = Math.round(weight * 10) / 10; if (weight >= 0.5) drivers.push({ key, weight, note }); return weight; };
+  const add = (key, weight, note) => { weight = Math.round(weight * mag * 10) / 10; if (weight >= 0.5) drivers.push({ key, weight, note }); return weight; };
 
   const zF = clamp((pulse.z - 1.5) / 8.5), absF = clamp(Math.log10(Math.max(pulse.rate1h, 1) / 8) / Math.log10(40));
   const kat = pulse.baseline1h >= 1 ? ` (yaklaşık ${Math.max(1, Math.round(pulse.rate1h / pulse.baseline1h))} kat)` : '';
   add('hacim', 22 * zF * (0.4 + 0.6 * absF) * negTone, `Son 1 saatte ${pulse.rate1h} gönderi var; olağan düzey saatte ${Math.round(pulse.baseline1h)}${kat}.`);
-  const negF = clamp((st.negShare - 0.25) / 0.45), volF = clamp(Math.log10(Math.max(st.neg, 1) / 5) / Math.log10(40));
+  const negF = clamp((st.hostile - 0.15) / 0.35), volF = clamp(Math.log10(Math.max(st.neg, 1) / 5) / Math.log10(40));
   add('olumsuz', 20 * negF * volF, `Son 3 saatteki gönderilerin yüzde ${Math.round(st.negShare * 100)} kadarı eleştiri ya da alay (${st.neg} gönderi).`);
   const reachPts = add('erişim', 14 * clamp((Math.log10(reach + 1) - 4.5) / 2.5), `Olumsuz gönderileri paylaşan hesapların toplam takipçisi yaklaşık ${fmtNum(reach)}.`);
   let bm = 0; const bmNote = [];
-  if (big) { bm += big.followers >= 1e6 ? 8 : 6; bmNote.push(`${fmtNum(big.followers)} takipçili bir hesap konuya girdi`); }
-  if (media) { bm += 5; bmNote.push('konu medyada yer aldı'); }
+  if (big) { bm += big.followers >= 1e6 ? 8 : 5; bmNote.push(`${fmtNum(big.followers)} takipçili bir hesap konuya girdi`); }
+  if (media) { bm += 4; bmNote.push('konu medyada yer aldı'); }
   const bmPts = add('büyük-hesap-medya', Math.min(12, bm), bmNote.length ? bmNote.join('; ').replace(/^./, (ch) => ch.toLocaleUpperCase('tr')) + '.' : '');
   const sensShare = st.neg ? sensHit / st.neg : 0;
   add('hassas-konu', sensHit >= 3 ? 10 * clamp(sensShare / 0.2, 0.4, 1) * Math.max(volF, 0.3) : 0,
@@ -88,7 +90,7 @@ function narrKind(narrs, nid) { if (!nid) return null; for (const n of narrs) if
 export function buildIncident(ctx, { pulse, risk, st, cas, prev }) {
   const { now, client } = ctx;
   const p = prev?.incident || null;
-  const hot = risk.score >= 50 || (pulse.z >= 12 && pulse.rate1h >= 100 && st.negShare >= 0.35);
+  const hot = risk.score >= 50 || (pulse.z >= 12 && pulse.rate1h >= 150 && st.hostile >= 0.35 && risk.score >= 40);
   const name = client?.name || 'Danışan';
   const topic = cas.focus ? `“${cas.focus.label}”` : 'olumsuz gönderiler';
   let inc = null;

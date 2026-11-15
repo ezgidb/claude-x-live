@@ -3,6 +3,8 @@ import { DAY, engagement, STANCES } from './util.js';
 import { words, stemOf, guessStance, STOP } from './text.js';
 
 const YOUNG_MS = 45 * DAY;
+// İddiayı çürütmeye çalışan gönderilerin ipuçları (karşı-anlatı tespiti için)
+const DEBUNK = new Set(['asıls', 'teyit', 'iftir', 'monta', 'dezen', 'manip', 'uydur', 'kurgu', 'eski', 'yalan', 'karal']);
 
 export function buildContext({ client, items, now }) {
   const clientStop = new Set();
@@ -30,8 +32,10 @@ export function buildContext({ client, items, now }) {
     if (!unit) {
       const ws = words(src.text);
       const stems = new Set();
+      let debunk = false;
       for (let i = 0; i < ws.length; i++) {
         const w = ws[i];
+        if (!debunk && DEBUNK.has(w.length > 5 ? w.slice(0, 5) : w)) debunk = true;
         if (w.length < 3 || STOP.has(w)) continue;
         const st = w.length > 5 ? w.slice(0, 5) : w;
         if (clientStop.has(st)) continue;
@@ -39,7 +43,7 @@ export function buildContext({ client, items, now }) {
         const cur = surf.get(st);
         if (cur === undefined || w.length < cur.length || (w.length === cur.length && w < cur)) surf.set(st, w);
       }
-      unit = { id: src.id, src, words: ws, stems, label: null, docs: [], guess: null, nar: null };
+      unit = { id: src.id, src, words: ws, stems, label: null, docs: [], guess: null, nar: null, debunk };
       const lab = src.enr?.narrative;
       if (typeof lab === 'string' && lab.trim()) unit.label = lab.trim();
       unitMap.set(src.id, unit);
