@@ -1,6 +1,6 @@
 // Ham gönderilerden çözümleme bağlamı: pencere, yeniden paylaşım kökleri, belirteçler.
 import { DAY, engagement, STANCES } from './util.js';
-import { words, stemOf, stemsOf, guessStance, STOP } from './text.js';
+import { words, stemOf, guessStance, STOP } from './text.js';
 
 const YOUNG_MS = 45 * DAY;
 
@@ -29,17 +29,17 @@ export function buildContext({ client, items, now }) {
     let unit = unitMap.get(src.id);
     if (!unit) {
       const ws = words(src.text);
-      const stems = stemsOf(ws, clientStop);
-      unit = { id: src.id, src, words: ws, stems, label: null, docs: [], guess: null, nar: null };
-      for (const st of stems) df.set(st, (df.get(st) || 0) + 1);
-      for (const w of ws) {
+      const stems = new Set();
+      for (let i = 0; i < ws.length; i++) {
+        const w = ws[i];
         if (w.length < 3 || STOP.has(w)) continue;
-        const st = stemOf(w);
+        const st = w.length > 5 ? w.slice(0, 5) : w;
         if (clientStop.has(st)) continue;
-        let m = surf.get(st);
-        if (!m) surf.set(st, (m = new Map()));
-        m.set(w, (m.get(w) || 0) + 1);
+        if (!stems.has(st)) { stems.add(st); df.set(st, (df.get(st) || 0) + 1); }
+        const cur = surf.get(st);
+        if (cur === undefined || w.length < cur.length || (w.length === cur.length && w < cur)) surf.set(st, w);
       }
+      unit = { id: src.id, src, words: ws, stems, label: null, docs: [], guess: null, nar: null };
       const lab = src.enr?.narrative;
       if (typeof lab === 'string' && lab.trim()) unit.label = lab.trim();
       unitMap.set(src.id, unit);
@@ -65,13 +65,8 @@ export function buildContext({ client, items, now }) {
     unit.docs.push(doc);
     docs.push(doc);
   }
-  const surface = (st) => {
-    const m = surf.get(st);
-    if (!m) return st;
-    let best = st, bc = -1;
-    for (const [w, c] of m) if (c > bc || (c === bc && (w.length < best.length || (w.length === best.length && w < best)))) { best = w; bc = c; }
-    return best;
-  };
+  // Görünen biçim: kökün rastlanan en kısa hâli (çoğunlukla yalın sözcük)
+  const surface = (st) => surf.get(st) ?? st;
   const N = units.length || 1;
   const idf = (st) => Math.log(N / (df.get(st) || 1)) + 0.5;
   return { client, now, docs, units, byId, df, idf, surface, clientStop, coverageStart: all.length ? coverageStart : null,

@@ -389,7 +389,7 @@ A.bakanlik = {
     '{Gıda denetimi|Denetim} bu ülkede {videodan sonra mı başlıyor|sosyal medyayla mı yapılıyor}? Anadolu Süt {incelensin|için numune alınsın}',
     'Tüketici Nöbeti Bakanlığa başvurmuş{, destekliyorum|}. Anadolu Süt denetlensin, {temizse aklansın|sonuç neyse bilelim}',
     'Anadolu Süt için {il tarım müdürlüğüne|gıda hattına} {şikâyet bıraktım|kayıt açtırdım}, {başvuru numarası aldım|takipçisiyim}',
-    'Denetim raporu açıklanmadan {ne boykotçuya|ne Anadolu Süt savunucusuna} {inanırım|güvenirim}. Bakanlık {nerede|konuşsun}',
+    'Denetim raporu açıklanmadan {boykot diyene de|Anadolu Süt savunucusuna da} {inanmam|güvenmem}. Bakanlık {nerede|konuşsun}',
     'Bakanlık bugüne kadar Anadolu Süt tesisini {kaç kez denetledi|en son ne zaman denetledi}? {Raporlar açıklansın|Bilgi edinme başvurusu yapacağım}',
     "Anadolu Süt'ün o partisinden numune alınsın, {bağımsız laboratuvar baksın|sonuç kamuoyuyla paylaşılsın}. {Başka türlü kapanmaz|Tartışma ancak böyle biter}",
     'Milletvekillerine yazıyorum: Anadolu Süt konusu {Meclis gündemine gelsin|için soru önergesi verin}',

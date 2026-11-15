@@ -3,8 +3,8 @@
 import { MIN, clamp, fmtDur, handleOf } from './util.js';
 import { fnv } from './text.js';
 
-const K = 18, ROWS = 3, MIN_WORDS = 6, SIM = 0.7;
-const SEEDS = Array.from({ length: K }, (_, i) => [(0x9e3779b1 * (i + 1)) | 1, (0x85ebca6b * (i + 7)) >>> 0]);
+const K = 12, ROWS = 3, MIN_WORDS = 6, SIM = 0.7;
+const SA = Int32Array.from({ length: K }, (_, i) => (0x9e3779b1 * (i + 1)) | 1), SB = Int32Array.from({ length: K }, (_, i) => (0x85ebca6b * (i + 7)) | 0);
 
 function find(p, i) { while (p[i] !== i) { p[i] = p[p[i]]; i = p[i]; } return i; }
 function jac(a, b) { let n = 0; for (const x of a) if (b.has(x)) n++; return n / (a.size + b.size - n); }
@@ -30,23 +30,24 @@ function copyClusters(ctx) {
   }
   const uniq = [...texts.values()].filter((t) => t.set.size >= MIN_WORDS - 1);
   const parent = uniq.map((_, i) => i);
-  const buckets = new Map();
-  const sig = new Uint32Array(K);
+  const bands = Array.from({ length: K / ROWS }, () => new Map());
+  const sig = new Uint32Array(K), hc = new Map();
   uniq.forEach((t, i) => {
     sig.fill(0xffffffff);
     for (const w of t.set) {
-      const h = fnv(w);
-      for (let k = 0; k < K; k++) { const v = (Math.imul(h, SEEDS[k][0]) + SEEDS[k][1]) >>> 0; if (v < sig[k]) sig[k] = v; }
+      let h = hc.get(w);
+      if (h === undefined) hc.set(w, (h = fnv(w)));
+      for (let k = 0; k < K; k++) { const v = (Math.imul(h, SA[k]) + SB[k]) >>> 0; if (v < sig[k]) sig[k] = v; }
     }
     for (let b = 0; b < K / ROWS; b++) {
-      const key = `${b}:${sig[b * ROWS]}:${sig[b * ROWS + 1]}:${sig[b * ROWS + 2]}`;
+      const buckets = bands[b], key = (sig[b * ROWS] ^ Math.imul(sig[b * ROWS + 1], 0x9e3779b1) ^ Math.imul(sig[b * ROWS + 2], 0x85ebca6b)) & 0x3fffffff;
       let l = buckets.get(key);
       if (!l) { buckets.set(key, [i]); continue; }
-      for (let q = 0; q < l.length && q < 6; q++) {
-        const j = l[q], a = find(parent, i), c = find(parent, j);
-        if (a !== c && jac(t.set, uniq[j].set) >= SIM) parent[Math.max(a, c)] = Math.min(a, c);
+      for (let q = 0; q < l.length; q++) {
+        const j = l[q], a = find(parent, i), c = find(parent, j), u = uniq[j].set;
+        if (a !== c && Math.min(u.size, t.set.size) >= SIM * Math.max(u.size, t.set.size) && jac(t.set, u) >= SIM) parent[Math.max(a, c)] = Math.min(a, c);
       }
-      if (l.length < 6) l.push(i);
+      if (l.length < 4) l.push(i);
     }
   });
   const groups = new Map();

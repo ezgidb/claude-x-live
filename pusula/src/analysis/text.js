@@ -1,6 +1,10 @@
 // Türkçe'ye uygun metin işleme: küçük harf, belirteçleme, kök, slug, benzerlik.
+const UP_I = /[İI]/, DOT = /i\u0307/;
 export function trLower(s) {
-  return String(s ?? '').replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/i̇/g, 'i');
+  s = String(s ?? '');
+  if (UP_I.test(s)) s = s.replace(/İ/g, 'i').replace(/I/g, 'ı');
+  s = s.toLowerCase();
+  return DOT.test(s) ? s.replace(/i\u0307/g, 'i') : s;
 }
 export function fold(s) {
   return trLower(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i');
@@ -12,13 +16,14 @@ export function slugify(s) {
 export const STOP = new Set(`ve veya ile ama fakat ancak çünkü de da ki mi mı mu mü bu şu bir iki için gibi kadar daha en çok az her hiç ne neden niye nasıl ben sen biz siz onlar bana sana bize size beni seni bizi sizi onu ona bunu buna şunu benim senin bizim sizin onun var yok değil olan olarak oldu olur olmuş olsun ise diye ya yani hem bile sadece artık şimdi sonra önce bugün dün yarın evet hayır tamam lütfen rt via the and of to in is http https www com amp şey şeyi bence aynen işte hani zaten yine gene tüm bütün bazı böyle şöyle öyle kendi kim kimse herkes hep hala hâlâ oluyor olacak etti ediyor eden etmek olmak yapıyor yapan yaptı dedi diyor göre karşı üzere tarafından biri birisi bunlar şunlar orada burada nerede bişey falan filan abi yaa bunun şunun onların mısınız misiniz musunuz iyi tek ilk son yeni eski bana kez defa hiçbir birkaç ayrıca üstelik resmen gerçekten kesinlikle acaba belki galiba sanki tam hemen bunları olsa olmaz olmasın oldu olduğu olduğunu değilse nedir budur`.split(/\s+/));
 
 // Sözcükler: bağlantı ve @anma atılır, etiketler (#AnadoluSütBoykot) parçalanır, kesme sonrası ek düşer.
+const WORD = /[\p{L}\p{N}]+/gu;
 export function words(text) {
-  const s = String(text ?? '')
-    .replace(/https?:\/\/\S+/g, ' ')
-    .replace(/@[\w.]+/g, ' ')
-    .replace(/#(\p{L}[\p{L}\p{N}_]*)/gu, (m, w) => ' ' + w.replace(/(\p{Ll})(\p{Lu})/gu, '$1 $2').replace(/_/g, ' ') + ' ')
-    .replace(/(\p{L})['’]\p{L}+/gu, '$1 ');
-  return trLower(s).match(/[\p{L}\p{N}]+/gu) || [];
+  let s = String(text ?? '');
+  if (s.includes('http')) s = s.replace(/https?:\/\/\S+/g, ' ');
+  if (s.includes('@')) s = s.replace(/@[\w.]+/g, ' ');
+  if (s.includes('#')) s = s.replace(/#(\p{L}[\p{L}\p{N}_]*)/gu, (m, w) => ' ' + w.replace(/(\p{Ll})(\p{Lu})/gu, '$1 $2').replace(/_/g, ' ') + ' ');
+  if (s.includes("'") || s.includes('’')) s = s.replace(/(\p{L})['’]\p{L}+/gu, '$1 ');
+  return trLower(s).match(WORD) || [];
 }
 // Türkçe sondan eklemeli olduğu için basit ama işe yarar kök: ilk 5 harf.
 export const stemOf = (w) => (w.length > 5 ? w.slice(0, 5) : w);

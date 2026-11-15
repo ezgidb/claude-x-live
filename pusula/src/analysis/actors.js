@@ -30,8 +30,19 @@ export function buildActors(ctx, narrs, coord, cas) {
   const engCut = evDocs.map((d) => d.eng).sort((x, y) => y - x)[Math.min(9, evDocs.length - 1)] || 0;
   const defN = new Set(narrs.filter((n) => n.kind === 'savunma').map((n) => n.id));
 
+  // Hız: ayrıntılı rol çözümlemesi yalnızca aday hesaplara (özel rol adayları + en yüksek puanlı 80)
+  const base = (a) => 2 * Math.log10(1 + a.eng) + Math.log10(1 + (a.followers || 0)) + Math.min(a.docs.length, 5) * 0.3;
+  let pool = [...by.values()];
+  if (pool.length > 200) {
+    const special = [], plain = [];
+    for (const a of pool) (origins.has(a.id) || a.media || coord.suspects.has(a.id) || bridge.has(a.id) || a.followers >= 10_000 ? special : plain).push(a);
+    for (const a of plain) a.base = base(a);
+    plain.sort((x, y) => y.base - x.base);
+    special.sort((x, y) => base(y) - base(x));
+    pool = special.slice(0, 300).concat(plain.slice(0, 80));
+  }
   const out = [];
-  for (const a of by.values()) {
+  for (const a of pool) {
     a.followers = a.followers || 0;
     const stance = Object.entries(a.st).sort((x, y) => y[1] - x[1] || (x[0] < y[0] ? -1 : 1))[0][0];
     const first = a.docs[0];
@@ -73,12 +84,16 @@ export function buildActors(ctx, narrs, coord, cas) {
         role, items: a.docs.length, reach: a.reach, engagement: a.eng, firstAt: first.t, stance, narrativeIds: [...a.nids], note } });
   }
   out.sort((x, y) => y.score - x.score || (String(x.pub.id) < String(y.pub.id) ? -1 : 1));
-  const res = [];
-  let sus = 0;
+  // Şüpheli hesaplara en çok 6 yer; varsa en az 3'ü listede kalsın
+  const reserved = out.filter((o) => o.pub.role === 'şüpheli').slice(0, 3);
+  const picked = [];
+  let sus = reserved.length;
   for (const o of out) {
-    if (res.length >= MAX) break;
+    if (picked.length >= MAX - reserved.length) break;
+    if (reserved.includes(o)) continue;
     if (o.pub.role === 'şüpheli' && ++sus > 6) continue;
-    res.push(o.pub);
+    picked.push(o);
   }
+  const res = picked.concat(reserved).sort((x, y) => y.score - x.score).map((o) => o.pub);
   return res;
 }
