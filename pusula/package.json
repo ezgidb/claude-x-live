@@ -1,0 +1,13 @@
+{
+  "name": "pusula",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Danışan odaklı canlı gündem odası",
+  "type": "module",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/main.js",
+    "pusula": "node src/cli.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  }
+}
