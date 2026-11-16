@@ -20,7 +20,7 @@ function pack(kind, docs, score, note, windowMin) {
 function copyClusters(ctx) {
   const texts = new Map();
   for (const d of ctx.docs) {
-    if (d.isRepost || d.isMedia) continue;
+    if (d.isRepost || d.isMedia || d.own) continue;
     const ws = d.unit.words;
     if (ws.length < MIN_WORDS) continue;
     const key = ws.join(' ');
@@ -69,7 +69,7 @@ function copyClusters(ctx) {
     const tight = spanMin <= 20 ? 1 : spanMin <= 60 ? 0.8 : spanMin <= 180 ? 0.5 : spanMin <= 360 ? 0.25 : 0;
     const size = clamp((nAcc - 3) / 9);
     const score = 0.3 * size + 0.4 * youngShare + 0.3 * tight;
-    const ok = score >= 0.5 && ((youngShare >= 0.4 && tight >= 0.5) || (youngShare >= 0.6 && nAcc >= 5) || (tight >= 0.8 && nAcc >= 10 && g.len / g.n >= 10));
+    const ok = score >= 0.5 && ((youngShare >= 0.4 && tight >= 0.5) || (youngShare >= 0.6 && nAcc >= 5) || (tight === 1 && nAcc >= 12 && g.len / g.n >= 10));
     if (!ok) continue;
     const windowMin = Math.max(1, Math.round((ts[n - 1] - ts[0]) / MIN));
     const yn = young ? ` Bu hesapların ${young} tanesi son 45 günde açılmış.` : '';

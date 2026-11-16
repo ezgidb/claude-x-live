@@ -103,6 +103,20 @@ export function createEngine({
       const nm = s.names.get(n.id);
       if (nm) { n.label = nm.label; if (nm.summary) n.summary = nm.summary; }
     }
+    // aynı ada kavuşan kümeleri tek anlatıda birleştir
+    const byLabel = new Map(), merged = [];
+    for (const n of snap.narratives) {
+      const m = byLabel.get(n.label);
+      if (!m) { byLabel.set(n.label, n); merged.push(n); continue; }
+      m.count += n.count; m.share += n.share; m.reach += n.reach;
+      m.firstSeen = Math.min(m.firstSeen, n.firstSeen); m.lastSeen = Math.max(m.lastSeen, n.lastSeen);
+      m.risk = Math.max(m.risk, n.risk);
+      m.terms = [...new Set([...m.terms, ...n.terms])].slice(0, 8);
+      m.topItemIds = [...new Set([...(m.topItemIds || []), ...(n.topItemIds || [])])].slice(0, 6);
+      const add = new Map((n.series || []).map((p) => [p.t, p.n]));
+      for (const p of m.series || []) p.n += add.get(p.t) || 0;
+    }
+    snap.narratives = merged.sort((a, b) => b.count - a.count);
   }
 
   const topItems = (clientId, snap) => {

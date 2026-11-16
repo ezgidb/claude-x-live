@@ -19,7 +19,7 @@ const THEMES = [
   [/(açıklama bekli|açıklama yap|sessiz|susuyor|neden konuşm)/, 'Açıklama beklentisi', 'danışanın sessizliğini sorgulayan paylaşımlar'],
   [/(reklam|kampanya|reklam filmi)/, 'Reklam kampanyası yorumları', 'reklam ve kampanyalar üzerine yorumlar'],
   [/(tarif|malzeme|su bardağı|kaşık|fırın)/, 'Tarif paylaşımları', 'ürünün geçtiği tarif ve kullanım paylaşımları'],
-  [/(imza günü|kitap|okudum|okur|yazar|sayfa|ön sipariş)/, 'Kitap ve okur yorumları', 'kitap çıkışı ve okur yorumları'],
+  [/(imza günü|kitab|kitap|ön sipariş)/, 'Kitap ve okur yorumları', 'kitap çıkışı ve okur yorumları'],
   [/(yeni hat|sefer|tarife|fabrika|yatırım|pazar payı|çeyrek|ciro)/, 'Kurumsal haberler', 'şirket haberleri ve duyurular'],
 ];
 

@@ -54,7 +54,10 @@ export function buildActors(ctx, narrs, coord, cas) {
       const d = a.docs.find((x) => !x.isRepost && (!cas.eventIds.size || cas.eventIds.has(x.nid))) ;
       if (d && d !== cas.originDoc) { const j = jumpAt(cas.times, d.t, ctx.now); if (isJump(j)) jump = j; }
     }
-    if (on && (a.id === mainOrigin || !sus)) {
+    if (a.docs[0].own) {
+      role = 'savunucu'; bonus = 6;
+      note = `Danışanın kendi hesabı; ${a.docs.length} paylaşım yaptı.`;
+    } else if (on && (a.id === mainOrigin || !sus)) {
       role = 'kaynak'; bonus = a.id === mainOrigin ? 100 : 6;
       note = `“${on.label}” konusunu ilk paylaşan hesap (saat ${fmtTime(on.origin.t)}).`;
     } else if (a.media) {

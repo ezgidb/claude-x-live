@@ -54,7 +54,7 @@ export function diffEvents(prev, next, { client, items } = {}) {
     const p = pN.get(n.id) || pList.find((q) => sameNarr(q, n, ns));
     // Sözcüksel (adsız) kümeler oynak olabilir: yalnızca gerçekten yeni ve eleştirel olanı haber ver
     const min = n.lexical ? 15 : NEW_NARR;
-    const fresh = !n.lexical || (n.kind === 'saldırı' && at - n.firstSeen <= 3 * 3_600_000);
+    const fresh = at - n.firstSeen <= 3 * 3_600_000 && (!n.lexical || n.kind === 'saldırı');
     if (n.count >= min && fresh && (!p || p.count < min)) {
       ev('yeni-anlatı', n.id, n.kind === 'saldırı' ? 'dikkat' : 'bilgi', n.kind === 'saldırı' ? 'Yeni eleştirel konu' : 'Yeni konu',
         `“${n.label}”: ${n.count} gönderi, ilk görülme ${fmtTime(n.firstSeen)}.`, { narrativeId: n.id, itemId: n.originItemId });
@@ -63,15 +63,16 @@ export function diffEvents(prev, next, { client, items } = {}) {
       ev('anlatı-büyüyor', `${n.id}:${m}`, n.kind === 'saldırı' ? 'dikkat' : 'bilgi', 'Konu büyüyor', `“${n.label}” ${m} gönderiyi geçti; son 1 saatte hız ${String(n.velocity).replace('.', ',')} kat.`, { narrativeId: n.id });
     }
   }
-  // Karşı-anlatı: yayılım zincirinde ilk kez belirdiğinde
-  const cs = next.cascade.steps.find((x) => x.kind === 'karşı-anlatı');
-  if (cs && !(prev.cascade?.steps || []).some((x) => x.kind === 'karşı-anlatı')) {
-    const n = next.narratives.find((x) => x.originItemId === cs.itemId);
-    ev('karşı-anlatı', n?.id ?? cs.itemId, 'bilgi', 'Karşı görüş belirdi', n ? `“${n.label}” başlığında danışanı savunan ya da iddiayı sorgulayan ${n.count} gönderi var.` : cs.note, { narrativeId: n?.id, itemId: cs.itemId });
+  // Karşı-anlatı: açık olay sırasında ilk kez belirdiğinde (olay başına bir kez)
+  if (nInc?.counter && !(pInc && pInc.id === nInc.id && pInc.counter)) {
+    const n = next.narratives.find((x) => x.id === nInc.counter);
+    const cs = next.cascade.steps.find((x) => x.kind === 'karşı-anlatı');
+    ev('karşı-anlatı', nInc.id, 'bilgi', 'Karşı görüş belirdi', n ? `“${n.label}” başlığında danışanı savunan ya da iddiayı sorgulayan ${n.count} gönderi var.` : (cs?.note || 'Danışanı savunan gönderiler belirdi.'), { narrativeId: nInc.counter, itemId: cs?.itemId });
   }
   // Büyük hesap ve medya girişi (önceki anlık görüntüden sonra ilk kez görünenler)
   const pA = new Set((prev.actors || []).map((a) => a.id));
   const nA = new Map(next.actors.map((a) => [a.id, a]));
+  const own = new Set((client?.terms || []).filter((t) => String(t).startsWith('@')).map((t) => String(t).slice(1).toLowerCase()));
   const firsts = new Map();
   for (const it of items || []) {
     if (!it?.author || it.createdAt > at || it.createdAt <= at - 86_400_000) continue;
@@ -81,7 +82,7 @@ export function diffEvents(prev, next, { client, items } = {}) {
   }
   const bigs = [], medias = [];
   for (const [id, it] of firsts) {
-    if (it.createdAt < prev.at || pA.has(id)) continue;
+    if (it.createdAt < prev.at || pA.has(id) || own.has(String(it.author.handle ?? '').replace(/^@/, '').toLowerCase())) continue;
     const media = it.author.kind === 'medya' || it.source === 'haber';
     if (media) medias.push([id, it]); else if ((it.author.followers || 0) >= 100_000) bigs.push([id, it]);
   }

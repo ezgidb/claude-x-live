@@ -32,7 +32,7 @@ export function buildRisk(ctx, { pulse, st, narrs, coord, forecast, prev }) {
     const d = ctx.docs[i], age = now - d.t;
     if (age >= 6 * HOUR) break;
     const hostile = d.stance !== 'destek';
-    if (hostile && !d.isMedia && d.followers >= 100_000 && (d.neg || d.stance === 'soru' || narrKind(narrs, d.nid) === 'saldırı' || pulse.z >= 4) && (!big || d.followers > big.followers)) big = d;
+    if (hostile && !d.isMedia && !d.own && d.followers >= 100_000 && (d.neg || d.stance === 'soru' || narrKind(narrs, d.nid) === 'saldırı' || pulse.z >= 4) && (!big || d.followers > big.followers)) big = d;
     if (hostile && d.isMedia && (d.neg || narrKind(narrs, d.nid) === 'saldırı')) media = media || d;
     if (age >= 3 * HOUR) continue;
     n3++;
@@ -113,6 +113,7 @@ export function buildIncident(ctx, { pulse, risk, st, cas, prev }) {
     if (inc.peaked && pulse.rate1h > inc.peakRate * 1.2) inc.peaked = false;
     if (!inc.peaked) { inc.peakRate = pulse.rate1h; inc.peakAt = now; }
   } else if (!inc.peaked && inc.peakRate >= 30 && pulse.rate1h <= 0.75 * inc.peakRate && now - inc.peakAt >= 40 * 60_000) inc.peaked = true;
+  inc.counter = inc.counter || cas.counter?.id || null;
   inc.narrativeId = cas.focus?.id ?? inc.narrativeId ?? null;
   inc.headline = inc.status === 'açık'
     ? `${name}: ${topic} ${pulse.trend === 'sönüyor' ? 'konusu yavaşlıyor ama sürüyor' : pulse.trend === 'patlama' || pulse.trend === 'yükseliyor' ? 'konusu hızla yayılıyor' : 'konusu gündemde'}`

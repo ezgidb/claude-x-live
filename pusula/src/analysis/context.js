@@ -6,11 +6,18 @@ const YOUNG_MS = 45 * DAY;
 // İddiayı çürütmeye çalışan gönderilerin ipuçları (karşı-anlatı tespiti için)
 const DEBUNK = new Set(['asıls', 'teyit', 'iftir', 'monta', 'dezen', 'manip', 'uydur', 'kurgu', 'eski', 'yalan', 'karal']);
 
+export function ownHandles(client) {
+  const s = new Set();
+  for (const t of client?.terms || []) if (String(t).startsWith('@')) s.add(String(t).slice(1).toLowerCase());
+  return s;
+}
+
 export function buildContext({ client, items, now }) {
   const clientStop = new Set();
   for (const s of [client?.name, ...(client?.terms || [])]) {
     for (const w of words(String(s ?? '').replace(/[@#]/g, ' #'))) clientStop.add(stemOf(w));
   }
+  const own = ownHandles(client);
   const all = [];
   let coverageStart = Infinity;
   for (const it of items || []) {
@@ -64,7 +71,7 @@ export function buildContext({ client, items, now }) {
       authorId: a.id ?? a.handle ?? `?${it.id}`,
       young: typeof a.createdAt === 'number' && it.createdAt - a.createdAt >= 0 && it.createdAt - a.createdAt < YOUNG_MS,
       isMedia: a.kind === 'medya' || it.source === 'haber',
-      nid: null,
+      nid: null, own: own.has(String(a.handle ?? '').replace(/^@/, '').toLowerCase()),
     };
     unit.docs.push(doc);
     docs.push(doc);
