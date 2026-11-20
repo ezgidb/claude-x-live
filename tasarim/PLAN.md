@@ -1,94 +1,197 @@
 # Rasat — ölçülmüş doğrulukla gündem ve itibar gözlemevi
 
-**Tasarım ve uygulama planı.** Yazan: lider. Sürüm: 2 (üç araştırma işlendi; bağımsız denetim öncesi).
+**Tasarım ve uygulama planı.** Yazan: lider. **Sürüm 3** — üç araştırma (A, B, C) ve bağımsız denetimin (D, 39 bulgu)
+işlendiği sürüm. Denetim bulgularının her birinin nasıl karşılandığı bölüm 14'te.
 
-"Rasat" çalışma adıdır (gözlemevinde yapılan sistemli gözlem). Bu belge, Nabız, Pusula ve Kule'den öğrenilenlerin
-ve üç araştırmanın üstüne kurulmuş **dördüncü ve son tasarımdır**: bütçe kısıtı olmadan, yapılabilirlik sınırları
-içinde en kapsamlı ve en doğru bilgiyi vermek üzere.
+"Rasat" çalışma adıdır (gözlemevinde yapılan sistemli gözlem).
 
-Dayanaklar (hepsi `tasarim/` altında):
-
-| Belge | Ne verir |
+| Belge (`tasarim/`) | Ne verir |
 |---|---|
 | `00-BRIEF.md` | Kullanıcı ve talep |
 | `01-GEREKSINIM-MEVCUT.md` | Kullanıcının kararları, gereksinimler, doğruluğun altı boyutu, zayıflıkların 11 kök nedeni |
 | `A-PAZAR.md` | Piyasa: kim ne yapıyor, nerede yetersiz |
-| `B-VERI-HUKUK.md` | Veri erişimi, sözleşme ve hukuk, fizibilite |
+| `B-VERI-HUKUK.md` | Veri erişimi, sözleşme ve hukuk, fizibilite; avukata sorulacak 15 soru |
 | `C-YONTEM.md` | Doğruluk yöntemleri ve ölçüm çerçevesi |
-| `ZAYIFLIKLAR.md` (depo kökü) | Mevcut üç aracın 31 zayıflığı |
+| `D-DENETIM.md` | Sürüm 2'nin bağımsız denetimi |
+| `ZAYIFLIKLAR.md` (depo kökü) | Nabız, Pusula ve Kule'nin 31 zayıflığı |
 
-Araştırmaların sınırı: dış sitelerin tam metni bu ortamda okunamadı; bulgular arama sonuçlarındaki alıntılara
-dayanıyor. Bu yüzden plandaki her dış olgu, **Aşama 0'da birincil kaynaktan yeniden doğrulanacak** varsayım
-olarak ele alınır (bkz. bölüm 10).
+**Bu belgedeki dış bilgilerin dayanağı:** araştırmalar dış sitelerin tam metnini okuyamadı; bulgular arama
+sonuçlarındaki alıntılara dayanıyor ve arama kotası araştırma sırasında doldu. Bu yüzden plandaki her dış olgu, A0
+aşamasında birincil kaynaktan yeniden doğrulanacak **varsayım** olarak ele alınır (bölüm 11). Piyasa hakkındaki
+cümleler "araştırmada bulunamadı" düzeyindedir, "yoktur" değil.
+
+Terimlerin sade açıklaması: bölüm 12 (sözlük).
+
+---
+
+## 0. Karar özeti (tek sayfa)
+
+**Ne:** Danışmana "danışanım hakkında ne oluyor" sorusunun yanıtını, **o yanıtın ne kadar eksiksiz ve ne kadar
+doğru olduğunun ölçülmüş değeriyle birlikte** veren bir sistem: yazılım + insan analist + süreç.
+
+**Neden farklı:** Piyasa araştırmasında, kendi kapsamını ve Türkçe okuma isabetini müşterinin verisinde ölçüp gösteren
+bir satıcı bulunamadı. Rasat'ın asıl yatırımı bu ölçüm düzeneğidir.
+
+**Önerilen yol: karma (bölüm 6).** Veri satın alınır (X kurumsal erişim, bir dinleme platformu, Türk medya takip
+firması, ajans aboneliği); ölçüm, Türkçe okuma, olgu hesapları, yorum katmanı ve insan iş akışı kurulur.
+
+**Süre:** canlıya kadar kabaca **12–18 ay** (sözleşme ve satış süreçlerine bağlı). Bu sürede **köprü çözüm**: bir
+dinleme platformu lisansı + Türk medya takip hizmeti + Nabız; köprü platformu aynı zamanda veri yarışmasının adayıdır.
+
+**Maliyet büyüklüğü (bölüm 7.3):** en büyük kalemler X kurumsal erişimi (ikincil kaynaklara göre ayda 42–50 bin $'dan
+başlıyor; doğrulanmadı) ve insanlardır (7/24 nöbet tek koltuk için 5–6 analist, etiketçiler, mühendislik lideri,
+proje yöneticisi, değerlendirme lideri).
+
+**İlk adım para harcamaz:** hukuki görüş (KVKK, X'in kuralları) ve X'ten yazılı teyit. **Hukuki görüş gelmeden gerçek
+kişisel veri işlenmez.**
+
+**Sizin vermeniz gereken kararlar** (ayrıntı bölüm 13): (1) karma yolu ve köprü çözümü onaylıyor musunuz; (2) süre ve
+bütçe büyüklüğü kabul mü; (3) doğruluk hedefleri (günlük dille, bölüm 2.1) uygun mu; (4) siyasi danışanınız olacak mı;
+(5) nöbetçi analistler kimden; (6) ölçü aleti için hatırladığınız 10 büyük geçmiş olay; (7) size bağımsız bir teknik
+danışman atanmasını istiyor musunuz.
 
 ---
 
 ## 1. Vizyon
 
 ### 1.1 Tek cümle
-**Rasat, danışmana "ne oluyor" sorusunun yanıtını, o yanıtın ne kadar eksiksiz ve ne kadar doğru olduğunun
-ölçülmüş değeriyle birlikte verir.**
+**Rasat, danışmana "ne oluyor" sorusunun yanıtını, o yanıtın ne kadar eksiksiz ve ne kadar doğru olduğunun ölçülmüş
+değeriyle birlikte verir.**
 
-### 1.2 Neden bu, neden şimdi
-Araştırma A'nın en önemli bulgusu: pazarda en pahalı araçlar bile **kendi doğruluklarını ölçmüyor ve
-göstermiyor.** Hiçbir satıcı "hangi platformun yüzde kaçını görüyoruz" ya da "Türkçe duruş okumamız sizin
-verinizde ölçüldüğünde şu kadar isabetli" demiyor. Duygu analizi için bağımsız ölçüm yok; koordinasyon ve risk
-puanları kara kutu; uyarılar geçmiş olaylarda sınanmıyor; Türkçe ve alay ikinci sınıf.
+### 1.2 Neden bu
+Araştırma A: incelenen satıcıların hiçbirinde müşterinin kendi verisinde, dil ve sınıf bazında ölçülmüş başarı
+raporu bulunamadı. Duygu analizinin bağımsız bir karşılaştırması da bulunamadı. Risk ve koordinasyon puanlarının
+yöntemi kapalı. Uyarıların geçmiş olaylarda sınandığına rastlanmadı. Türkçe ve alay için ürün düzeyinde yayımlanmış
+ölçüm bulunamadı. (Arama kotası dolduğu için küresel araçların Türkçe desteği tam araştırılamadı.)
 
-Araştırma C'nin bulgusu: bunların hepsi **ölçülebilir** — kapsam bile. E-keşif dünyasından gelen elüzyon
-örneklemesi, iki bağımsız toplayıcıyla yakala-yeniden yakala tahmini, altın standart veri ve geçmiş olaylarla
-geriye dönük sınama olgun yöntemler.
+Araştırma C: bunların hepsi ölçülebilir, kapsam bile. Rastgele örnekle "dışarıda kalanlar" denetimi, birden çok
+bağımsız toplama yolunun örtüşmesinden toplam tahmini, altın standart veri ve geçmiş olaylarla geriye dönük sınama
+olgun yöntemlerdir.
 
-Dolayısıyla Rasat'ın farkı daha çok veri ya da daha parlak yapay zekâ değil, **ölçülmüş doğruluk**tur. Bütçe
-kısıt olmadığı için en iyi veriyi de satın alacağız; ama asıl yatırım, o verinin ve okumanın isabetini sürekli
-ölçen düzenektir.
+Rasat'ın farkı daha çok veri ya da daha parlak yapay zekâ değil, **ölçülmüş doğruluktur.**
 
 ### 1.3 Rasat ne değildir
-- Kamuoyu araştırması değildir. "İnsanlar ne düşünüyor" sorusunu yanıtlamaz; "görebildiğimiz kanallarda
-  yazanlar ne yazıyor"u, görmediği kanalları da açıkça söyleyerek gösterir.
-- Doğruluk kontrolü (teyit) kuruluşu değildir. Bir iddianın ne kadar yayıldığını gösterir; doğru olup
-  olmadığını ancak bağımsız teyit kaynağına bağlayarak söyler.
-- Yalnızca yazılım değildir. **Yazılım + insan analist + süreç**tir. Kritik çıkarımlarda son söz ölçülmüş
-  güvende ya da insan onayındadır.
+- Kamuoyu araştırması değildir: "görebildiğimiz kanallarda yazanlar ne yazıyor"u, görmediklerini de söyleyerek gösterir.
+- Teyit kuruluşu değildir: bir iddianın yayılımını gösterir, doğruluğunu ancak bağımsız teyit kaynağına bağlayarak söyler.
+- Kişi izleme aracı değildir: **konu odaklıdır**; bireyler hakkında dosya tutmaz (bölüm 4.3).
+- Yalnız yazılım değildir: kritik çıkarımlarda son söz ölçülmüş güvende ya da insan onayındadır.
 
 ### 1.4 Yedi ürün ilkesi
-1. **Ölçülmüş doğruluk her ekranda.** Her sayı ve yorumun yanında dayanak satırı: sayım (kesin) / örneklem
-   (n, güven aralığı) / model yorumu (son ölçülen isabet ve tarihi) / kapsam tahmini.
-2. **Kör nokta haritası.** Görülemeyen kanallar ve içerik türleri listelenir; "bulunamadı" yanıtı her zaman
-   "nerede arandı"yı söyler.
-3. **Geniş ağ, dar süzgeç.** Toplama bilerek geniş ve gürültülüdür; ilgililik ayrı ve ölçülen bir adımdır.
-   Hiçbir sayı "konunun sayısı" diye sunulmaz; "ilgili bulunan gönderilerin sayısı, tahmini kapsam %X"tir.
-4. **Olgular hesaptan, yorum kanıttan.** Sayılar deterministik hesap katmanından gelir; yapay zekâ sayı
-   üretmez. Her olgusal cümle bir kayda bağlanır ve makine tarafından denetlenir; denetimden geçmeyen cümle
-   yayımlanmaz.
-5. **Yabancı metin veridir, talimat değildir.** Gönderileri okuyan model hiçbir araç kullanamaz; araç kullanan
-   model gönderi metnini görmez.
-6. **Suçlayıcı okunabilecek bulgu insan onayından geçer.** Koordinasyon, "ilk kaynak", "sıçratan hesap" gibi
-   bulgular güven basamaklı, tarif edici dille ve isimli sunumda analist onayıyla.
-7. **İzleyeni izleyen.** Veri akışı, kapsam, kalite ve bildirim teslimi sürekli denetlenir; sessiz arıza
+1. **Ölçülmüş doğruluk her ekranda.** Her sayı ve yorumun yanında dayanak satırı: sayım (kesin) / örneklem (n, güven
+   aralığı) / model yorumu (son ölçülen isabet ve tarihi) / kapsam tahmini.
+2. **Kör nokta haritası.** Görülemeyen kanal ve içerik türleri listelenir; "bulunamadı" her zaman "nerede arandı"yı söyler.
+3. **Geniş ağ, dar süzgeç.** Toplama bilerek geniştir; ilgililik ayrı ve ölçülen bir adımdır. Hiçbir sayı "konunun
+   sayısı" diye sunulmaz.
+4. **Olgular hesaptan, yorum kanıttan.** Yapay zekâ sayı üretmez. Her olgusal cümle bir kayda bağlanır ve denetlenir.
+5. **Yabancı metin veridir, talimat değildir.** Araç kullanan model gönderi metnini, alıntıları ve görünen adları
+   **hiç** görmez; bunlara yalnız kimlikle başvurur.
+6. **Suçlayıcı okunabilecek bulgu insan onayından geçer ve hiçbir koşulda kamuya gitmez** (isimli koordinasyon bulgusu).
+7. **İzleyeni izleyen.** Veri akışı, kapsam, kalite, bildirim teslimi ve harcama sürekli denetlenir; sessiz arıza
    kendisi bir alarmdır.
 
 ---
 
 ## 2. Doğruluk sözleşmesi
 
-Kullanıcının "en doğru bilgi" talebi, aşağıdaki ölçülebilir hedeflere çevrildi. Değerler Araştırma C'nin
-önerdiği **başlangıç** eşikleridir; Aşama 1'deki geçmiş olay sınamasından sonra kullanıcıyla birlikte
-kesinleşir. Her metrik güven aralığıyla raporlanır; **aralığın alt sınırı eşiğin altındaysa hedef karşılanmamış
-sayılır.**
+### 2.1 Hedefler
 
-| Boyut | Metrik | Başlangıç hedefi | Nasıl ölçülür |
-|---|---|---|---|
-| **Kapsam** | İlgili içeriğin yakalanan payı | ≥ %85 (en az iki bağımsız yöntemle) | Elüzyon örneklemesi, iki toplayıcıyla yakala-yeniden yakala, bilinen-öğe listeleri |
-| **İlgililik** | Toplananın ilgili payı | ≥ %90 (alt sınır ≥ %85) | Danışan başına haftalık ~200 rastgele gönderi, insan etiketi |
-| **Anlama** | Duruş makro-F1; olumsuz sınıf duyarlılığı; kalibrasyon hatası; olumsuz pay hatası | ≥ 0,75; ≥ 0,85; ≤ 0,05; ≤ 5 puan | Kör altın set; alay alt kümesi ayrıca raporlanır |
-| **Çıkarım** | Başlangıç doğru pencerede; kesin yayılım bağları; koordinasyon işareti kesinliği; tahmin kalibrasyonu | ≥ %90; ≥ %98; ≥ %90; ±10 puan | Geçmiş olay kronolojileri; sunulan her koordinasyon işaretinin incelenmesi |
-| **Zamanlılık** | İlk ilgili gönderi → ilk uyarı; olay yakalama; kırmızı yanlış alarm | medyan ≤ 30 dk; ≥ %90; ≤ 1/hafta/danışan | Geri-test + canlı kayıt |
-| **Sunum dürüstlüğü** | Olgusal cümlede atıf; atıf doğruluğu; sayı eşleşmesi; aynı soruda aynı sayı | %100; ≥ %95; %100 (otomatik engel); %100 | Otomatik denetleyici + haftalık insan örneği |
-| **Güvenlik** | Gönderi içi talimatla araç/kural/harcama değişikliği | 0 | Türkçe kırmızı takım seti, her sürümde |
+Her metrik iki sayı taşır:
+- **Hedef:** ölçülen değerin (nokta tahmini) ulaşması gereken düzey.
+- **Taban:** güven aralığının alt sınırının (%95) inmemesi gereken düzey. Sistem "hedefte görünüyor ama ölçüm
+  yetersiz" ile "gerçekten hedefte" arasını bu ikinci sayıyla ayırır.
 
-Etiketleyici uyumu (Krippendorff α) ≥ 0,80 olmayan bir görev için altın set güvenilir sayılmaz; o görevde
-isabet iddiası yapılmaz.
+Ölçüm birimi danışan başına haftalık değil, **bütün danışanlar üzerinde 4 haftalık birikimli penceredir**; danışan
+bazında değerler bilgi amaçlı gösterilir. Gerekli örnek sayıları bölüm 2.3'tedir.
+
+| Boyut | Metrik | Hedef | Taban | Günlük dille |
+|---|---|---|---|---|
+| **Kapsam** | İlgili metin içeriğin yakalanan payı (tanım: 2.2) | ≥ %90 | ≥ %85 | "Danışanla ilgili 100 yazılı gönderiden en az 85–90'ını görüyoruz" |
+| **İlgililik** | Sisteme girenin ilgili payı | ≥ %90 | ≥ %85 | "Ekranda gördüğünüz 100 gönderiden en çok 10'u alakasız" |
+| **Anlama** | Duruş makro-F1 | ≥ 0,75 | ≥ 0,70 | Dört duruş türünün ortalama isabeti |
+| | Olumsuz sınıf duyarlılığı | ≥ %90 | ≥ %85 | "100 olumsuz gönderiden en az 85'ini olumsuz diye okuyoruz" |
+| | Olumsuz pay hatası | ≤ 5 puan | aralık gerçek değeri %95 kapsıyor | "Eleştiri payı %30 dediğimizde gerçek değer %25–35 arasında" |
+| | Kalibrasyon hatası | ≤ 0,05 | — | "%80 eminim dediğimiz okumaların yaklaşık 80'i doğru" |
+| | Alay alt kümesi | ölçülür ve gösterilir | — | Kalıcı zorluk; hedef konmaz, isabeti her zaman görünür |
+| | Anlatı saflığı / ana anlatının bölünmesi / ad uygunluğu | ≥ %80 / ≤ %10 / ≥ %80 | — | "Bir başlık altındaki gönderilerin en az 80'i gerçekten o konu" |
+| **Çıkarım** | Olay yakalama | ≥ %92,5 | ≥ %80 | 40 geçmiş olayın en az 37'si |
+| | Başlangıç doğru pencerede (değilse "daha önce başlamış olabilir" uyarısı %100) | ≥ %92,5 | ≥ %80 | |
+| | "Kesin" etiketli yayılım bağlarının doğruluğu | ≥ %99 | ≥ %98 | Yalnız gözlenen bağlar "kesin" |
+| | Sunulan koordinasyon işaretlerinin kesinliği | ≥ %95 | ≥ %85 | İlk 45 işarete kadar "deneme" etiketiyle |
+| | Tahmin kalibrasyonu | ±10 puan | — | Ölçülmemişse tahmin gösterilmez |
+| **Zamanlılık** | Belirginleşme → sistem uyarısı (medyan) | ≤ 30 dk | — | Geri-testte 40 olay üzerinde |
+| | Kırmızı uyarı → danışmanın okuması (p95) | ≤ 15 dk | — | Okunmazsa 10 dk içinde telefonla eskalasyon |
+| | Kırmızı yanlış alarm | ≤ 0,5 / danışan-hafta | üst sınır ≤ 1 | En az 100 danışan-haftalık olaysız dönemde |
+| **Sunum** | Olgusal cümlede atıf; sayı eşleşmesi | %100; %100 | otomatik engel | Denetçiden geçmeyen cümle yayımlanmaz |
+| | Atıf doğruluğu (insan denetimi) | ≥ %98 | ≥ %95 | |
+| | Aynı soru + aynı anlık görüntüde aynı sayı | %100 | — | Silme yükümlülüğünden kaynaklanan değişiklik hariç (bölüm 4.3c) |
+| | Yorum tutarlılığı (5 tekrar) | ≥ 0,9 | — | |
+| **Güvenlik** | Gönderi içi talimatla araç/kural/harcama değişikliği | 0 | — | ≥ 500 saldırı örneği |
+| | Metin sapması | ≤ %1 | üst sınır ≤ %2 | |
+| **Çoklu ortam** | Ses dökümü kelime hata oranı | ≤ %15 | — | Aşılırsa döküm alıntı kaynağı olamaz |
+
+### 2.2 Kapsam metriğinin tanımı (payda)
+
+"Tüm ilgili içerik" belirsiz kalırsa kapsam rakamı anlamsızdır. Tanım **kanal × içerik türü** düzeyindedir:
+
+| Kanal | Kapsam ölçülür mü | Payda |
+|---|---|---|
+| X | Evet (birincil) | Herkese açık, metin içeren, danışanla ilgili gönderiler (Türkçe + danışanı anan diğer diller) |
+| Haber (web, ajans) | Evet (göreli) | Birden çok bağımsız haber toplayıcısının birleşimi; evren bilinmediği için "göreli kapsam" diye etiketlenir |
+| YouTube, Bluesky, Threads | Bilinen-öğe testleriyle | Analistin başka yoldan bulduğu içerik |
+| Instagram, TikTok, Facebook | Hayır | Kör nokta haritasında "kısmi, ölçülemiyor" |
+| Metinsiz görsel ve video (her kanalda) | A10'a kadar hayır | Kör nokta haritasında "görülmüyor"; A10'dan sonra bilinen-öğe testiyle |
+| Telegram, Ekşi Sözlük, kapalı gruplar | Hayır | Kademe 3 ya da kalıcı kör nokta |
+
+**Ölçüm yöntemi (X için):**
+1. **Birincil — bağımsız örneklem:** X'in %10 rastgele örneklem akışından **tabakalı** örnek alınır: sistemin
+   ilgisiz saydığı ama zayıf bir işaret taşıyan gönderiler (geniş terim, anlamsal benzerlik, danışanla ilgili
+   hesaplara yanıt) fazla örneklenir; geri kalan akıştan küçük rastgele örnek, "hiç işaret taşımayan ilgili
+   içerik" oranını sınırlar. İnsan etiketler; kapsam = sistemin yakaladığı / örneklemdeki bütün ilgililer.
+2. **İkincil — çoklu yakalama:** en az **üç bağımsız toplama yolu** (anahtar sözcük sorgusu / hesap-ağ temelli
+   toplama / anlamsal eşleşme) üzerinden, yollar arası bağımlılığı hesaba katan bir tahminci (Chao türü). **İki
+   satıcı iki bağımsız yol sayılmaz:** aynı X akışından beslenen iki satıcı aynı gönderileri yakalar ve kapsamı
+   yapay olarak %100'e yakın gösterir. İkinci satıcı yalnız yedektir.
+3. **Üçüncül — bilinen-öğe listeleri:** analistin başka yollarla bulduğu gönderiler.
+4. Yöntemler çelişirse **düşük olan** esas alınır; kalite ekranında hangi yöntemin kullanıldığı görünür.
+
+Geçmiş olaylarda %10 akış ve anlamsal işleç kullanılamayabilir (ürünler akış tabanlı; A2'de doğrulanacak). Bu
+durumda geri-testte kapsam bilinen-öğe listeleri ve tam arşiv aramasıyla ölçülür ve "geri-test kapsamı" diye ayrı
+gösterilir; birincil yöntem canlı ve gölge işletimde uygulanır.
+
+X kurumsal erişimi alınamazsa (risk R4) kapsam yalnız dolaylı ölçülür ve ekranda **"dolaylı tahmin"** diye
+etiketlenir; bu durumda kapsam hedefi karşılanmış sayılmaz ve kullanıcıya yazılı bildirilir.
+
+### 2.3 Gerekli örnek sayıları
+
+Hesap: Wilson aralığı (%95); hatasız durumda Clopper–Pearson. Etiketleri **yalnız insanlar** verir (en az iki
+bağımsız etiketçi + uzlaştırıcı); sistemin içindeki model ailesi ölçüme katkı vermez.
+
+| Metrik | Gerekli örnek (4 haftalık pencere, bütün danışanlar) | Neden |
+|---|---|---|
+| İlgililik | ≥ 200 rastgele gönderi | Gözlenen %90'da alt sınır ≈ %85 |
+| Kapsam | Örneklemde ≥ 200 ilgili gönderi → tabakalamaya göre **1.000–4.000 etiket** | Gözlenen %90'da alt sınır ≈ %85 |
+| Olumsuz sınıf duyarlılığı | Altın sette ≥ 200 olumsuz örnek (sınama bölümü) | Gözlenen %90'da alt sınır ≈ %85 |
+| Alay | Altın sette ≥ 300 alaylı örnek | Yalnız ölçüm; hedef yok |
+| Kalibrasyon | ≥ 1.000 altın set öğesi | |
+| Olay yakalama, başlangıç penceresi | **≥ 40 geçmiş olay**: 10 büyük kriz (tam kronoloji) + ≥ 30 küçük dalga (hafif kronoloji); birden çok danışan ve sektör | 10 olayla hatasız sonuç bile alt sınırı 0,69'da bırakır; 40 olayda 37 doğru → ≈ 0,80 |
+| Yanlış alarm | ≥ 100 danışan-hafta olaysız dönem | Sayım verisiyle geçmişe dönük ucuz ölçülür |
+| Atıf doğruluğu | ≥ 200 cümle / 4 hafta | Gözlenen %98'de alt sınır ≈ %95 |
+| Koordinasyon kesinliği | Birikimli ≥ 45 sunulan işaret | O sayıya kadar "deneme" etiketi |
+| Güvenlik | ≥ 500 saldırı örneği / sürüm | |
+
+### 2.4 Kapılar nasıl geçilir, düşüşte ne olur
+
+- **Ön kabul:** mevcut veride hedef (nokta tahmini) karşılanıyor → sonraki aşamaya geçilebilir.
+- **Kesin kabul:** biriken veride taban karşılanıyor → **canlıya almanın (A9) ön koşulu.** Bütün metrikler için.
+- **İzleme:** haftalık değerler kalite ekranında görünür; tek haftalık düşüş yalnız inceleme başlatır.
+  **Geri dönüş** kararı 4 haftalık birikimli taban altına inildiğinde ya da ardışık izleme (CUSUM türü) alarm
+  verdiğinde alınır. Çok sayıda metrik aynı anda izlendiği için yanlış "düşüş" alarmı çoklu karşılaştırma
+  düzeltmesiyle sınırlanır.
+- **Hedef değişikliği** yalnız kullanıcının yazılı kararıyla olur ve kalite ekranında görünür; hiçbir ekip hedefi
+  kendisi gevşetemez.
+- **Etiketçi uyumu (Krippendorff α):** ≥ 0,80 → görev tam kullanılır; 0,67–0,80 → görev kullanılır, sonuçları
+  "temkinli" etiketi taşır, kod kitabı en çok iki tur düzeltilir; < 0,67 → görev yeniden tanımlanır, isabet iddiası
+  yapılmaz. Bir görevin zorluğu (ör. alay) projeyi durdurmaz.
 
 ---
 
@@ -98,595 +201,789 @@ isabet iddiası yapılmaz.
 
 ```
  ┌──────────────────────────────────────────────────────────────────────────────┐
- │  ARAYÜZ   Sabit pano · Konuşma + kartlar · Bildirim (eskalasyonlu) · Rapor   │
+ │  ARAYÜZ  Sabit pano · Konuşma+kartlar · Bildirim (eskalasyonlu) · Rapor ·    │
+ │          Kalite ekranı · Kör nokta haritası · Harcama ekranı                 │
  └───────────────▲─────────────────────────────────────────────▲────────────────┘
-                 │                                             │
  ┌───────────────┴──────────────┐              ┌───────────────┴────────────────┐
  │ YORUM DÜZLEMİ                │              │ İNSAN DÜZLEMİ                  │
- │ Planlayıcı (araç kullanır,   │◄────────────►│ Nöbetçi analist kuyruğu        │
- │   ham metin görmez)          │   onay /     │ Onay kapıları                  │
- │ Karantina okuyucular (metin  │   düzeltme   │ Düzeltme kütüphanesi (sürümlü) │
- │   okur, araç kullanamaz)     │              │ Etiketleme (altın set)         │
- │ Yazıcı + atıf/sayı denetçisi │              └───────────────▲────────────────┘
+ │ Planlayıcı: araç kullanır;   │◄────────────►│ Nöbetçi analist kuyruğu        │
+ │  yalnız olgu kayıtlarını ve  │   onay /     │ Onay kapıları                  │
+ │  kimlikleri görür            │   düzeltme   │ Düzeltme kütüphanesi (sürümlü) │
+ │ Karantina okuyucular: metni  │              │ Etiketleme (yalnız insan)      │
+ │  okur, araç kullanamaz       │              │ Kriz modu (kapasite planı)     │
+ │ Yazıcı → Denetçi (kod) →     │              └───────────────▲────────────────┘
+ │  Yerleştirici (alıntıyı en   │                              │
+ │  son kod koyar)              │                              │
  └───────────────▲──────────────┘                              │
-                 │ yalnızca olgu kayıtları ve kimlikli alıntılar │
  ┌───────────────┴───────────────────────────────────────────────┴──────────────┐
- │ OLGU DÜZLEMİ (deterministik, sürümlü anlık görüntüler)                       │
- │ Sayımlar · Mevsimsel taban + alarm · Etkileşim yeniden ölçümü ·              │
- │ Yayılım ağacı (kesin/olası bağ) · Anlatı kimliği · Koordinasyon (sıfır       │
- │ modeli) · Tahmin (aralıklı) · Risk (açıklanabilir) · Kanıt deposu            │
+ │ OLGU DÜZLEMİ (deterministik, sürümlü anlık görüntü, kanıt deposu)            │
+ │ Sayım · Mevsimsel taban · İki alarm serisi (hacim, olumsuz ağırlıklı) ·      │
+ │ Etkileşim yeniden ölçümü · Yayılım (kesin/olası) · Anlatı kimliği ·          │
+ │ Koordinasyon (sıfır modeli) · Otomatik içerik payı · Tahmin · Risk           │
  └───────────────▲──────────────────────────────────────────────────────────────┘
  ┌───────────────┴──────────────────────────────────────────────────────────────┐
- │ ANLAMA DÜZLEMİ                                                               │
- │ İlgililik + varlık bağlama · Türkçe duruş/duygu/alay/iddia/çağrı (katmanlı)  │
- │ Oran düzeltme · Kalibrasyon · Çoklu ortam (ses→metin, görsel yazı, logo,     │
- │ yakın-kopya)                                                                 │
+ │ ANLAMA DÜZLEMİ  İlgililik + varlık bağlama · Türkçe katmanlı okuma ·         │
+ │ Oran düzeltme · Kalibrasyon · Çoklu ortam (A10)                              │
  └───────────────▲──────────────────────────────────────────────────────────────┘
  ┌───────────────┴──────────────────────────────────────────────────────────────┐
- │ VERİ DÜZLEMİ                                                                 │
- │ Danışan varlık dosyası · Geniş ağ toplama (sorgu + hesap + ağ) ·             │
- │ Lisanslı çok kaynak (en az iki bağımsız toplayıcı) · Kapsam ölçümü ·         │
- │ Kör nokta haritası                                                           │
+ │ VERİ DÜZLEMİ  Varlık dosyası · Üç toplama yolu · Lisanslı kaynaklar          │
+ │ (birincil + yedek) · Kapsam ölçümü · Kör nokta haritası · Kanarya            │
  └──────────────────────────────────────────────────────────────────────────────┘
-   GÖZETİM (her katmanı izler): kaynak sağlığı · gecikme · kapsam düşüşü ·
-   kalite metrikleri · bildirim teslimi · denetim kaydı · harcama
-   UYUM: veri ikametgâhı katmanı (KVKK) · kullanım politikası motoru (platform
-   kuralları) · silme yükümlülükleri · şifreleme · erişim · denetim kaydı
+  GÖZETİM: kaynak kalp atışı · kanarya · gecikme · kapsam · kalite · bildirim
+           teslimi · harcama · sürüm
+  UYUM:    barındırma (TR) · aktarım envanteri · veri ikametgâhı yönlendirmesi ·
+           kullanım politikası motoru · silme yayılımı · görüntüleme/paylaşım
+           politikası · danışan bazında veri ayrımı · olay müdahale planı
 ```
 
 ### 3.2 Veri düzlemi
 
-**Danışan varlık dosyası.** Danışanın adı ve bütün biçimleri: yazım varyantları (Türkçe karakterli/karaktersiz,
-ekli biçimler), lakaplar, ürün ve marka adları, yöneticiler ve sözcüler, kampanya adları, etiketler, resmî ve
-sahip olunan hesaplar, rakipler, hassas konular; **eşsesli dışlamalar** (aynı adı taşıyan başka şeyler). Dosya
-sürümlüdür; her değişiklik geçmiş olaylarda kapsam etkisi ölçülerek etkinleşir.
+**Danışan varlık dosyası.** Adın bütün biçimleri (Türkçe karakterli/karaktersiz, ekli biçimler), lakaplar, ürünler,
+yöneticiler ve sözcüler, kampanyalar, etiketler, sahip olunan hesaplar, rakipler, hassas konular, **eşsesli
+dışlamalar**. Sürümlüdür; her değişiklik geçmiş olaylarda kapsam etkisi ölçülerek etkinleşir. X aramasının Türkçe
+ekli biçimleri nasıl eşleştirdiği A0'da sınanır (bölüm 11).
 
-**Geniş ağ toplama.** Üç bağımsız yoldan:
-1. *Sorgu tabanlı:* bilerek geniş, yüksek duyarlılıklı sorgular. Yapay zekâ sorgu önerebilir ama sorgu her
-   zaman insanın okuyabileceği biçimde görünür ve onaylanır.
-2. *Hesap tabanlı:* danışanın ekosistemindeki **kurum, medya ve kamusal figür** hesapları (gazeteciler,
-   yayın organları, sektör kuruluşları, tüketici hakları kuruluşları) — ad geçmese de konuşmayı yakalar.
-   X'in kısıtlı kullanım kuralları kullanıcı izlemeyi yasakladığı için **özel kişiler bu listeye alınmaz**
-   (bölüm 4.3b).
-3. *Ağ tabanlı:* ilgili bulunan gönderilere gelen yanıt, alıntı, yeniden paylaşım ve aynı bağlantıyı
-   paylaşanlar — sorgunun kaçırdığı "çevre" konuşmayı yakalar.
+**Üç toplama yolu** (aynı zamanda kapsam ölçümünün üç bağımsız yakalama yolu):
+1. *Sorgu tabanlı:* bilerek geniş sorgular. Yapay zekâ sorgu önerebilir; sorgu her zaman okunur biçimde görünür ve
+   analist onaylar.
+2. *Hesap-ağ tabanlı:* ilgili bulunan gönderilere gelen yanıt, alıntı, yeniden paylaşım ve aynı bağlantıyı
+   paylaşanlar (ağ genişletme); ayrıca, **yalnız X'in yazılı teyidinden sonra ve teyidin izin verdiği ölçüde**, kurum
+   ve yayın organı hesapları. Teyit gelene kadar hesap listesi tabanlı toplama **kapalıdır**; özel kişiler hiçbir
+   durumda listeye alınmaz (bölüm 4.3b).
+3. *Anlamsal:* X kurumsal erişimindeki anlamsal eşleşme işleci ya da kendi gömme modelimizle aday havuzundan seçim.
 
-**Lisanslı çok kaynak.** Veri, çağrı başına değil, lisanslı ve tam erişimle alınır (kök neden K-1'in çözümü).
-X için **en az iki bağımsız toplayıcı** hedeflenir (örneğin doğrudan X kurumsal erişimi + X ile resmî veri
-ortaklığı olan bir dinleme platformu). İki toplayıcı hem satıcı arızasına karşı yedek hem de kapsamın
-yakala-yeniden yakala ile ölçülmesi için gereklidir. Kaynak listesi ve fizibilitesi: bölüm 4.
+**Lisanslı kaynaklar:** birincil ve yedek (bölüm 4.1). Yedek kaynak satıcı arızası içindir, kapsam ölçümü için değil.
 
-**Kapsam ölçümü** (Araştırma C §1.5):
-- Haftalık elüzyon örneklemesi: geniş ağın "ilgisiz" sayılan ve sorgu dışı kalan kısmından rastgele örnek,
-  insan etiketi → kaçırılan ilgili oranı.
-- Yakala-yeniden yakala: iki bağımsız toplayıcının ortak yakaladığı payla toplam ilgili hacim tahmini.
-- Bilinen-öğe listeleri: analistin başka yollarla (haber, ekran görüntüsü, el araması) bulduğu gönderilerden
-  kaçının sistemde olduğu.
-- Kapsamda düşüş = yeni lakap/etiket/kanal belirdi demektir → genişletme önerisi analist kuyruğuna düşer.
+**Kapsam ölçümü:** bölüm 2.2. Kapsamdaki düşüş **olası nedenleriyle** gösterilir: yeni lakap/etiket, kaynak kesintisi,
+erişim kısıtlaması, sorgu değişikliği. Gözetim düzlemi kaynak sağlığını ayrıca bildiği için nedenler ayırt edilir;
+genişletme önerisi analist kuyruğuna düşer.
 
-**Kör nokta haritası.** Her danışan ekranında: hangi kanal görülüyor, hangi tamlıkta, hangi gecikmeyle; hangi
-kanal hiç görülmüyor (kapalı gruplar, kişisel Instagram hesapları vb.); Türkiye'de erişime kapatılmış içerik
-ayrıca işaretli ("TR'de görünmüyor": danışanın Türkiye'deki kitlesi bunu görmüyor).
+**Kanarya.** Danışanın kendi hesaplarının ve sahip olunan kanallarının paylaşımları bilinen zamanda yayımlanır; her biri
+beklenen süre içinde sisteme düşmezse "kaynak ya da sorgu arızası" alarmı verir. Test ortamında ayrıca yapay arıza
+enjeksiyonu yapılır. "Sessiz arıza 0" hedefi bu ikisiyle ölçülür.
+
+**Kör nokta haritası.** Kanal × içerik türü × tamlık × gecikme; görülmeyenler açıkça; Türkiye'de erişime kapatılmış
+içerik ayrıca işaretli (gösterimi hukuki görüşe bağlı, bölüm 4.3).
 
 ### 3.3 Anlama düzlemi
 
-**İlgililik ve varlık bağlama.** Toplanan her içerik için "danışanla ilgili mi, hangi anlamda" kararı ayrı bir
-sınıflandırıcıyla verilir; eşsesli ayrımı varlık dosyasındaki dışlamalar ve bağlamla yapılır. Danışanın sahip
-olduğu hesaplar ayrı rol alır ("sahip olunan kanal"); yükseltici listesine girmez (P11).
+**İlgililik ve varlık bağlama.** Ayrı sınıflandırıcı; eşsesli ayrımı varlık dosyasıyla. Danışanın sahip olduğu hesaplar
+"sahip olunan kanal" rolündedir; yükseltici listesine girmez (P11).
 
-**Katmanlı Türkçe okuma** (Araştırma C §2):
-1. *İnce ayarlı Türkçe kodlayıcı* (BERTurk / TurkishBERTweet türü): bütün içeriği hızlı ve tutarlı okur.
-   Araştırma C'ye göre Türkçe sınıflamada hâlâ sıfır-örnekli büyük dil modellerinden iyidir. Kendi
-   altyapımızda çalışır (KVKK açısından içerik dışarı çıkmaz). Hangi veriyle eğitilebileceği X'in eğitim
-   yasağına bağlıdır (bölüm 4.3b).
-2. *Büyük dil modeli (karantinada):* kodlayıcının emin olmadığı, alaylı, kritik ya da yüksek erişimli
-   içeriği ikinci kez okur.
-3. *İnsan:* ikisinin ayrıştığı, alay olasılığı yüksek ya da olayın gidişatını belirleyen içerik nöbetçi
-   analiste gider.
+**Katmanlı Türkçe okuma:**
+1. *İnce ayarlı Türkçe kodlayıcı* (BERTurk / TurkishBERTweet türü). İlk yayımlanmış ölçümler Türkçe sınıflamada bu
+   modellerin sıfır örnekli büyük dil modellerinden iyi olduğunu gösteriyor, ama kanıtların çoğu kısmi ve en yeni büyük
+   dil modelleri Türkçe duruşta ölçülmemiş. **Hangisinin daha iyi olduğu A4'te kendi altın setimizde sınanır.** Kendi
+   altyapımızda çalışır. Hangi veriyle eğitilebileceği bölüm 4.3b'deki kurala bağlıdır.
+2. *Büyük dil modeli (karantinada):* belirsiz, alaylı, kritik ya da yüksek erişimli içeriği ikinci kez okur.
+3. *İnsan:* ayrışma, yüksek alay olasılığı, olayın gidişini belirleyen içerik.
 
-Okunan sınıflar: ilgililik, duruş (danışana karşı), duygu, alay, iddia (doğrulanabilir önerme), çağrı (boykot,
-şikâyet, paylaş), hedef (ürün, kişi, kurum), dil. Her etiketin yanında **kalibre edilmiş** güven.
+Okunan sınıflar: ilgililik, duruş (danışana karşı), duygu, alay, iddia, çağrı (boykot, şikâyet, paylaş), hedef, dil,
+**olası otomatik/koordineli içerik**. Her etikette kalibre edilmiş güven.
 
-**Oran düzeltme.** "Olumsuz pay" gibi oranlar model etiketlerinin ham sayımı değildir; küçük bir insan
-örneğiyle düzeltilmiş tahmin ve güven aralığı verilir (DSL/PPI yöntemleri; Araştırma C §2.3).
+**Özel nitelikli veri çıkarımı sınırı.** Sistem bireylerin siyasi görüşünü, dinini, sağlığını **kişi düzeyinde**
+çıkarmaz ve saklamaz; duruş okuması yalnız "danışana karşı tutum" ve yalnız toplu düzeyde raporlanır. Siyasi
+danışanlarda bu kural hukuki görüşe göre sıkılaştırılır (bölüm 4.3).
 
-**Çoklu ortam.** Videolardan ses → metin, görseller üzerindeki yazı, logo tanıma, yakın-kopya görsel/video
-eşleştirme. Her biri kendi Türkçe örneklerimizde ölçülür; ölçülen hata eşiğin üstündeyse o dökümden alıntı
-yapılmaz, yalnızca "olası bahsetme" sayılır.
+**Oran düzeltme.** "Olumsuz pay" ham model sayımı değildir; insan örneğiyle düzeltilmiş tahmin ve aralık (DSL/PPI).
+
+**Çoklu ortam (A10).** Ses → metin, görsel üzerindeki yazı, logo, yakın-kopya. Her biri kendi Türkçe örneklerimizde
+ölçülmeden açılmaz.
 
 ### 3.4 Olgu düzlemi
 
-Bütün hesaplar deterministiktir, aynı veriyle aynı sonucu verir ve **sürümlü anlık görüntüler** olarak
-saklanır ("dün ne demiştik" sorusu bu kayda dayanır).
+Bütün hesaplar deterministiktir ve sürümlü anlık görüntüler olarak saklanır.
 
 | Olgu | Yöntem | Dürüstlük kuralı |
 |---|---|---|
-| Hacim ve hız | Sayım uçları ve tam akış; yeniden paylaşımlar toplam sayımdan | "İlgili bulunan" sayısı + kapsam tahmini |
-| Olağan düzey | En az 4 haftalık geçmişten günün saati ve haftanın günü etkisini ayıran ayrıştırma + sağlam istatistik | İlk haftalarda "ısınma" etiketi |
-| Alarm | Halk sağlığı gözetimi yöntemleri (CUSUM, EARS türü); eşik geçmiş olaylarda yanlış/kaçırılan dengesine göre seçilir | Her alarm kuralının geri-test sonucu görünür |
-| Etkileşim | Zaman damgalı yeniden ölçüm (yayımdan sonra 1 sa, 6 sa, 24 sa…); yaşa göre normalize sıralama | "En çok etkileşim alan" ölçüm saatiyle birlikte |
-| Yayılım | Gözlenen bağlar (yanıt, alıntı, yeniden paylaşım) **kesin**; çıkarılan bağlar (zamanlama, metin benzerliği) **olası** | "İlk kaynak" = "topladığımız veride gözlenen en erken"; arşivde geriye genişletme otomatik |
-| Anlatı | Gömme tabanlı kümeleme + zaman içinde kalıcı kimlik eşleştirme + üst anlatı düzeyi; ad önerisi model, onay analist | Saflık ve bölünme oranı ölçülür |
-| Koordinasyon | En az üç bağımsız sinyal (eşzamanlılık, metin benzerliği, ortak bağlantı, hesap yaşı kümeleri); aynı konuyu konuşan doğal kullanıcılardan kurulan **sıfır modeli** ile kıyas | Güven basamaklı (düşük/orta/yüksek + gerekçe); tarif edici dil; isimli sunum analist onayıyla |
-| Tahmin | Olasılıklı ve aralıklı; tek kaynak (eğilim ve tahmin aynı modelden) | Kalibrasyonu geri-testte ölçülür; ölçülmemişse gösterilmez |
-| Risk | Açıklanabilir sürücüler; ağırlıklar yazılı ve danışana göre ayarlanabilir | Puan değil, sürücüler ön planda |
+| Hacim ve hız | Tam akış ve sayım; yeniden paylaşımlar sayımdan | "İlgili bulunan" + kapsam tahmini; "sayılan" ile "okunabilen" ayrı (fark: silinmiş/erişilemeyen) |
+| Otomatik içerik payı | Otomatik/koordineli olası içerik ayrı sütunda | Hacim ve alarm bu payla ve onsuz gösterilir |
+| Olağan düzey | ≥ 4 haftalık geçmiş; günün saati ve haftanın günü etkisi ayrılır; sağlam istatistik | İlk 4 hafta "ısınma" etiketi; bu dönemin yanlış/kaçan alarmı ayrıca ölçülür |
+| Alarm | **İki seri:** hacim ve olumsuz ağırlıklı hacim. Kırmızı yalnız olumsuz ağırlıklı seri ya da çağrı/iddia işaretleriyle; övgü dalgası "viral an" diye ayrı bildirilir. Gözetim tipi yöntemler (CUSUM, EARS); eşik geri-testle | Her kuralın geri-test sonucu görünür; uyarılar danışan bazında birleştirilir ve önceliklendirilir; portföy düzeyinde yanlış alarm da izlenir |
+| Etkileşim | 1 sa, 6 sa, 24 sa yeniden ölçüm; yaşa göre normalize sıralama | "En çok etkileşim alan" ölçüm saatiyle |
+| Yayılım | Gözlenen bağlar **kesin**; çıkarılan bağlar **olası** | "İlk kaynak" = "topladığımız veride gözlenen en erken"; arşivde geriye genişletme otomatik; "sıçrattı" denmez, katkı tahmini yapılırsa hesap adıyla birlikte neden-sonuç cümlesi kurulmaz |
+| Anlatı | Gömme kümeleme + kalıcı kimlik + üst anlatı; ad önerisi model, onay analist | Saflık, bölünme, ad uygunluğu ölçülür; "anlatı evrildi" notu |
+| Koordinasyon | ≥ 3 bağımsız sinyal; aynı konuyu konuşan doğal kullanıcılardan **sıfır modeli**; anlamlılık p < 0,01; **alternatif açıklamalar listesi** (meşru kampanya, ortak haber kaynağı, fan topluluğu…) | Güven basamaklı; tarif edici dil; kanıt kimliksiz istatistikle saklanır; isimli bulgu yalnız iç kullanım, **hiçbir koşulda kamuya ya da danışanın kamusal metnine girmez** |
+| Tahmin | Olasılıklı, aralıklı; eğilim ve tahmin aynı modelden | Kalibrasyonu ölçülmemişse gösterilmez |
+| Risk | Açıklanabilir sürücüler; erişim bilgisi bilinmeyen kanalda "bilinmiyor" sürücüsü, sıfır değil | Puan değil, sürücüler ön planda |
 
-**Kanıt deposu.** Her olgu bir kayıttır: kimlik, hesaplama sürümü, girdi kapsamı, sonuç, güven. Yorum düzlemi
-yalnızca bu kayıtlara ve kimlikli alıntılara atıf yapabilir.
+**Kanıt deposu.** Her olgu: kimlik, hesap sürümü, girdi kapsamı, sonuç, güven, **silme kuralı**. Yorum düzlemi yalnız
+bu kayıtlara atıf yapabilir.
 
 ### 3.5 Yorum düzlemi (konuşan katman)
 
-Kule'deki "yetenek + kapı + ajan" fikri korunur; güvenlik ve dayanak **mimariyle** sağlanır (Araştırma C §8):
-
-- **Planlayıcı:** kullanıcıyla konuşur, hangi yeteneğin çalışacağına karar verir. Ham gönderi metnini görmez;
-  yalnızca olgu kayıtlarını ve karantina okuyucuların yapılandırılmış çıktısını görür.
-- **Karantina okuyucular:** gönderi ve haber metnini okur, şemaya bağlı yapılandırılmış çıktı verir (etiket,
-  gönderi kimliği, kısa alıntı). Araç çağıramaz, kural kuramaz, harcama yapamaz. Her gönderi ayrı okunur; bir
-  gönderi diğerinin okumasını etkileyemez.
-- **Yazıcı:** durum notu, yanıt planı, rapor. Sayıları yer tutucuyla yazar; yer tutucular olgu kayıtlarından
-  doldurulur.
-- **Denetçi (yapay zekâ değil, kod):** her olgusal cümlede atıf var mı, alıntı birebir geçiyor mu, her rakamın
-  olgu kayıtlarında karşılığı var mı, dayanak türü etiketli mi. Geçmeyen cümle yayımlanmaz; yazıcıya geri döner.
-- **Her yanıtta "ne yaptım":** çalıştırılan sorgu ve yetenekler, bakılan kapsam, "bulunamadı" ise nerede
-  arandığı.
-- **Sabit pano + konuşma:** hacim, taban, alarm, risk gibi sabit sayımlar her gün aynı panoda; açık uçlu
-  sorular konuşmada. Konuşmada üretilen kart panoya sabitlenebilir.
-- **Kalıcı izleme talimatı:** yazıyla verilir, yapılandırılmış kurala çevrilir, kullanıcıya geri okunur ve
-  **kurulmadan önce geçmiş olaylarda denenir** ("bu kural geçen ayki olayda tetiklenir miydi?"). Kurulu
-  kurallar periyodik olarak yeniden sınanır; tetiklenmeyecek hale gelen kural uyarı üretir (K5).
+- **Planlayıcı:** kullanıcıyla konuşur, yetenek seçer. **Gördükleri:** olgu kayıtları, etiketler, sayılar, **opak
+  kimlikler** (gönderi, hesap, alıntı). **Görmedikleri:** gönderi metni, alıntı metni, görünen ad, profil açıklaması,
+  model önerisi anlatı adı (onaylanmamışsa). Kullanıcının sohbete yapıştırdığı ya da ilettiği içerik (WhatsApp, ekran
+  görüntüsü) de önce karantina okuyucudan geçer.
+- **Karantina okuyucular:** metni okur, şemaya bağlı yapılandırılmış çıktı verir; araç çağıramaz, kural kuramaz,
+  harcama yapamaz; her gönderi ayrı okunur.
+- **Yazıcı:** not, yanıt planı, rapor; sayıları ve alıntıları **yer tutucuyla** yazar (`{sayi:hacim_24s}`,
+  `{alinti:G123}`).
+- **Denetçi (kod):** her cümlede atıf, her yer tutucunun kanıt deposunda karşılığı, dayanak türü etiketi. **Sözle
+  yazılmış nicelik yasaktır** ("iki katına çıktı", "yarısı", "üç hesap") — bunlar da yer tutucuyla yazılır; denetçi
+  sözle nicelik kalıplarını tanır ve reddeder. Olgusal cümle tanımı yazıcının etiketine bırakılmaz: haftalık insan
+  örneğiyle (≥ 200 cümle) atıf doğruluğu ve kaçan olgusal cümle ölçülür.
+- **Yerleştirici (kod):** denetimden geçen metne alıntıları ve sayıları en son koyar. Böylece yabancı metin hiçbir
+  model adımına talimat olarak girmez.
+- **"Ne yaptım" satırı:** çalışan sorgular ve yetenekler, bakılan kapsam, "bulunamadı" ise nerede arandığı. Yanlış
+  sorgu/araç seçimi (K3) bir değerlendirme setiyle ölçülür (A6).
+- **Sabit pano + konuşma:** sabit sayımlar her gün aynı panoda; açık uçlu sorular konuşmada; kart panoya sabitlenebilir.
+- **Kalıcı izleme talimatı:** yazıyla verilir → kurala çevrilir → kullanıcıya geri okunur → kurulmadan önce geçmiş
+  olaylarda denenir → kurulduktan sonra periyodik olarak yeniden sınanır. Kullanım politikası motoru hassas olay ve
+  kişi izleme kurallarını reddeder.
+- **Bozulmuş mod:** yapay zekâ sağlayıcısı kesilir ya da yavaşlarsa olgu düzlemi, pano, alarm ve bildirim çalışmaya
+  devam eder; konuşma ve not "şu an kullanılamıyor" der. Hiçbir uyarı yapay zekâya bağımlı değildir.
 
 ### 3.6 İnsan düzlemi
 
-| Rol | Ne yapar | Ne zaman devreye girer |
-|---|---|---|
-| **Nöbetçi analist** (7/24) | Kuyruktaki belirsiz okumaları çözer, kırmızı uyarıyı doğrular, danışmanı arar | Model ayrışması, alay şüphesi, kritik içerik, kırmızı uyarı |
-| **Onay kapıları** | İsimli koordinasyon bulgusu, "ilk kaynak/sıçratan" adlandırması, kamuya gidecek taslak | Her seferinde, istisnasız |
-| **Düzeltme kütüphanesi** | Kullanıcı ve analist düzeltmeleri modeli doğrudan değiştirmez; kapsamı (danışan, olay, tarih) ve son kullanma tarihiyle sürümlü kütüphaneye girer; altın sette ve geri-testte etkisi ölçüldükten sonra etkinleşir | Sürekli (K7) |
-| **Etiketleme** | Altın set ve haftalık kalite örnekleri; en az iki bağımsız etiketçi + uzlaştırıcı | Sürekli |
+| Bileşen | Ne yapar |
+|---|---|
+| **Nöbetçi analist (7/24)** | Kuyruktaki belirsiz okumalar, kırmızı uyarının doğrulanması, danışmanı arama |
+| **Onay kapıları** | İsimli koordinasyon bulgusu (yalnız iç kullanım), "ilk kaynak" adlandırması, kamuya gidecek taslak — her seferinde |
+| **Düzeltme kütüphanesi** | Düzeltmeler modeli doğrudan değiştirmez; kapsamı (danışan, olay, tarih) ve son kullanma tarihiyle sürümlü; altın sette ve geri-testte etkisi ölçülünce etkinleşir; X içeriği için kural 4.3b |
+| **Etiketleme** | Yalnız insan; en az iki bağımsız etiketçi + uzlaştırıcı; aktif öğrenmenin seçtiği örnekler **ölçüm için kullanılmaz**, rastgele ölçüm örneği ayrıdır |
+| **Olay sonrası kayıt** | Her olaydan sonra kimliksiz "ne oldu, ne yapıldı, ne işe yaradı" kaydı (öğrenme kararı için) |
+
+**Kriz kapasitesi ve bozulmuş mod.**
+- Kuyruğa yalnız öncelikli öğe düşer: kırmızı uyarı doğrulaması (öncelik 1), olayın gidişini belirleyen yüksek erişimli
+  içerik (öncelik 2), model ayrışması ve alay şüphesi (öncelik 3).
+- Kapasite modeli: saatlik kuyruk = ilgili hacim × kuyruğa düşme oranı. Örnek: saatte 20 bin ilgili gönderinin %5'i
+  kuyruğa düşerse saatte 1.000 öğe; kişi başı saatte ~120 öğeyle eşzamanlı ~8 analist. Bu yüzden kriz anında
+  **kuyruğa düşme oranı önceliğe göre kısılır** (yalnız öncelik 1–2), öncelik 3 "insan incelemesi bekliyor" etiketiyle
+  ekranda kalır.
+- Nöbet planı: normal dönem tek koltuk (5–6 kişi), kriz için çağrılabilir yedek havuzu (sözleşmeli dış analist dahil).
+- Zamanlılık iki ayrı ölçülür: (1) sistem uyarısı, (2) **analistçe doğrulanmış** uyarının danışmana ulaşması.
+- Dış analist hizmeti alınırsa sözleşmede: veri işleyen yükümlülükleri, gizlilik, **çıkar çatışması** (aynı firmanın
+  rakip danışana hizmeti), X paylaşım sınırları.
 
 ### 3.7 Arayüz
 - **Sabit pano:** danışanlar, risk, alarm, olay akışı, kör nokta haritası, kalite özeti.
-- **Danışan odası:** Pusula'daki bölümler (durum notu, ne yapmalı, nabız, anlatılar, yayılım, aktörler,
-  koordinasyon, akış) — her biri dayanak satırıyla.
-- **Konuşma + kartlar** (Kule): öngörülmemiş sorular; sonuçlar kart olarak panoya sabitlenebilir.
-- **Bildirim:** önem düzeyine göre kanal (uygulama, e-posta, SMS/arama); okunmazsa eskalasyon (nöbetçi
-  analist arar). Teslim edildiği doğrulanır.
-- **Rapor:** danışana gönderilecek, dayanak ekli, dışa aktarılabilir.
-- **Kalite ekranı:** her boyutun son ölçülen değeri ve eğilimi; kullanıcı aracın ne kadar güvenilir olduğunu
-  her zaman görebilir.
+- **Danışan odası:** durum notu, ne yapmalı, nabız, anlatılar, yayılım, aktörler (X yanıtına göre isimli ya da isimsiz,
+  bölüm 4.3b), koordinasyon, akış — her biri dayanak satırıyla.
+- **Konuşma + kartlar.**
+- **Bildirim:** önem düzeyine göre kanal; okunmazsa eskalasyon; teslim doğrulanır. Bildirim içeriği kişisel veri ya da
+  gönderi metni taşımaz ("Danışan K-07: kırmızı uyarı, uygulamayı açın").
+- **Rapor:** danışana giden her raporda **zorunlu "güven ve kapsam" bölümü** (neyi gördük, neyi göremedik, hangi
+  sonuç ne kadar güvenilir). Raporda gönderi metni ve hesap adı görüntüleme ve paylaşım politikasına uyar (bölüm 4.3d).
+- **Kalite ekranı:** her metriğin son değeri, aralığı, eğilimi, kullanılan yöntem.
+- **Harcama ekranı:** lisans (sabit) ve değişken kalemler (API okuma, yapay zekâ, etiketleme); tahmini ile sağlayıcının
+  kullanım kaydı arasındaki fark; tavanlar (N6).
 
-### 3.8 Gözetim ve uyum
-- **Gözetim:** her kaynağın akış gecikmesi ve hacmi (beklenenden sapma = arıza şüphesi), kapsam ölçümünde
-  düşüş, kalite metriklerinde kayma, bildirim teslim süresi, model sürüm değişimi. Her biri kendi alarmı olan
-  bir olgudur. Model ya da kural sürümü değişimi tam regresyon setinden geçmeden canlıya alınmaz.
-- **Uyum:** iki bileşen mimarinin parçasıdır, sonradan eklenmez. *Veri ikametgâhı katmanı* hangi verinin
-  hangi model yoluna (yerinde / yurt dışı sağlayıcı / ayıklanmış) gidebileceğini belirler. *Kullanım politikası
-  motoru* platform kurallarını uygular: kişi izleme ve hassas olay izleme kurallarını reddeder, silme
-  yükümlülüklerini (X: 24 saat) yürütür. Ayrıca şifreleme, rol tabanlı erişim, denetim kaydı. Ayrıntı: bölüm
-  4.3 ve Araştırma B.
+### 3.8 Gözetim
+Kaynak kalp atışı ve hacim sapması, kanarya, akış gecikmesi, kapsam düşüşü, kalite metriklerinde kayma, bildirim teslim
+süresi, harcama ve tavanlar, model/kural/sağlayıcı sürüm değişimi. **Model, kural, varlık dosyası ya da veri sağlayıcı
+değişikliği regresyon setinden geçmeden canlıya alınmaz;** sağlayıcı değişikliğinde kapsam ölçümü yeniden kurulur ve
+kalite eğrisinde kırılma işareti konur.
+
+### 3.9 Uyum ve güvenlik (mimarinin parçası)
+- **Barındırma:** ana sistem, veri ve yedekler **Türkiye'de**. Erişim kısıtlaması dönemlerinde Türkiye'den API
+  erişiminin sürüp sürmediği A0'da sınanır; gerekirse yurt dışında **kalıcı saklama yapmayan** toplama rölesi, ancak
+  hukuki görüş ve aktarım sözleşmesiyle (bölüm 4.3a).
+- **Aktarım envanteri:** kişisel verinin geçtiği her akış, dayanağıyla (bölüm 4.3a).
+- **Veri ikametgâhı yönlendirmesi:** hangi verinin hangi model yoluna gidebileceği (yerinde / yurt dışı sağlayıcı /
+  ayıklanmış).
+- **Kullanım politikası motoru:** kişi izleme, hassas olay izleme, özel nitelikli çıkarım kurallarını reddeder; silme
+  yükümlülüklerini yürütür.
+- **Silme yayılımı:** bölüm 4.3c.
+- **Danışan bazında veri ayrımı** (bir danışanın verisi diğerinin ekranına, raporuna ya da modeline sızmaz).
+- **Gizli anahtar yönetimi, şifreleme, rol tabanlı erişim, denetim kaydı.**
+- **Güvenlik olayı ve veri ihlali müdahale planı:** sahibi KVKK sorumlusu; Kurul'a bildirim süresi hukuki görüşle
+  kesinleşir (denetimin bilgisine göre 72 saat; doğrulanacak).
+- **Bağımsız sızma testi ve bağımsız kod incelemesi A8'den önce;** sonra yılda en az bir kez.
+- **Geliştirme kuralı:** yazılımı geliştiren model ekipleri gerçek kişisel veri görmez; kimliksizleştirilmiş ya da
+  sentetik veriyle çalışır.
+
+### 3.10 Harcama defteri (N6)
+"Lisans + değişken" yapısı: sabit lisanslar (X kurumsal, dinleme platformu, medya takip, ajans), değişken kalemler (X
+okuma, yapay zekâ çağrıları, etiketleme saatleri). Her değişken kalem sağlayıcının kullanım kaydıyla günlük mutabık
+kılınır; fark ekranda görünür. Yapay zekâ çağrıları için günlük ve aylık tavan; tavan aşılırsa bozulmuş moda geçilir,
+uyarılar sürer.
 
 ---
 
 ## 4. Veri kaynakları, hukuk ve fizibilite
 
-Kaynak: `B-VERI-HUKUK.md`. Etiketli bulgular orada; burada tasarım kararları var. Her satır A0'da birincil kaynak
-ve satıcı görüşmesiyle yeniden doğrulanır (bölüm 10).
+Kaynak: `B-VERI-HUKUK.md`. Her satır A0'da birincil kaynak ve satıcı görüşmesiyle yeniden doğrulanır.
 
 ### 4.1 Üç kademeli veri modeli
 
-**Kademe 1 — doğrudan, tam, sözleşmeli (otomatik işlenir):**
+**Kademe 1 — doğrudan, sözleşmeli (otomatik işlenir):**
 
 | Kanal | Yol | Neden | Fizibilite |
 |---|---|---|---|
-| X | **Enterprise**: Türkçe kural akışı (PowerTrack) ya da tam akış + **%10 rastgele örneklem akışı** + uyum akışı + tam arşiv + anlamsal (`embedding:`) eşleşme işleci | Kapsamı **doğrudan** ölçmenin tek yolu %10 örneklem ya da tam akış; anlamsal işleç ikinci bağımsız toplayıcı | Orta (satış süreci; fiyat yayımlanmıyor) |
-| X (geçiş dönemi) | Kullandıkça öde: tam arşiv arama + sayım (ayda 2 milyon okuma tavanı) | Enterprise sözleşmesi bitene kadar ve A2 yarışması için | Yüksek |
-| Ajans haberleri | AA aboneliği (+ DHA, İHA kurumsal) | Haberin kaynağı; tam metin | Yüksek (yapay zekâ ile işleme izni sorulmalı) |
-| Haber siteleri | Ticari haber API'si (Event Registry türü) + GDELT (15 dk, ücretsiz, sinyal) | İki bağımsız haber toplayıcısı → haberde de örtüşme ölçümü | Yüksek |
-| YouTube | Data API (video, yorum) + kendi ses → metin dökümümüz | Video kanalı; yorumlar tam | Yüksek (30 gün yenileme kuralı) |
-| Bluesky | Jetstream (tam akış) | Ücretsiz tam evren: sorgu ve kapsam yöntemlerinin ilk sınama alanı | Yüksek (Türkiye'de kitle küçük) |
-| Threads | Anahtar kelime araması | Meta tarafında arama yapılabilen tek yüzey | Orta |
+| X | **Kurumsal erişim (Enterprise):** Türkçe kural akışı ya da tam akış + **%10 rastgele örneklem akışı** + uyum (silme) akışı + tam arşiv + anlamsal eşleşme işleci | Kapsamı doğrudan ölçmenin yolu %10 akış ya da tam akış | Orta (satış süreci; fiyat yayımlanmıyor; kullanım amacı nedeniyle başvuru reddedilebilir) |
+| X (geçiş) | Kullandıkça öde: tam arşiv arama + sayım (ayda 2 milyon okuma tavanı) | Kurumsal sözleşme **imzalanana kadar** ve A2 yarışması için | Yüksek |
+| Ajans | AA aboneliği; DHA kurumsal | Haberin kaynağı | AA yüksek, DHA orta (izinsiz kullanım yasağı), İHA doğrulanamadı; yapay zekâ ile işleme izni sorulacak |
+| Haber siteleri | Ticari haber API'si + GDELT | İki bağımsız haber toplayıcısı → haberde göreli kapsam | Yüksek |
+| YouTube | Data API + kendi ses dökümümüz | Video kanalı; seçilen videolarda yorumlar tam (yeni video keşfi arama kotasıyla sınırlı) | Yüksek (30 gün yenileme kuralı) |
+| Bluesky | Tam akış | Ücretsiz tam evren; yöntemlerin ilk sınama alanı | Yüksek (kitle küçük) |
+| Threads | Anahtar kelime araması | Meta tarafında aranabilen tek yüzey | Orta |
 | Facebook | Herkese açık Sayfa içerikleri | Yalnız Sayfalar | Düşük–orta |
 | Şikâyetvar | Danışanın kendi marka API anahtarı | Danışanın kendi şikâyetleri | Orta |
 
-**Kademe 2 — lisanslı aracı (otomatik işlenir, sözleşmesi izin verdiği ölçüde):**
+**Kademe 2 — lisanslı aracı (sözleşmesi izin verdiği ölçüde otomatik):**
 
 | Kanal | Yol | Not |
 |---|---|---|
-| X (ikinci toplayıcı) | API ile ham veri veren bir dinleme platformu (ör. X içeriğini yeniden dağıtma hakkı olan) | Satıcı arızasına yedek; yakala-yeniden yakala için bağımsız ikinci kaynak |
-| TV, radyo, basılı, yerel haber | Yerli medya izleme firması (Ajans Press, Interpress, MTM) | Türkiye'de tek gerçekçi lisanslı yol; deşifre, arşiv, tiraj/reyting sorulacak |
-| Instagram, TikTok | Dinleme platformu üzerinden | **Beklenti düşük**: Instagram'da hesap başına 30 etiket/hafta, geçmişe dönük veri yok; TikTok'ta yalnız dar "bahsetme" verisi |
+| X (yedek) | Ham veriyi API ile veren bir dinleme platformu | Satıcı arızasına yedek; **kapsam ölçümünde bağımsız yol sayılmaz** |
+| TV, radyo, basılı, yerel haber | Yerli medya izleme firması (Ajans Press, Interpress, MTM) | Türkiye'de tek gerçekçi lisanslı yol |
+| Instagram, TikTok | Dinleme platformu üzerinden | Beklenti düşük: Instagram'da hesap başına 30 etiket/hafta, geçmiş yok; TikTok'ta dar "bahsetme" verisi |
 
-**Kademe 3 — insan okuması (yapay zekâ hattına girmez):**
-Ekşi Sözlük ve yerel forumlar (lisans alınamazsa), Telegram kanalları (koşullar yapay zekâ amaçlı toplamayı
-Şubat 2026'dan beri yasaklıyor), danışanın ilettiği WhatsApp içerikleri. Nöbetçi analist okur, olay kaydına
-"insan gözlemi" diye işler; sayıma ve otomatik okumaya girmez.
+**Kademe 3 — insan okuması (yapay zekâ hattına girmez; A0'daki hukuki görüşe bağlıdır):** Ekşi Sözlük ve yerel forumlar
+(lisans alınamazsa), Telegram kanalları (koşullar yapay zekâ amaçlı toplama ve kullanımı yasaklıyor), danışanın ilettiği
+WhatsApp içerikleri (alenileştirilmemiş kişisel veri; ayrı hukuki soru). Analistin "insan gözlemi" kaydının yapay
+zekâya gidip gitmeyeceği **kaynak bazında** hukuki görüşle yazılır; Telegram kaynaklı gözlemler varsayılan olarak
+gitmez.
 
-**Kalıcı kör noktalar** (kör nokta haritasında her zaman görünür): WhatsApp ve kapalı gruplar; Facebook
-kişisel profilleri ve grupları; Instagram/TikTok'ta etiketsiz bahsetmeler ve bunların geçmişi; gizli hesaplar;
-silinen içerik; LinkedIn'de üye gönderileri; Instagram, TikTok ve haberde erişim/gösterim verisi (medya izleme
-firmasından gelmezse "bilinmiyor", sıfır değil).
+**Kalıcı kör noktalar:** WhatsApp ve kapalı gruplar; Facebook kişisel profilleri ve grupları; Instagram/TikTok'ta
+etiketsiz bahsetmeler ve geçmişleri; gizli hesaplar; silinen içerik; LinkedIn üye gönderileri; A10'a kadar metinsiz
+görsel ve video; haber, Instagram ve TikTok'ta erişim verisi (medya izleme firmasından gelmezse "bilinmiyor").
 
 ### 4.2 Veri kararlarının tasarıma etkisi
+1. **X kurumsal erişimi, kapsam hedefinin ön koşuludur;** alınamazsa kapsam "dolaylı tahmin" olur ve hedef karşılanmış
+   sayılmaz (risk R4, bölüm 2.2). Bu bir çelişki değil, açık bir indirgeme kuralıdır.
+2. Sayılan ile okunabilen ayrı gösterilir.
+3. Yeniden paylaşımlar sayımdan; kim paylaştı yalnız kritik gönderilerde.
+4. Etkileşim yeniden okunur.
+5. Yeni danışan için 30–90 günlük sayım tabanı ve olay dönemlerinden hedefli geriye doldurma.
+6. Instagram kriz etiketleri önceden kayda alınır (30 etiket sınırı danışan bazında planlanır).
+7. Erişim olayı takvimi: Türkiye'deki yavaşlatma/engelleme dönemlerinde hacim düşüşü "ilgi azaldı" diye yorumlanmaz.
 
-1. **X Enterprise zorunlu.** Doğruluk sözleşmesindeki kapsam hedefi (≥ %85, iki yöntemle) yalnızca %10 örneklem
-   akışı ya da tam akışla doğrudan ölçülebilir. Kullandıkça öde ile kapsam yalnızca dolaylı ölçülür; bu
-   durumda kapsam metriği arayüzde "dolaylı tahmin" diye etiketlenir.
-2. **Sayılan ile okunabilen ayrı gösterilir.** Sayım uçları silinen gönderileri düşmeyebilir, okuma ucu düşer;
-   aradaki fark "silinmiş ya da erişilemeyen" diye etiketlenir, örneklem hatası sanılmaz.
-3. **Yeniden paylaşımlar sayımdan, kim paylaştı yalnız kritik gönderilerde** (P6).
-4. **Etkileşim yeniden okunur** (1 sa, 6 sa, 24 sa) (P8).
-5. **Yeni danışan için 30–90 günlük sayım tabanı** ve olay dönemlerinden hedefli geriye doldurma (P7).
-6. **Instagram için önceden kayıt:** danışanın olası kriz etiketleri (ad + boykot, ad + şikâyet vb.) baştan
-   izlemeye alınır, çünkü sonradan eklenen etiketin geçmişi gelmez. 30 etiket sınırı danışan bazında planlanır.
-7. **Silme yükümlülüğü:** X'te silinen içerik 24 saatte sistemden de silinir. Olay arşivi kimliksiz istatistik
-   ve kısa özetle tutulur; veri modelinde her kaydın hangi silme kuralına tabi olduğu işaretlidir (YouTube: 30
-   gün yenileme).
-8. **"TR'de görünmüyor":** X'in ülkeye göre gizleme bilgisi saklanır ve gösterilir.
-9. **Erişim olayı takvimi:** Türkiye'deki yavaşlatma ve engelleme dönemleri işaretlenir; o dönemdeki hacim
-   düşüşü "ilgi azaldı" diye yorumlanmaz.
+### 4.3 Hukuk ve uyum: dört kısıt ve tasarım karşılıkları
 
-### 4.3 Hukuk ve uyum: tasarımı belirleyen üç kısıt
+**(a) KVKK — yurt dışına aktarım ve barındırma.** Gönderiler kişisel, kimi zaman özel nitelikli veri içerir. Yurt
+dışındaki bir hizmete gönderim yurt dışına aktarımdır (KVKK standart sözleşmesi Türkçe imzalanır, 5 iş günü içinde
+Kurul'a bildirilir). Yapay zekâ sağlayıcısının sözleşmesinde yalnız AB maddeleri bulundu; işlem yeri "küresel" ya da
+"ABD"; sıfır saklama anlaşmayla mümkün, en üst modeller kapsam dışı olabilir. AB de yurt dışıdır.
 
-**(a) KVKK — yurt dışına aktarım.** Gönderiler kişisel veri, kimi zaman özel nitelikli veri (siyasi görüş, din,
-sağlık) içerir. Yurt dışındaki bir yapay zekâ hizmetine gönderim **yurt dışına aktarım**dır: KVKK standart
-sözleşmesinin Türkçe imzalanıp 5 iş günü içinde Kurul'a bildirilmesi gerekir. Yapay zekâ sağlayıcısının
-sözleşmesinde yalnızca AB maddeleri bulundu; KVKK metnini imzaladığı doğrulanamadı. Sağlayıcının işlem yeri
-yalnız "küresel" ya da "ABD"; sıfır saklama anlaşmayla mümkün, ama en üst modeller bu kapsamın dışında olabilir.
+**Aktarım envanteri (ilk sürüm):**
 
-Tasarım karşılığı — **veri ikametgâhı katmanı:**
-- Toplanan ham veri ve bütün otomatik okuma **kendi altyapımızda** çalışır. Araştırma C'ye göre Türkçe
-  sınıflamada en iyi sonucu veren ince ayarlı Türkçe kodlayıcılar zaten yerinde çalışan modellerdir; içeriğin
-  büyük kısmı hiç dışarı çıkmaz.
-- Büyük dil modeli gerektiren okuma (karantina okuyucu) için üç yol, A0'daki hukuki görüşe göre seçilir:
-  1. Sağlayıcıyla KVKK standart sözleşmesi + sıfır saklama → bulut modeli.
-  2. Kendi altyapımızda çalışan açık ağırlıklı model → aktarım yok.
-  3. Gönderilmeden önce kişisel veriyi ayıklayan ön katman (kullanıcı adları, kimlikler, kişi adları yer
-     tutucuya) → aktarım riski azalır ama metin içinde kalan özel nitelikli veri için yetmeyebilir.
-- Planlayıcı ve yazıcı yalnız olgu kayıtlarını ve kimlikli kısa alıntıları görür; bu, güvenlik için seçilen
-  mimarinin (bölüm 3.5) aktarımı da en aza indiren yan etkisidir.
-- Hangi verinin hangi model yoluna gittiği bir **yönlendirme politikasıyla** belirlenir ve denetim kaydına
-  yazılır.
+| Akış | Nereye | Kişisel veri | Gereken | Varsayılan karar |
+|---|---|---|---|---|
+| Ana sistem, veri, yedek | Türkiye'deki veri merkezi | Evet | — | Türkiye'de |
+| Toplama rölesi (gerekirse) | Yurt dışı | Geçici | Aktarım sözleşmesi + hukuki görüş | A0'daki erişim sınamasına göre |
+| Yapay zekâ sağlayıcısı | Yurt dışı | Evet | Standart sözleşme + bildirim + sıfır saklama | **İmza ve Kurul bildirimi tamamlanmadan kapalı** |
+| Yerinde açık ağırlıklı model | Türkiye | Evet | — | Alternatif yol |
+| Bildirim (e-posta/SMS/uygulama) | Sağlayıcıya göre | **Hayır** (içerik kişisel veri taşımaz) | — | Açık |
+| İzleme/kayıt hizmetleri | Sağlayıcıya göre | Hayır (yalnız teknik ölçüm) | — | Açık |
+| Dış analist hizmeti | Türkiye | Evet | Veri işleyen sözleşmesi | Sözleşmeyle |
+| Etiketçiler | Türkiye | Evet | Gizlilik + veri işleyen | Sözleşmeyle |
+| Geliştirme ekipleri (model) | Sağlayıcıya göre | **Hayır** (kimliksiz/sentetik) | — | Açık |
+| Veri sağlayıcılar | Yurt dışından içeri | (toplama) | Sağlayıcı sözleşmesi | — |
 
-**(b) X'in kısıtlı kullanım kuralları.** Model eğitimi yasak (Rasat eğitmez; ince ayar X içeriğiyle **yapılmaz**
-— bkz. aşağıda). Kullanıcıları izleme ve profil çıkarma; protesto, miting, topluluk örgütlenmesi gibi hassas
-olayları izleme ve uyarı kurma; sendika ve aktivist grup izleme; hesabı X dışı kimlikle eşleştirme (açık rıza
-olmadan) yasak. Kişisel veri saklamayan toplu analiz serbest.
+**Model yolu seçimi** (A0, hukuki görüşe göre): (1) sağlayıcıyla standart sözleşme + sıfır saklama; (2) yerinde açık
+ağırlıklı model; (3) kişisel veriyi ayıklayan ön katman (metin içi özel nitelikli veri için yetmeyebilir). **Öneri:**
+hukuki görüş elverdiği ölçüde yerinde model ağırlıklı karma; bu karar A4'teki karşılaştırma sınamasıyla da kesinleşir.
 
-Tasarım karşılığı — **kullanım politikası motoru:**
-- Rasat **konu odaklıdır, kişi odaklı değildir.** Bireyler hakkında dosya tutulmaz; aktör bilgisi yalnız bir
-  olayın bağlamında, o olay için gösterilir.
-- **Hesap tabanlı toplama** (bölüm 3.2) yalnız kurumlar, medya ve kamusal figürlerle sınırlıdır; özel kişiler
-  bu listeye alınamaz. Kapsamı hukuki görüşle kesinleşir.
-- Hassas olay izleme kuralları (miting, protesto, eylem vb.) **kurulamaz**; politika motoru bu türden kural
-  ve izleme talimatlarını reddeder ve gerekçesini söyler.
-- Koordinasyon ve tekil hesap bulguları iç kullanım içindir, isimsiz sunulur, isimli sunum analist onayıyla
-  ve hukuki çerçeve içinde yapılır.
-- **İnce ayar verisi:** X içeriği bir "temel ya da öncü model" eğitimi için kullanılamaz. Küçük bir Türkçe
-  sınıflandırıcının X içeriğiyle ince ayarının bu yasağa girip girmediği A0'da X'ten yazılı olarak sorulur;
-  yanıt olumsuzsa sınıflandırıcılar X dışı kaynaklarla (haber yorumları, Bluesky, lisanslı Türkçe derlemler)
-  eğitilir, X içeriği yalnız **ölçüm** (altın set) için kullanılır.
-- Bir LLM'e analiz için gönderme konusunda açık hüküm bulunamadı; X'ten yazılı teyit alınır.
+**KVKK'nın diğer yükümlülükleri** (A0'da avukatla): işleme dayanağı ve meşru menfaat denge testi; alenileştirme amacıyla
+uyum; aydınlatma; VERBİS; saklama-imha politikası; özel nitelikli veri; GDPR (Avrupa'daki gazeteci ve diaspora
+hesapları). Avukat yanıtları bir **"yanıt → özellik"** tablosuna bağlanır; olumsuz yanıt hangi özelliği kapatıyorsa
+tasarım önceden bilir.
 
-**(c) Sözleşmelerin yapay zekâ ile işleme izni.** Her lisanslı kaynakta (dinleme platformu, ajans, medya
-izleme firması) içeriğin (1) kendi sistemimizde saklanması, (2) bir yapay zekâ ile işlenmesi, (3) kendi
-altyapımızdaki bir modelle işlenmesi ayrı ayrı sorulur. Bir kaynak (2)'ye izin vermiyorsa o kaynak yalnız
-yerinde çalışan modellerle okunur.
+**(b) X'in kısıtlı kullanım kuralları.** Model eğitimi yasak. Kullanıcıları izleme ve profil çıkarma; protesto, miting,
+topluluk örgütlenmesi gibi hassas olayları izleme ve uyarı kurma; sendika ve aktivist grup izleme; hesabı X dışı
+kimlikle eşleştirme yasak. Kişisel veri saklamayan toplu analiz serbest. Bir LLM'e analiz için gönderme konusunda açık
+hüküm bulunamadı.
+
+**X'ten yazılı olarak sorulacaklar:** (1) bir LLM'e analiz için gönderme; (2) küçük bir sınıflandırıcının ince ayarı,
+düzeltme kütüphanesi ve aktif öğrenme; (3) bir olay bağlamında öne çıkan hesapların (isimle) gösterilmesi; (4) kurum ve
+yayın organı hesaplarının toplama listesine alınması; (5) boykot çağrılarının izlenmesi (topluluk örgütlenmesi sayılır
+mı); (6) tüketici hakları kuruluşları (aktivist grup sayılır mı); (7) koordinasyon analizi.
+
+**X yanıtına göre özellikler (önceden kararlaştırılmış):**
+
+| Özellik | X olumlu | X kısmi / belirsiz (en temkinli yorum) | X olumsuz |
+|---|---|---|---|
+| İçeriğin bulut yapay zekâsına gönderilmesi | Açık (KVKK şartıyla) | Yalnız yerinde model | Yalnız yerinde model |
+| Sınıflandırıcı ince ayarı X içeriğiyle | Açık | Kapalı; X dışı veriyle eğitim, X yalnız ölçüm | Kapalı; A4 hedefleri yeniden değerlendirilir |
+| Düzeltme kütüphanesi (X içeriği) | Model güncellemesine girer | Yalnız kural ve bağlam örneği; model ağırlığı değişmez | Aynı |
+| Aktör tablosu | İsimli, olay bağlamında | Yalnız kurum/medya isimli; bireyler isimsiz (rol + takipçi aralığı) | Tamamen isimsiz |
+| Hesap listesi tabanlı toplama | Kurum ve yayın organları | Kapalı | Kapalı |
+| Yayılım adımlarında hesap adı | Açık | Kurum/medya ve 100 binin üstü kamusal hesaplar | İsimsiz |
+| Koordinasyon analizi | İç kullanım, isimli kanıt yok | Yalnız toplu istatistik | Yalnız toplu istatistik |
+| Boykot çağrısı içerik sınıfı | Açık | Toplu sayım açık; düzenleyenleri izleme kapalı | Aynı |
+| Hassas olay izleme | **Her durumda kapalı** | Kapalı | Kapalı |
+
+**Eğitim kuralı (tek ve tutarlı):** X'in yazılı teyidi gelene kadar **X içeriği hiçbir modelin ağırlıklarını
+değiştirmek için kullanılmaz** (ince ayar, düzeltmeden öğrenme ve aktif öğrenme dahil). Sınıflandırıcılar X dışı
+kaynaklarla (lisanslı Türkçe derlemler, haber yorumları, Bluesky) eğitilir; X içeriği yalnız **ölçüm** için kullanılır.
+Bu alan kayması doğurabilir; A4 hedefleri bu durumda kullanıcıyla yeniden değerlendirilir.
+
+**(c) Silme yükümlülüğü ve yayılımı.** X'te silinen, düzenlenen, korumaya alınan ve askıya alınan içerik 24 saat içinde
+sistemden kaldırılır ya da güncellenir. Yayılım kuralları:
+
+| Kayıt türü | Silmede ne olur |
+|---|---|
+| Ham gönderi, metin, alıntı | Silinir |
+| Etiketler, anlatı üyeliği | Kimlikle birlikte silinir; toplu sayılara katkısı kalır |
+| Durum notu, rapor, anlık görüntü | İçindeki alıntı yer tutucusu "kaldırılmış içerik" olur; sayılar sürüm notuyla korunur |
+| Düzeltme kütüphanesi örneği | Silinir |
+| Koordinasyon kanıtı | Baştan kimliksiz istatistikle tutulur (gönder-sil desenleri dahil) |
+| Altın set, kronolojiler | Kimlik + etiket; silinen öğe düşer; aşınma oranı izlenir; set dönemsel yenilenir |
+| Yapay zekâ sağlayıcısındaki kopya | X içeriğinin gittiği her bulut yolunda **sıfır saklama ön koşuldur** |
+
+Tutarlılık metriği (K9) silmeden kaynaklanan değişiklikleri hariç tutar; anlık görüntüde "şu kadar öğe sonradan
+kaldırıldı" notu görünür. A3 kapısında silme yayılımının bütün kayıt türlerinde çalıştığı sınanır.
+
+**(d) Görüntüleme ve paylaşım politikası.** X: bir kuruma 30 günde en çok 1,5 milyon gönderi kimliği; alıcı başına günde
+en çok 50 bin tam nesne; kamuya yayımlama yasağı; alan üçüncü tarafın X koşullarını kabul etmesi. Ajans telifi (DHA:
+izinsiz kullanılamaz). Bu yüzden danışana giden raporda gönderi metni kısa alıntı ve bağlantıyla, ajans içeriği yalnız
+başlık ve bağlantıyla; dış analist ve etiketçi akışları bu sınırlara göre ayarlanır. Satıcılara "danışana ya da üçüncü
+kişiye aktarım" sorusu eklenir. "TR'de görünmüyor" içeriğin Türkiye'deki danışmana gösterilmesi hukuki görüşe
+bağlıdır; görüş gelene kadar yalnız sayım düzeyinde gösterilir.
 
 ### 4.4 Avukata ve satıcılara sorulacaklar
-Avukat soruları `B-VERI-HUKUK.md` §5.6'da (15 madde). Satıcılara sorulacaklar:
-1. İçerik kendi sistemimizde saklanabilir mi, ne kadar süre?
-2. İçerik analiz için yurt dışındaki bir yapay zekâ sağlayıcısına gönderilebilir mi? Kendi altyapımızdaki bir
-   modelle işlenebilir mi?
-3. Silinen içerik bildirimi (uyum akışı) veriliyor mu?
-4. Kitle/erişim verisi (tiraj, reyting, gösterim, takipçi) geliyor mu?
-5. Türkiye'de erişime kapatılan içerik nasıl işaretleniyor?
-6. Hizmet kesintisinde bildirim ve telafi?
-7. (X) %10 örneklem akışı ve anlamsal işleç Türkçede nasıl çalışıyor, fiyatı?
-8. (Yapay zekâ sağlayıcısı) KVKK standart sözleşmesini imzalıyor mu; sıfır saklama hangi modelleri kapsıyor?
+Avukat: `B-VERI-HUKUK.md` §5.6'daki 15 soru + bölüm 4.3'teki ekler (barındırma ve röle, yanıt→özellik tablosu, boykot,
+tüketici kuruluşları, GDPR, özel nitelikli çıkarım, WhatsApp, Telegram insan okuması, "TR'de görünmüyor", ihlal bildirim
+süresi).
+
+Satıcılar: (1) içerik bizde saklanabilir mi, ne kadar; (2) yurt dışı yapay zekâ ile, (3) yerinde modelle işlenebilir mi;
+(4) silme bildirimi; (5) erişim/tiraj/reyting verisi; (6) TR'de erişime kapatılan içeriğin işaretlenmesi; (7) kesinti
+bildirimi ve telafi; (8) danışana ya da üçüncü kişiye aktarım; (9) sözleşmeden çıkış, otomatik yenileme, veri
+taşınabilirliği; (10) (X) %10 akış ve anlamsal işlecin Türkçe başarımı, geçmişe uygulanabilirliği, fiyat; (11) (yapay
+zekâ sağlayıcısı) KVKK standart sözleşmesi, sıfır saklamanın kapsadığı modeller.
 
 ---
 
 ## 5. Zayıflıktan çözüme izlenebilirlik
 
-Her kök neden (bkz. `01-GEREKSINIM-MEVCUT.md` §4) bir mimari bileşene, bir metriğe ve dürüst bir duruma
-bağlanır. Kod bazında ayrıntılı eşleme `C-YONTEM.md` §11'dedir; bu tablo onun mimariye izdüşümüdür.
+Her madde: Rasat'taki bileşen (bölüm), ölçümü (bölüm 2) ve doğrulandığı kapı (bölüm 8).
+Durum: **K** = karşılanır · **Y** = yönetilebilir (azaltılır ve ölçülür) · **Ç** = çözülemez, yalnız görünür kılınır.
 
-| Kök neden | Kapsadığı zayıflıklar | Rasat'taki karşılığı | Metrik (bölüm 2) | Durum |
+| Madde | Bileşen | Ölçüm | Kapı | Durum |
 |---|---|---|---|---|
-| K-1 Veri maliyete göre | N1, N4, P6, P7, P8, P15, Ortak-3 | Lisanslı tam erişim, iki toplayıcı, etkileşim yeniden ölçümü, arşivle geriye genişletme | Kapsam, zamanlılık | Karşılanır |
-| K-2 Kapsam ölçülmüyor | N1, N3, N4, P6, P7 | Elüzyon + yakala-yeniden yakala + bilinen-öğe; kapsam düşüş alarmı | Kapsam | Karşılanır (metinsiz medya: yönetilebilir) |
-| K-3 İlgililik ayrı adım değil | N1, N5 | Geniş ağ + ilgililik sınıflandırıcısı + varlık dosyası + eşsesli dışlama | İlgililik | Karşılanır |
-| K-4 Doğruyu bilen ölçüt yok | P2, P3, P16, K8, Ortak-5 | Bağımsız değerlendirme ekibi, kör altın set, geçmiş olay kronolojileri | Hepsi | Karşılanır |
-| K-5 Anlama kaba, kalibresiz | N2, P3, P4, P13, P14, Ortak-4 | Katmanlı Türkçe okuma, kalibrasyon, oran düzeltme, anlatı kimliği | Anlama | Yönetilebilir (alay kalıcı zorluk) |
-| K-6 İlişki bulgu gibi | N4, P5, P11, P12, Ortak-7 | Kesin/olası bağ ayrımı, sıfır modeli, güven basamakları, onay kapısı, tarif edici dil | Çıkarım | Çözülemez, yönetilebilir |
-| K-7 Zaman modeli zayıf | P8, P9, P10 | Mevsimsel taban, gözetim tipi alarm, kalibre tahmin, yeniden ölçüm | Zamanlılık, çıkarım | Karşılanır (tahmin tavanı: yönetilebilir) |
-| K-8 Akıcı anlatım hatayı gizliyor | K2, K4, K9, P13 | Olgular hesaptan, atıf/sayı denetçisi, "ne yaptım" satırı, sürümlü anlık görüntü | Sunum dürüstlüğü | Yönetilebilir |
-| K-9 İzleyeni izleyen yok | K5, Nabız'ın durması, bildirim yokluğu | Gözetim düzlemi, kural geri-testi, eskalasyonlu bildirim, 7/24 nöbet | Zamanlılık | Karşılanır |
-| K-10 Güvenlik/hukuk sonradan | K6, hukuki belirsizlik, düz metin anahtar | Karantina mimarisi, kırmızı takım, veri ikametgâhı katmanı (KVKK), kullanım politikası motoru (X kuralları), A0 hukuk görüşü, şifreleme | Güvenlik | Yönetilebilir |
-| K-11 İnsan yok | P5, P12, P13, K7 | İnsan düzlemi: nöbetçi analist, onay kapıları, sürümlü düzeltme | Çıkarım, sunum | Karşılanır |
+| N1 kelimeye bağlı | Üç toplama yolu, varlık dosyası, ilgililik (3.2–3.3); metinsiz medya kör nokta → A10 | Kapsam, ilgililik | A3, A10 | Y (metinsiz medya: Ç→A10) |
+| N2 duruş okumaz | Katmanlı okuma (3.3); olumsuz ağırlıklı alarm, "viral an" ayrımı (3.4) | Anlama; övgü dalgasında yanlış kırmızı alarm | A4, A5 | K |
+| N3 örneklem | Tam akış; oran düzeltme; etkileşim yeniden ölçümü | Olumsuz pay hatası | A4, A5 | Y |
+| N4 başlangıç pencereye bağlı | Arşivde otomatik geriye genişletme; "gözlenen en erken" dili | Başlangıç penceresi (40 olay) | A5 | Ç (yönetilir) |
+| N5 alt başlık sözcük sıklığı | Anlatı kimliği (3.4) | Saflık, bölünme, ad uygunluğu | A4 | Y |
+| N6 tutar tahmin | Harcama defteri ve ekranı (3.10) | Tahmin–fatura farkı | A3 (defter), A7 (ekran) | K |
+| P1 gerçek veri yok | A0b ilk gerçek veri sınaması; A8 gölge işletim | Kapı sonuçları | A0b, A8 | K |
+| P2 kendi sınavı | Bağımsız değerlendirme, kör altın set, yalnız insan etiketi | Bütün metrikler | A1 | K |
+| P3 kaba duruş | Katmanlı okuma, oran düzeltme | Anlama | A4 | Y |
+| P4 anlatı bölünmesi | Anlatı kimliği, üst anlatı, analist onaylı ad | Bölünme ≤ %10 | A4 | Y |
+| P5 "sıçrama" | Kesin/olası bağ; dil kuralı; onay kapısı; isim + neden-sonuç birlikte yok | Kesin bağ doğruluğu; "ilk kaynak" adlandırması kronolojiye karşı | A5 | Ç (yönetilir) |
+| P6 yeniden paylaşım | Sayımdan toplam; kritikte okuma | Kesin bağ doğruluğu | A3 | K |
+| P7 ilk gün | 30–90 günlük sayım tabanı; ısınma etiketi | Isınma dönemi yanlış/kaçan alarm ayrı | A5 | K |
+| P8 etkileşim donuyor | Yeniden ölçüm | Yeniden ölçüm sonrası sıralamanın tam akışla kıyası | A5 | K |
+| P9 taban 24 saat | Mevsimsel taban | Yanlış alarm, gecikme | A5 | K |
+| P10 tahmin çelişkisi | Tek model, aralık | Tahmin kalibrasyonu | A5 | Y |
+| P11 danışan hesabı yükseltici | Sahip olunan kanal rolü | İlgililik setinde rol doğruluğu | A3 | K |
+| P12 koordinasyon iki yön | Sıfır modeli, p < 0,01, alternatif açıklamalar, onay | Kesinlik; **kaçırma:** kronolojilerde bilinen kampanyaların yakalanma oranı | A5 | Ç (yönetilir) |
+| P13 taslak | Taslak yalnız doğrulanmış olgudan; uzman kabulü; insan onayı | Taslak kabul ölçütü (A6) | A6 | Y |
+| P14 anlatı adı donuyor | Her pencerede ad önerisi, "anlatı evrildi" | Ad uygunluğu | A4 | K |
+| P15 haber erişimi | Medya izleme firmasından tiraj; yoksa "bilinmiyor" sürücüsü | — | A2, A5 | Y |
+| P16 ikinci göz | Bağımsız kod incelemesi ve sızma testi A8'den önce | İnceleme bulguları kapatıldı | A8 öncesi | K |
+| K1 denenmedi | Aşamalı kurulum, sayısal kapılar | Kapılar | Hepsi | K |
+| K2 ikna edici yanlış | Denetçi, yer tutucu, dayanak satırı, ölçülmüş isabet | Atıf, sayı eşleşmesi | A6 | Y |
+| K3 yanlış sorgu/araç | Sorgu görünür; "ne yaptım"; araç seçimi değerlendirme seti | Doğru araç/sorgu oranı | A6 | Y |
+| K4 özet üstünden | Ham veriye sorgu atan yetenekler; kapsam etiketi | "Bulunamadı" yanıtlarında arama kapsamı %100 | A6 | K |
+| K5 sessiz görev | Kural geri-testi; periyodik yeniden sınama; kanarya | Sessiz arıza 0 | A6, A8 | K |
+| K6 gönderi içi talimat | Opak kimlik, yerleştirici, karantina, yapıştırılan içerik karantinada | Güvenlik | A6 | Y |
+| K7 düzeltmeden öğrenme | Sürümlü kütüphane; X kuralı | Önce/sonra ölçümü | A4, A7 | K |
+| K8 demo değerlendirme | Bağımsız altın set ve 40 olay | — | A1 | K |
+| K9 aynı soru farklı yanıt | Anlık görüntü; sayılar hesaptan | Tutarlılık (silme hariç) | A6 | Y |
+| Ortak-1 X kamuoyu değil | Rapor dili; kör nokta haritası | — | A7 | Ç |
+| Ortak-2 görünmeyen yerler | Kademe 2–3; kör nokta haritası | — | A2 | Ç |
+| Ortak-3 X'in verdiği | Silme yayılımı; "sayılan/okunabilen" | — | A3 | Ç |
+| Ortak-4 Türkçe zor | Katmanlı okuma; alay ayrı ölçüm | Anlama | A4 | Y |
+| Ortak-5 doğruyu bilen ölçüt | A1 ölçü aleti | — | A1 | K |
+| Ortak-6 iddianın doğruluğu | Teyit kaynağı eşleştirme (koşulları A0b'de); "doğrulanmadı" etiketi | — | A4 | Ç |
+| Ortak-7 zamanlama neden değil | Dil kuralı, denetçi | — | A6 | Ç |
+| En tehlikeli-1 kendi sınavı | P2 ile aynı | | A1 | K |
+| En tehlikeli-2 ikna edici yanlış | K2 + rapordaki zorunlu güven bölümü + kullanıcı eğitimi | | A6, A7 | Y |
+| En tehlikeli-3 sessiz görev | K5 ile aynı | | A6, A8 | K |
+| En tehlikeli-4 suçlayıcı bulgu | "Kamuya hiç" kuralı; onay; isimsiz varsayılan | | A5, A6 | Y |
+| En tehlikeli-5 ilk günler | P7 + ısınma ölçümü | | A5 | Y |
+| Yapay zekâ harcama tavanı yok | Harcama defteri (3.10) | | A3 | K |
+| Yapay zekâ kesilirse | Bozulmuş mod (3.5) | Kesinti benzetimi | A6 | K |
+| Süre ve maliyet tahmini yok | Bölüm 7 | | — | K |
+| Rakip bilgisinin kullanımı | A10 (rakip karşılaştırma), kapılı | | A10 | — |
+| Kapanan olayların arşivi | Kimliksiz olay sonrası kaydı (3.6); A10 arşiv | | A7, A10 | Y |
+| Konuşmanın gecikmesi ve maliyeti | Harcama ekranı; yanıt süresi hedefi (p90 ≤ 30 sn) | | A6 | K |
 
 ### 5.1 Çözülemeyenler (dürüst liste)
-Bu sınırlar hiçbir bütçeyle kaldırılamaz; Rasat bunları **görünür kılar ve diliyle sınırlar**:
 1. Görülen kanallar kamuoyunun tamamı değildir.
 2. Kapalı gruplar, özel mesajlar, kişisel Instagram hesapları ve Hikâyeler görünmez.
-3. Silinen ve erişime kapatılan içerik geriye dönük olarak eksiktir ve bu eksiklik rastgele değildir.
-4. "İlk kaynak" kuramsal olarak kesin bilinemez; "gözlenen en erken" söylenir.
-5. Zamanlama neden değildir; "sıçrattı" denmez.
+3. Silinen ve erişime kapatılan içerik eksiktir; eksiklik rastgele değildir; geçmiş olayların ayrıntısı zamanla aşınır.
+4. "İlk kaynak" kesin bilinemez; "gözlenen en erken" söylenir.
+5. Zamanlama neden değildir.
 6. Meşru topluluk eşgüdümü ile örgütlü kampanya her zaman ayrılamaz.
-7. Türkçe alay ve ima, en iyi yöntemle bile hata üretir.
-8. Bir iddianın doğruluğu, bağımsız teyit olmadan bilinemez.
+7. Türkçe alay ve ima en iyi yöntemle de hata üretir.
+8. Bir iddianın doğruluğu bağımsız teyit olmadan bilinemez.
 9. Viral tahminin öngörülebilirlik tavanı vardır.
-10. Instagram ve TikTok'ta ticari kullanıcıya genel dinleme yolu yoktur; en pahalı aracılar da aynı sınıra
-    bağlıdır.
-11. Telegram kanalları ve lisanslanamayan yerel kaynaklar yalnız insan gözüyle okunur; sayıma girmez.
-12. Silinen içerik saklanamaz; geçmiş olayların ayrıntısı zamanla aşınır.
+10. Instagram ve TikTok'ta ticari kullanıcıya genel dinleme yolu yoktur.
+11. Telegram ve lisanslanamayan yerel kaynaklar yalnız insan gözüyle okunur.
+12. X'in kuralları bireyleri izlemeyi yasaklar; bazı aktör analizleri ancak isimsiz yapılabilir.
 
 ---
 
-## 6. Ekip
+## 6. Seçenekler: kur, satın al, karma
 
-İki ayrı ekip vardır: **tasarlayan** (bu belgeyi üreten, tamamlandı) ve **kuran ve işleten**. İkincisinin en
-önemli kuralı: **sistemi kuranlar ile doğruluğunu ölçenler ayrıdır** (Araştırma C §9.5). Sınavı hazırlayan,
-sınava girmez.
-
-### 6.1 Tasarım ekibi (bu süreçte kullanıldı)
-| Rol | Yaptığı | Çıktı |
-|---|---|---|
-| Lider | Gereksinim, kök neden analizi, sentez, mimari, plan | `01`, `PLAN.md` |
-| Araştırma A — piyasa | Dünya ve Türkiye'deki araçlar, yaklaşımlar, boşluklar | `A-PAZAR.md` |
-| Araştırma B — veri ve hukuk | Kaynak erişimi, sözleşme, KVKK, fizibilite | `B-VERI-HUKUK.md` |
-| Araştırma C — yöntem | Doğruluk yöntemleri, ölçüm çerçevesi | `C-YONTEM.md` |
-| Denetim | Planı araştırmalara ve zayıflıklara karşı sınama | `D-DENETIM.md` |
-
-### 6.2 Kurma ve işletme ekibi
-
-İnsan olması gereken roller ile yapay zekâ modellerine verilebilecek roller ayrı işaretlenmiştir.
-"Model" yazan rollerde de son onay ve sorumluluk bir insandadır.
-
-**Ürün ve alan**
-| Rol | Yetkinlik | Sorumluluk | Kim |
+| | A. Satın al | B. Her şeyi kendimiz kuralım | C. Karma (önerilen) |
 |---|---|---|---|
-| Ürün sahibi | Danışmanlık işinin kendisi | Öncelikler, kabul, eşiklerin son kararı | Kullanıcı |
-| Kriz iletişimi uzmanı | Kurumsal kriz yönetimi deneyimi | Kod kitabındaki iletişim kavramları, yanıt planı kuralları, kabul senaryoları | İnsan (danışman) |
+| Ne | Kurumsal dinleme platformu + yerli medya takip + analist hizmeti | Veri dahil her katman kendi sözleşmelerimiz ve kodumuzla, hazır platform yok | Veri satın alınır; ölçüm, Türkçe okuma, olgu, yorum, insan iş akışı kurulur |
+| Canlıya süre | 1–3 ay | 18–24 ay | 12–18 ay |
+| Kapsam ve isabetin ölçülmesi | Satıcı ölçmüyor; biz ancak dışarıdan örnekle denetleriz | Tam | Tam |
+| Türkçe ve alay | Satıcıya bağlı; ölçüm yayımlanmamış | Tam kontrol | Tam kontrol |
+| Yöntem şeffaflığı | Kara kutu (risk, bot, koordinasyon) | Tam | Tam |
+| Hukuk | Satıcının sözleşmesi; KVKK aktarımı satıcıya göre | Tamamen bizde | Bizde; veri sözleşmeleri satıcılarla |
+| Satıcı riski | Yüksek (tek satıcı) | Düşük | Orta (iki toplayıcı) |
+| Kullanıcının talebine uyum ("ölçülmüş en doğru") | Düşük | Yüksek | Yüksek |
 
-**Veri, hukuk, güvenlik**
-| Rol | Yetkinlik | Sorumluluk | Kim |
-|---|---|---|---|
-| Veri ortaklıkları yöneticisi | Veri lisansı ve satıcı müzakeresi | Satıcı yarışması, sözleşmeler, hizmet seviyeleri | İnsan |
-| Hukuk danışmanı | KVKK, platform sözleşmeleri, telif | Hukuki görüş, aktarım çerçevesi, saklama politikası | İnsan (dış) |
-| Veri koruma (KVKK) sorumlusu | KVKK uygulaması, Kurul bildirimleri | Standart sözleşme ve bildirimler, işleme envanteri, yönlendirme politikasının denetimi | İnsan |
-| Güvenlik ve gizlilik mühendisi | Uygulama güvenliği, şifreleme, erişim | Tehdit modeli, gizli anahtar yönetimi, denetim kaydı | Model + insan onayı |
-
-**Mühendislik** (model ekiplerine verilebilir; her biri bir katmanın sahibi)
-| Rol | Yetkinlik | Sorumluluk |
-|---|---|---|
-| Veri mühendisi | Akış işleme, depolama, yeniden ölçüm zamanlaması | Veri düzlemi, kaynak bağdaştırıcıları, kanıt deposu |
-| Bilgi erişimi mühendisi | Sorgu tasarımı, sorgu genişletme, varlık bağlama | Varlık dosyası, geniş ağ, ilgililik, kapsam ölçüm düzeneği |
-| Türkçe dil işleme mühendisi | İnce ayar, kalibrasyon, oran düzeltme, aktif öğrenme | Anlama düzlemi |
-| Çoklu ortam mühendisi | Ses → metin, görsel yazı, logo, yakın-kopya | Çoklu ortam kanalı |
-| İstatistik ve zaman serisi uzmanı | Mevsimsellik, gözetim alarmları, tahmin, güven aralıkları | Taban, alarm, tahmin, kapsam istatistiği |
-| Ağ bilimi uzmanı | Yayılım ağaçları, koordinasyon ağları, sıfır modelleri | Yayılım ve koordinasyon |
-| Yapay zekâ ajan mühendisi | Araç kullanımı, karantina deseni, atıf | Yorum düzlemi, denetçi |
-| Arayüz tasarımcısı ve geliştiricisi | Teknik olmayan kullanıcı için arayüz, veri görselleştirme | Pano, oda, konuşma, kalite ekranı |
-| İşletim (SRE) mühendisi | İzleme, kesinti yönetimi, bildirim altyapısı | Gözetim düzlemi, eskalasyon |
-
-**Bağımsız değerlendirme** (kuranlardan ayrı; çıktıları kuranlardan gizli tutulur)
-| Rol | Yetkinlik | Sorumluluk | Kim |
-|---|---|---|---|
-| Değerlendirme lideri | Ölçüm tasarımı, istatistik, etiketleme yönetimi | Altın set, kod kitabı, geçiş kapılarının ölçümü | İnsan (model destekli) |
-| Etiketçiler (en az 3) | Türkçe anadil; sosyal medya dili, alay, ima | Altın set, haftalık kalite örnekleri | İnsan |
-| Olay kronolojisi araştırmacıları | Gazetecilik ya da açık kaynak araştırması | Geçmiş olayların bağımsız kronolojileri | İnsan |
-| Kırmızı takım | İstem enjeksiyonu, kötüye kullanım senaryoları | Türkçe saldırı seti, her sürümde sınama | Model + insan |
-
-**İşletme**
-| Rol | Yetkinlik | Sorumluluk | Kim |
-|---|---|---|---|
-| Nöbetçi analistler (7/24) | Sosyal medya analizi, Türkçe, kriz duyarlılığı | Kuyruk, onay kapıları, kırmızı uyarı doğrulama, eskalasyon | İnsan (kendi ekip ya da Türkiye'deki bir takip şirketinin analist hizmeti) |
-| Kalite sorumlusu | Değerlendirme lideriyle birlikte | Haftalık ölçüm, kayma takibi, kalite ekranı | İnsan |
-
-### 6.3 Model ekipleriyle çalışma kuralları
-Bu oturumda dört paralel model ekibi kullanım kotasını tekrar tekrar tüketti. Kurma aşamasında:
-- Aynı anda en çok iki ya da üç model ekibi; her biri tek katmanın sahibi.
-- Her ekibe sözleşme (arayüz, veri biçimi, geçiş kapısı) yazılı verilir; çıktı lider ve bağımsız değerlendirme
-  tarafından kapıdan geçirilir.
-- Tasarım, değerlendirme tasarımı ve güvenlik mimarisi en yetenekli modelle; uygulama orta düzey modelle;
-  toplu etiketleme ve sınıflama en hızlı modelle.
-- Araştırma çıktıları ve kararlar depoya yazılır; aynı araştırma tekrar yapılmaz.
+**Öneri: C, A ile köprülenmiş.** İlk aydan itibaren bir dinleme platformu lisansı ve Türk medya takip hizmeti alınır
+(Nabız X sayımında kalır). Bu, 12–18 ay boyunca çalışacak bir aracınız olmasını sağlar. Aynı platform A2'deki veri
+yarışmasının adayıdır; Rasat hazır olduğunda ya yedek toplayıcı olarak kalır ya da sözleşmesi bitirilir.
 
 ---
 
-## 7. Aşamalı plan ve kontrol kapıları
+## 7. Fizibilite: süre, kadro, maliyet
 
-Her aşamanın: **amacı, iş paketleri, sahibi, çıktısı, geçiş kapısı** (ölçülebilir) ve **durma koşulu** vardır.
-Kapıyı ölçen, işi yapan değildir. Kapıdan geçilmeden sonraki aşamaya yalnızca kapının bağımlı olmadığı işler
-için geçilir. Süreler kabaca verilmiştir; kesin süre Aşama 0 sonunda çıkar.
+### 7.1 Takvim ve kritik yol (kabaca, hafta)
 
-```
- A0 Doğrulama ve hazırlık ──┬──► A2 Veri yarışması ──► A3 Toplama+ilgililik+kapsam ──┐
- A1 Ölçü aleti (bağımsız) ──┘                          A4 Anlama (Türkçe) ────────────┤
-                                                       A5 Olgu düzlemi ───────────────┤
-                                                       A6 Yorum + güvenlik ───────────┤
-                                                                                      ▼
-                                       A7 İnsan iş akışı + arayüz + bildirim ──► A8 Gölge işletim
-                                                                                      ▼
-                                                    A9 Canlı + sürekli kalite ──► A10 Genişleme
-```
+| Aşama | Başlar | Biter | Bağımlı olduğu |
+|---|---|---|---|
+| A0a Hukuki zemin | 0 | 6 | — |
+| Köprü çözüm devreye | 0 | 8 | Satın alma |
+| A1 Ölçü aleti | 2 (kod kitabı, olay seçimi, işe alım) / 6 (gerçek veriyle etiketleme) | 20 | A0a (gerçek veri için) |
+| A0b Satıcı, X, model yolu | 4 | 14 | A0a |
+| A2 Veri yarışması | 14 | 20 | A0b, A1'in olay listesi ve kronolojileri |
+| A3 Toplama, ilgililik, kapsam | 20 | 30 | A2 |
+| A4 Anlama | 24 | 38 | A3'ün toplama hattı + ilgililik; A1 altın seti |
+| A5 Olgu düzlemi | 28 | 40 | A3; A4'ün duruş çıktısı (olumsuz ağırlıklı alarm için) |
+| A6 Yorum ve güvenlik | 36 | 46 | A5'in kanıt deposu |
+| A7 İnsan iş akışı, arayüz, bildirim | 38 | 48 | A5; A6 ile kısmen paralel |
+| Sızma testi + bağımsız kod incelemesi | 46 | 50 | A6, A7 |
+| A8 Gölge işletim | 50 | 62 | Hepsi |
+| A9 Canlı | ~62 (≈ 14. ay) | sürekli | A8 kesin kabul |
 
-### A0 — Doğrulama ve hazırlık *(paralel A1 ile; kabaca 4–6 hafta)*
-- **Amaç:** plandaki dış varsayımları birincil kaynaktan doğrulamak; hukuki zemini kurmak.
-- **İşler:**
-  - Araştırmalardaki "doğrulanamadı/kısmen" bulguların birincil kaynaktan kontrolü (bölüm 10).
-  - Hukuki görüş: `B-VERI-HUKUK.md` §5.6'daki 15 soru; özellikle yurt dışı aktarım, özel nitelikli veri,
-    alenileştirme amacıyla uyum, hesap tabanlı toplamanın sınırı, siyasi danışanlar.
-  - X'ten yazılı teyit: (1) içeriğin analiz için bir yapay zekâ sağlayıcısına gönderilmesi, (2) küçük bir
-    sınıflandırıcının X içeriğiyle ince ayarı, (3) bir olay içinde öne çıkan hesapların gösterilmesinin
-    "kullanıcı izleme" sayılıp sayılmadığı.
-  - Yapay zekâ sağlayıcısıyla KVKK standart sözleşmesi ve sıfır saklama görüşmesi; hangi modellerin sıfır
-    saklama kapsamında olduğu.
-  - **Veri ikametgâhı yolunun seçimi** (bölüm 4.3a: sağlayıcı sözleşmesi / yerinde model / ayıklama).
-  - Aday veri sağlayıcılara bölüm 4.4'teki sorular; X Enterprise satış görüşmesi.
-  - **İlk gerçek veri sınaması (P1)** ücretsiz kaynaklarla: Bluesky tam akışı, GDELT, YouTube; ardından küçük
-    bütçeli X kullandıkça öde. Amaç doğruluk ölçmek değil, kaynak bağdaştırıcılarının gerçek veriyle
-    çalıştığını görmek.
-  - İlk danışan ve ilk 5–10 geçmiş olayın seçimi.
-- **Sahip:** veri ortaklıkları yöneticisi, hukuk danışmanı, KVKK sorumlusu, lider.
-- **Kapı:** hukuki görüş yazılı; X'in yazılı yanıtı alınmış (ya da yanıt gelmezse en temkinli yorum seçilmiş);
-  veri ikametgâhı yolu seçilmiş ve sözleşmesi imzalanmış ya da imza takvimi belli; her kanal için
-  "yapılabilir/yapılamaz/koşullu" kararı birincil kaynağa dayalı; en az iki aday sağlayıcıdan örnek veri sözü.
-- **Durma koşulu:** KVKK açısından hiçbir model yolu uygun bulunmazsa gerçek kişisel veri işlenmez; yalnız
-  yerinde çalışan modellerle sınırlı bir sürüm tasarlanır (risk R1, R9).
+**Kritik yol:** A0a → A0b → A2 → A3 → A5 → A6 → güvenlik testleri → A8. **Tahmin: 12–18 ay**; en büyük belirsizlikler
+X kurumsal satış süreci ve hukuki görüşün içeriği.
 
-### A1 — Ölçü aleti *(paralel A0 ile; kabaca 6–10 hafta)*
-- **Amaç:** her şeyin ölçüleceği bağımsız altın standardı kurmak. Araştırma C'ye göre en yüksek öncelikli iş.
-- **İşler:** kod kitabı (her etiketin tanımı, sınır örnekleri, Türkçe alay ve ima örnekleri); etiketçilerin
-  eğitimi ve uyum ölçümü; tabakalı ve zaman bölmeli altın set (sınıf başına ≥ 100, alay ≥ 200); 5–10 geçmiş
-  Türkiye olayının bağımsız kronolojisi (gerçek başlangıç, dönüm noktaları, anlatılar, haber geçişleri);
-  bilinen-öğe listeleri; değerlendirme altyapısı (her bileşeni aynı sette otomatik ölçen düzenek, "o ana kadar
-  bilinen veri" kuralıyla geri-test).
-- **Silme yükümlülüğüyle uyum:** altın set ve kronolojiler gönderi **kimliği + etiket** olarak saklanır; metin
-  gerektiğinde kaynaktan yeniden çekilir. Silinen öğeler setten düşer; aşınma oranı izlenir, set dönemsel
-  olarak yenilenir. Kronolojiler olayın kendisini kimliksiz anlatım ve zaman damgalarıyla da kaydeder.
-- **Sahip:** bağımsız değerlendirme ekibi.
-- **Kapı:** Krippendorff α ≥ 0,80 (her görev için ayrı); kronolojiler iki araştırmacı tarafından bağımsız
-  doğrulanmış; değerlendirme altyapısı Pusula'nın mevcut analiziyle ilk ölçümü üretmiş (bu, "hiçbir şey
-  yapmasak" taban çizgisidir).
-- **Durma koşulu:** bir görevde α 0,67'nin altında kalırsa o görevin tanımı yeniden yazılır; isabet iddiası
-  yapılmaz.
+### 7.2 Kadro
 
-### A2 — Veri yarışması *(A0 ve A1'e bağlı; kabaca 4–6 hafta)*
-- **Amaç:** veri kaynaklarını kendi ölçümümüzle seçmek.
-- **İşler:** aday sağlayıcılardan aynı geçmiş olaylar için veri; kronolojilere ve bilinen-öğe listelerine
-  karşı kapsam, gecikme, tamlık; iki sağlayıcı arasında yakala-yeniden yakala; X Enterprise'ın %10 örneklem
-  akışıyla doğrudan kapsam ölçümünün denenmesi; anlamsal işlecin Türkçe başarımı; sözleşme koşullarının
-  (saklama, yapay zekâ ile işleme, silme bildirimi, erişim verisi) kıyası.
-- **Sahip:** veri ortaklıkları yöneticisi + veri mühendisi; ölçüm değerlendirme ekibinde.
-- **Kapı:** seçilen kaynak setiyle X için tahmini kapsam ≥ %85 (en az iki yöntemle); diğer kanallar için kör
-  nokta haritasının ilk sürümü; sözleşmeler hukuk onaylı.
-- **Durma koşulu:** hiçbir sağlayıcı hedefe ulaşmıyorsa hedef değil plan değişir: kapsam hedefi kanal bazında
-  yeniden belirlenir ve kullanıcıya açıkça bildirilir.
+| Rol | Sayı | Dönem |
+|---|---|---|
+| İnsan mühendislik lideri (model ekiplerinin çıktısını onaylar, gizli anahtarları tutar) | 1 | Baştan sona |
+| Proje yöneticisi | 1 | Baştan sona |
+| Nöbetçi SRE (insan ya da yönetilen hizmet) | 2–3 ya da hizmet | A7'den itibaren |
+| Değerlendirme lideri | 1 | Baştan sona |
+| Etiketçiler (Türkçe anadil) | Başlangıçta 4–6; işletmede danışan sayısına bağlı (aşağıda) | A1'den itibaren |
+| Olay kronolojisi araştırmacıları | 2–3 | A1 (40 olay) + her ay yeni olay |
+| Nöbetçi analistler (7/24 tek koltuk) | 5–6 + kriz yedek havuzu | A7'den itibaren (A8'de tam) |
+| Kriz iletişimi uzmanı | Yarı zamanlı | A1, A6, A7, A8 |
+| Veri ortaklıkları yöneticisi | 1 | A0–A2, sonra yarı zamanlı |
+| KVKK sorumlusu | Yarı zamanlı | Baştan sona |
+| Hukuk danışmanı | Dış | A0 yoğun, sonra gerektikçe |
+| Bağımsız teknik danışman (kullanıcı için) | Dış, yarı zamanlı | Kapı kararlarında |
+| Kırmızı takım | Dış ya da ayrı ekip | A6, sonra üç ayda bir |
+| Mühendislik katmanları (veri, bilgi erişimi, Türkçe dil işleme, istatistik, ağ bilimi, ajan, arayüz, güvenlik) | Model ekipleri + insan lider onayı | A3–A7 |
 
-### A3 — Toplama, ilgililik, kapsam ölçümü *(kabaca 8–10 hafta)*
-- **İşler:** varlık dosyası ve düzenleme aracı; üç yollu geniş ağ; ilgililik sınıflandırıcısı ve eşsesli
-  ayrımı; elüzyon, yakala-yeniden yakala ve bilinen-öğe ölçümlerinin otomatik çalışması; kapsam düşüş alarmı;
-  etkileşim yeniden ölçümü; kaynak sağlığı gözetimi; veri ikametgâhı katmanı ve kullanım politikası motoru;
-  silme yükümlülüklerinin yürütülmesi; Instagram kriz etiketlerinin önceden kaydı; erişim olayı takvimi.
-- **Kapı:** geri-test olaylarında ilgililik ≥ %90 (alt sınır ≥ %85), kapsam ≥ %85; ilgililik sınıflandırıcısı
-  F1 ≥ 0,85; kaynak kesintisi benzetiminde gözetim alarmı ≤ 5 dk; X'te silinen bir gönderinin sistemden 24
-  saat içinde silindiği sınanmış; politika motoru hassas olay ve özel kişi izleme isteklerinin tamamını
-  reddediyor (sınama seti); yönlendirme politikası dışına çıkan veri akışı 0 (denetim kaydıyla).
+**Model ekipleriyle çalışma kuralları:** aynı anda en çok 2–3 model ekibi, her biri tek katmanın sahibi; her ekibe yazılı
+sözleşme (arayüz, veri biçimi, kapı) verilir; tasarım, değerlendirme tasarımı ve güvenlik mimarisi en yetenekli modelle,
+uygulama orta düzey modelle; araştırma ve kararlar depoya yazılır, tekrar yapılmaz; model ekipleri gerçek kişisel veri
+görmez.
 
-### A4 — Anlama düzlemi *(A3 ile kısmen paralel; kabaca 8–12 hafta)*
-- **İşler:** ince ayarlı Türkçe kodlayıcı; karantina okuyucu olarak büyük dil modeli; ayrışma ve belirsizliğe
-  göre insan kuyruğu; kalibrasyon; oran düzeltme; anlatı kümeleme ve kalıcı kimlik; iddia tespiti ve teyit
-  kaynaklarıyla eşleştirme.
-- **Kapı:** kör altın sette duruş makro-F1 ≥ 0,75, olumsuz sınıf duyarlılığı ≥ 0,85, kalibrasyon hatası ≤ 0,05;
-  olumsuz pay hatası ≤ 5 puan ve güven aralığı kapsaması doğru; anlatı saflığı ≥ %80, ana anlatının bölünmesi
-  ≤ %10; büyük dil modeli–insan uyumu insan–insan uyumunun en çok 0,05 altında (değilse o görevde tek başına
-  kullanılmaz).
+**Etiketleme yükü (örnek: 10 danışan, 4 haftalık pencere):** kapsam 1.000–4.000 + ilgililik 200 + anlama kayma örneği
+≈ 1.000 + atıf 200 ≈ 2.400–5.400 öğe; çift etiketle 4.800–10.800 etiket ≈ haftada 1.200–2.700 etiket ≈ saatte ~120
+etiketle haftada 10–23 saat. Altın set kurulumu (A1) ayrıca ≈ 5.000 öğe × 2. Danışan sayısı arttıkça kapsam etiketi
+portföyde paylaşıldığı için yük doğrusal artmaz; ilgililik ve anlama örnekleri doğrusal artar.
 
-### A5 — Olgu düzlemi *(kabaca 8–10 hafta)*
-- **İşler:** mevsimsel taban; gözetim tipi alarm ve eşiğin geri-testle seçimi; yayılım ağacı (kesin/olası);
-  arşivde geriye otomatik genişletme; koordinasyon sinyalleri ve sıfır modeli; kalibre tahmin; açıklanabilir
-  risk; kanıt deposu ve sürümlü anlık görüntü.
-- **Kapı:** geri-testte olay yakalama ≥ %90, medyan tespit gecikmesi ≤ 30 dk, kırmızı yanlış alarm ≤ 1/hafta/
-  danışan; başlangıç doğru pencerede ≥ %90 (değilse "daha önce başlamış olabilir" uyarısı %100); kesin yayılım
-  bağı doğruluğu ≥ %98; sunulan koordinasyon işaretlerinin kesinliği ≥ %90; tahmin kalibrasyonu ±10 puan.
+### 7.3 Maliyet büyüklüğü
 
-### A6 — Yorum düzlemi ve güvenlik *(kabaca 8–10 hafta)*
-- **İşler:** planlayıcı / karantina okuyucu / yazıcı / denetçi ayrımı; yetenek kaydı ve harcama kapısı
-  (Kule'den); atıf ve sayı denetçisi; "ne yaptım" satırı; kalıcı izleme talimatının kurala çevrilmesi ve
-  geri-testi; Türkçe kırmızı takım seti; tutarlılık sınaması; durum notu ve yanıt planı (Pusula'dan, olgu
-  kayıtlarına bağlanarak).
-- **Kapı:** kırmızı takım setinde araç/kural/harcama değişikliği 0, metin sapması ≤ %1; olgusal cümlelerde atıf
-  %100, atıf doğruluğu ≥ %95, sayı eşleşmesi %100; aynı soru ve anlık görüntüde sayılar 5 tekrarda %100 aynı;
-  kriz iletişimi uzmanının 20 senaryoluk kabul değerlendirmesi.
+| Kalem | Büyüklük | Dayanak |
+|---|---|---|
+| X kurumsal erişim | Ayda 42–50 bin $'dan başlıyor (yıllık ≈ 0,5–0,6 milyon $) | İkincil kaynak, **doğrulanamadı** (B) |
+| Dinleme platformu (köprü + yedek) | Yıllık ≈ 25–130 bin $ (Sprinklr daha yüksek) | Kısmen (A) |
+| Yerli medya takip, ajans aboneliği, haber API'si | Teklif | Doğrulanamadı |
+| Yapay zekâ çağrıları, hesaplama, Türkiye'de barındırma | Değişken; harcama defterinde izlenir | — |
+| İnsanlar | Bölüm 7.2; en büyük sürekli kalem 7/24 nöbet | — |
 
-### A7 — İnsan iş akışı, arayüz, bildirim *(A6 ile kısmen paralel; kabaca 6–8 hafta)*
-- **İşler:** analist kuyruğu ve onay kapıları; sürümlü düzeltme kütüphanesi; pano, danışan odası, konuşma,
-  kalite ekranı, kör nokta haritası; eskalasyonlu bildirim; rapor dışa aktarma.
-- **Kapı:** kullanıcının kendi senaryolarıyla kabul testi; kırmızı uyarıdan danışmana ulaşma süresi ölçülmüş;
-  okunmayan bildirimin eskalasyonu sınanmış; analistin kuyruktan karar süresi ölçülmüş.
+Kesin bütçe A0b sonunda tekliflerle çıkar.
 
-### A8 — Gölge işletim *(kabaca 6–8 hafta)*
-- **Amaç:** canlı veriyle, danışana hiçbir şey gitmeden, gerçek dünyada ölçmek.
-- **İşler:** 2–3 gerçek danışanla tam işletim; kullanıcının mevcut yöntemiyle (elle izleme ya da satıcı aracı)
-  yan yana; her hafta kalite ölçümü; yaşanan her gerçek olay için sonradan bağımsız kronoloji ve kıyas.
-- **Kapı:** bölüm 2'deki bütün hedefler canlı veride, güven aralığının alt sınırıyla karşılanıyor; sessiz
-  arıza 0; kullanıcı "danışana bununla gidebilirim" diyor.
-- **Durma koşulu:** bir boyut iki ardışık hafta hedefin altındaysa ilgili aşamaya geri dönülür.
+---
 
-### A9 — Canlıya alma ve sürekli kalite *(sürekli)*
-- Haftalık kalite ölçümü ve kalite ekranı; aylık yeni geçmiş olay eklenerek geri-test; model, kural ve varlık
-  dosyası değişiklikleri regresyon setinden geçmeden canlıya alınmaz; kayma alarmı; üç ayda bir kırmızı takım
-  ve bağımsız kod incelemesi.
+## 8. Aşamalı plan ve kontrol kapıları
+
+**Her aşama aynı şablonla:** Amaç · Önkoşul · İşler · Sahip (yapan) · Ölçen (yapmayan) · Kapı (ön kabul / kesin kabul)
+· Durma ve geri dönüş. Kapıyı ölçen, işi yapan değildir; kapı sonucu, kullanılan veri ve tarih depoya yazılır; kapı
+kararını kullanıcı, bağımsız teknik danışmanın görüşüyle onaylar.
+
+### A0a — Hukuki zemin *(0–6. hafta; para harcanmaz, gerçek kişisel veri işlenmez)*
+- **Amaç:** gerçek veriyle çalışmanın hukuki dayanağını kurmak.
+- **İşler:** avukat görüşü (bölüm 4.4); işleme dayanağı ve denge testi; aktarım envanteri; barındırma kararı; geliştirme
+  ve etiketleme veri kuralı (kimliksiz/sentetik geliştirme, etiketçi gizlilik ve veri işleyen sözleşmeleri); X'e yazılı
+  sorular gönderilir; olay müdahale planı taslağı.
+- **Sahip:** hukuk danışmanı, KVKK sorumlusu, proje yöneticisi. **Ölçen:** bağımsız teknik danışman + lider.
+- **Kapı:** yazılı hukuki görüş; aktarım envanteri; barındırma kararı; yanıt→özellik tablosu; etiketçi sözleşme şablonu.
+- **Durma:** görüş gerçek veri işlemeyi hiçbir yolla mümkün görmezse proje A seçeneğine (satın al) indirgenir ve
+  kullanıcıya sunulur.
+
+### A0b — Satıcılar, X, model yolu *(4–14. hafta)*
+- **Önkoşul:** A0a.
+- **İşler:** birincil kaynaktan doğrulama (bölüm 11); X kurumsal satış görüşmesi; X'in yazılı yanıtları; yapay zekâ
+  sağlayıcısıyla standart sözleşme ve sıfır saklama görüşmesi; model yolu seçimi; satıcılara bilgi talebi; **ilk gerçek
+  veri sınaması** (Bluesky, GDELT, YouTube; ardından küçük bütçeli X kullandıkça öde) — amaç bağdaştırıcıların gerçek
+  veriyle çalıştığını görmek; Türkiye'den API erişiminin kısıtlama dönemlerindeki davranışı (geçmiş dönemler ve canlı
+  sınama); köprü çözüm sözleşmeleri.
+- **Sahip:** veri ortaklıkları yöneticisi, mühendislik lideri. **Ölçen:** değerlendirme lideri + bağımsız teknik danışman.
+- **Kapı:** her kanal için birincil kaynaklı "yapılabilir / yapılamaz / koşullu"; X yanıtları alınmış ya da 8 hafta
+  içinde gelmediyse **"X kısmi" sütunu** uygulanır; bulut yolu için **imza + Kurul bildirimi tamam** (takvim yetmez) ya
+  da yerinde model yolu seçilmiş; ilk gerçek veri sınamasında her bağdaştırıcı çalışıyor; en az iki aday sağlayıcıdan
+  örnek veri sözü; teklif bazlı bütçe.
+- **Durma:** X kurumsal erişimi reddedilirse R4 senaryosu: kapsam hedefi "dolaylı" olur; kullanıcı yazılı olarak
+  devam/vazgeç kararı verir.
+
+### A1 — Ölçü aleti *(2–20. hafta; bağımsız değerlendirme ekibi)*
+- **Önkoşul:** gerçek veriyle etiketleme için A0a.
+- **İşler:** kod kitabı; etiketçilerin işe alımı, eğitimi, uyum ölçümü; **40 olay havuzu** (10 büyük kriz tam kronoloji —
+  kullanıcının önerdikleri dahil — + ≥ 30 küçük dalga hafif kronoloji; birden çok danışan türü ve sektör); bilinen-öğe
+  listeleri; altın set: tabakalı ve zaman bölmeli, **aday havuzu geniş sorgu taslağıyla** üretilir (A3'ten sonra
+  tamamlayıcı örnek eklenir); olaysız dönem sayım verisi (≥ 100 danışan-hafta, yanlış alarm için); değerlendirme
+  altyapısı ("o ana kadar bilinen veri" kuralıyla geri-test); **ilk taban ölçüm:** Pusula'nın mevcut analizi ve köprü
+  platformu aynı sette ölçülür.
+- **Sahip:** değerlendirme lideri. **Ölçen:** kronolojileri ikinci bir araştırmacı bağımsız doğrular; uyumu istatistik
+  ölçer. Altın set yalnız insanlarca etiketlenir; sistemin model ailesi katkı vermez.
+- **Kapı:** her görev için α ölçülmüş ve bölüm 2.4'e göre sınıflanmış; 40 olay kronolojisi doğrulanmış; altın set
+  bölüm 2.3'teki sayılara ulaşmış; taban ölçüm raporu.
+- **Durma:** bölüm 2.4'teki α kuralları; bir görevin düşük uyumu projeyi durdurmaz.
+
+### A2 — Veri yarışması *(14–20. hafta)*
+- **Önkoşul:** A0b; A1'in olay listesi ve kronolojileri.
+- **İşler:** adaylardan aynı geçmiş olaylar için veri; kronolojilere ve bilinen-öğe listelerine karşı **tamlık**
+  (bilinen öğelerin kaçı var), gecikme, erişim verisi; %10 akış ve anlamsal işlecin geçmişe uygulanabilirliği ve
+  Türkçe başarımı; sözleşme koşullarının kıyası.
+- **Sahip:** veri ortaklıkları yöneticisi + veri mühendisi. **Ölçen:** değerlendirme ekibi.
+- **Kapı:** X için seçilen kaynakta bilinen-öğe tamlığı ≥ %95 (kaynak düzeyi; sorgudan bağımsız); kör nokta haritasının
+  ilk sürümü; sözleşmeler hukuk onaylı. (Kapsamın sorgu + sınıflandırıcı düzeyindeki ölçümü A3'tedir; A2 kaynağın
+  kendisini ölçer.)
+- **Durma:** hiçbir kaynak tamlık eşiğine ulaşmıyorsa eşik değil **kaynak seti** değişir (ek kaynak, farklı sözleşme);
+  hâlâ ulaşılamıyorsa kullanıcının yazılı kararıyla kanal bazında hedef yeniden belirlenir ve kalite ekranında görünür.
+
+### A3 — Toplama, ilgililik, kapsam *(20–30. hafta)*
+- **Amaç:** doğru içeriği eksiksiz ve ölçülerek toplamak.
+- **İşler:** varlık dosyası ve düzenleyicisi; üç toplama yolu (hesap listesi X yanıtına göre); ilgililik ve eşsesli
+  ayrımı; kapsam ölçümü (bölüm 2.2); kapsam düşüş alarmı ve neden ayrımı; etkileşim yeniden ölçümü; kaynak kalp atışı ve
+  kanarya; veri ikametgâhı yönlendirmesi; kullanım politikası motoru; silme yayılımı; Instagram etiket ön kaydı; erişim
+  olayı takvimi; harcama defteri.
+- **Sahip:** veri mühendisi, bilgi erişimi mühendisi (model ekipleri) + mühendislik lideri. **Ölçen:** değerlendirme ekibi.
+- **Kapı (ön kabul):** geri-test olaylarında ilgililik ≥ %90, geri-test kapsamı ≥ %90; ilgililik sınıflandırıcısı F1 ≥
+  0,85; kaynak kesintisi benzetiminde alarm ≤ 5 dk; kanarya alarmı çalışıyor; silme yayılımı bütün kayıt türlerinde
+  ve (bulut yolu varsa) sağlayıcıda sınanmış; politika motoru sınama setindeki yasaklı isteklerin %100'ünü reddediyor;
+  yönlendirme dışı veri akışı 0; harcama defteri sağlayıcı kayıtlarıyla mutabık.
+- **Durma/geri dönüş:** ilgililik ya da kapsam hedefi tutmazsa A2'ye (kaynak) ya da varlık dosyasına dönülür; politika
+  ya da silme sınaması başarısızsa gerçek veri akışı durdurulur.
+
+### A4 — Anlama *(24–38. hafta)*
+- **Amaç:** Türkçe içeriği doğru ve ölçülmüş güvenle okumak.
+- **İşler:** Türkçe kodlayıcı (eğitim verisi kuralı 4.3b); karantina büyük dil modeli; **kodlayıcı ↔ büyük dil modeli
+  karşılaştırması** kendi altın setimizde (model yolu kararını kesinleştirir); belirsizlik ve ayrışmaya göre insan
+  kuyruğu; kalibrasyon; oran düzeltme; anlatı kümeleme, kalıcı kimlik, ad önerisi; iddia tespiti ve teyit kaynağı
+  eşleştirmesi (koşulları A0b'de); olası otomatik içerik işareti.
+- **Sahip:** Türkçe dil işleme mühendisi (model ekibi) + lider. **Ölçen:** değerlendirme ekibi, kör altın set.
+- **Kapı (ön kabul):** bölüm 2.1'deki anlama hedefleri; büyük dil modeli–insan uyumu insan–insan uyumunun en çok 0,05
+  altında (değilse o görevde tek başına kullanılmaz).
+- **Durma/geri dönüş:** X ince ayar yanıtı olumsuz ve X dışı veriyle hedef tutmuyorsa kullanıcıyla hedef yeniden
+  değerlendirilir (yazılı karar); alay alt kümesi yalnız raporlanır.
+
+### A5 — Olgu düzlemi *(28–40. hafta)*
+- **Amaç:** sayıları, alarmları ve çıkarımları ölçülmüş doğrulukla üretmek.
+- **İşler:** mevsimsel taban; iki alarm serisi ve "viral an" ayrımı; uyarı birleştirme; yayılım (kesin/olası) ve arşivde
+  geriye genişletme; anlatı izleme; koordinasyon (sıfır modeli, p eşiği, alternatif açıklamalar, kimliksiz kanıt);
+  otomatik içerik payı; tahmin; risk; kanıt deposu ve anlık görüntü.
+- **Sahip:** istatistik ve ağ bilimi (model ekipleri) + lider. **Ölçen:** değerlendirme ekibi, 40 olay ve olaysız dönem.
+- **Kapı (ön kabul):** bölüm 2.1'deki çıkarım ve zamanlılık hedefleri (olay yakalama, başlangıç penceresi, kesin bağ,
+  yanlış alarm, gecikme); övgü dalgası geri-testlerinde yanlış kırmızı alarm 0; bilinen koordineli kampanyaların
+  yakalanma oranı raporlanmış (P12'nin ikinci yönü).
+- **Durma/geri dönüş:** alarm hedefi tutmazsa eşik seçimi ve taban modeli yeniden; geri-test başarısının canlı başarının
+  üst sınırı olduğu kapı raporunda yazılır.
+
+### A6 — Yorum düzlemi ve güvenlik *(36–46. hafta)*
+- **Amaç:** konuşan katmanı güvenli, dayanaklı ve tutarlı kılmak.
+- **İşler:** planlayıcı / karantina / yazıcı / denetçi / yerleştirici; opak kimlikler; sözle nicelik yasağı; yetenek kaydı
+  ve harcama kapısı; "ne yaptım"; araç/sorgu seçimi değerlendirme seti; kalıcı izleme talimatı ve geri-testi; Türkçe
+  kırmızı takım seti (görünen ad, anlatı adı, görsel içi yazı, yapıştırılan içerik saldırıları dahil); bozulmuş mod;
+  durum notu ve yanıt planı.
+- **Sahip:** ajan mühendisi (model ekibi) + lider. **Ölçen:** değerlendirme ekibi, kırmızı takım, kriz iletişimi uzmanı.
+- **Kapı (ön kabul):** bölüm 2.1'deki sunum ve güvenlik hedefleri; araç/sorgu seçiminde doğruluk ≥ %95; konuşma yanıt
+  süresi p90 ≤ 30 sn; yapay zekâ kesinti benzetiminde uyarı ve pano çalışıyor; **taslak kabulü:** 20 senaryoda olgu
+  hatası 0 ve uzman puanı (1–5) ortalaması ≥ 4, hiçbir senaryoda < 3.
+- **Durma/geri dönüş:** güvenlik hedefinde tek başarılı araç/kural/harcama değişikliği bile canlıya geçişi durdurur.
+
+### A7 — İnsan iş akışı, arayüz, bildirim *(38–48. hafta)*
+- **Amaç:** sistemi kullanıcının ve analistin günlük işine oturtmak.
+- **İşler:** analist kuyruğu, öncelik ve kriz modu; onay kapıları; düzeltme kütüphanesi; pano, oda, konuşma, kalite
+  ekranı, kör nokta haritası, harcama ekranı; eskalasyonlu bildirim; rapor şablonu (zorunlu güven ve kapsam bölümü);
+  **kullanıcı ve analist eğitimi** (dayanak satırını okumak, güven dilini danışana aktarmak).
+- **Sahip:** arayüz ve SRE (model ekibi + insan SRE). **Ölçen:** değerlendirme ekibi + kullanıcı.
+- **Kapı (ön kabul):** kırmızı uyarı → danışmanın okuması p95 ≤ 15 dk; okunmayanın telefon eskalasyonu ≤ 10 dk; **kriz
+  tekrar oynatmasında** (en büyük geçmiş olay 2× hızda) öncelik-1 kuyruk bekleme p95 ≤ 15 dk; kullanıcı senaryolarının
+  ≥ %90'ı yardımsız tamamlanıyor; eğitim tamamlanmış.
+- **Durma/geri dönüş:** kriz tekrar oynatmasında kuyruk taşarsa nöbet planı ve kuyruğa düşme kuralları yeniden.
+
+### Güvenlik kapısı *(46–50. hafta)*
+Bağımsız sızma testi ve bağımsız kod incelemesi; kritik ve yüksek bulgular kapatılmadan A8 başlamaz.
+
+### A8 — Gölge işletim *(50–62. hafta; 12 hafta)*
+- **Amaç:** canlı veriyle, danışana hiçbir şey gitmeden ölçmek.
+- **İşler:** 4–6 gerçek danışanla tam işletim; köprü platformuyla ve kullanıcının yöntemiyle yan yana; yaşanan her olay
+  için sonradan bağımsız kronoloji (olay havuzuna eklenir); haftalık kalite ölçümü; kanarya ve yapay arıza.
+- **Sahip:** proje yöneticisi. **Ölçen:** değerlendirme ekibi.
+- **Kapı (kesin kabul):** bölüm 2.1'deki **bütün tabanlar** birikimli veride karşılanıyor (olay düzeyi metrikler A1 + A8
+  olaylarının birleşimiyle); sessiz arıza 0 (kanarya ve yapay arıza ile); kullanıcı "danışana bununla gidebilirim"
+  diyor.
+- **Durma/geri dönüş:** bölüm 2.4 (4 haftalık birikimli taban altı ya da ardışık izleme alarmı → ilgili aşamaya dönüş;
+  tek hafta düşüşü → inceleme).
+
+### A9 — Canlı ve sürekli kalite *(≈ 14. aydan itibaren)*
+- **Kapı (canlıya alma):** A8 kesin kabulü + güvenlik kapısı + kullanıcı onayı.
+- **Sürekli:** haftalık kalite ekranı; ayda en az bir yeni olay kronolojisi ve geri-test; değişiklikler regresyon setinden
+  geçmeden canlıya alınmaz; üç ayda bir kırmızı takım; yılda bir sızma testi ve kod incelemesi.
+- **Geri çekilme:** bölüm 2.4 kuralıyla bir boyut taban altına inerse o boyutu kullanan ekranlara "ölçüm hedefin altında"
+  uyarısı düşer ve ilgili aşamaya dönülür; güvenlik hedefinde ihlal → konuşan katman bozulmuş moda alınır.
 
 ### A10 — Genişleme *(ölçüm verdikçe)*
-Çoklu ortam kanallarının kendi Türkçe ölçümüyle açılması; yeni kanallar (her biri önce kör nokta haritasında,
-sonra ölçülerek kapsamda); rakip karşılaştırması; olay arşivi ve karşılaştırma; sabah özeti; çok kullanıcı.
+Her yeni kanal ve çoklu ortam yeteneği için **açılış kapısı:** önce kör nokta haritasında; kendi Türkçe örneklerimizle
+ölçüm (ses dökümü kelime hata oranı ≤ %15, görsel yazı ve logo için bilinen-öğe tamlığı); hukuki ve sözleşme kontrolü;
+sonra kapsamda. Rakip karşılaştırma, olay arşivi ve karşılaştırma, sabah özeti, çok kullanıcı aynı kapı mantığıyla.
 
 ---
 
-## 8. Planın kendi denetimi
+## 9. Planın kendi denetimi
 
-"Her adım kontrol edilerek" talebi üç düzeyde karşılanır:
-1. **Tasarım düzeyi:** bu plan bağımsız bir denetim ekibince araştırmalara ve zayıflık listesine karşı
-   sınanır (`D-DENETIM.md`); bulgular plana işlenir.
-2. **Aşama düzeyi:** her aşamanın kapısı sayısaldır ve kapıyı ölçen, işi yapan değildir. Kapı sonucu,
-   kullanılan veri kümesi ve tarih depoya yazılır.
-3. **İşletme düzeyi:** kalite ekranı her hafta günceldir; kullanıcı aracın güvenilirliğini her an görebilir.
+1. **Tasarım düzeyi:** sürüm 2 bağımsız denetimden geçti (`D-DENETIM.md`); 39 bulgunun karşılığı bölüm 14'te. Sürüm 3
+   de A0a'da bağımsız teknik danışmana okutulur.
+2. **Aşama düzeyi:** her kapı sayısal; ölçen ≠ yapan; kapı kararını kullanıcı danışman görüşüyle onaylar.
+3. **İşletme düzeyi:** kalite ekranı; ardışık izleme; aylık yeni olayla geri-test.
 
 ---
 
-## 9. Riskler
+## 10. Riskler
 
 | # | Risk | Etki | Karşılık |
 |---|---|---|---|
-| R1 | X ya da başka bir kaynağın sözleşmesi içeriğin yapay zekâ sağlayıcısına gönderilmesini yasaklıyor | O kaynakta bulut modeli kullanılamaz | A0'da yazılı teyit; yerinde çalışan modeller; buluta yalnız türetilmiş veri (etiket, sayım) |
-| R9 | KVKK yurt dışı aktarım şartları yapay zekâ sağlayıcısıyla karşılanamıyor (standart sözleşme imzalanmıyor; yalnız ABD/küresel işlem yeri) | Gerçek veriyle bulut modeli kullanılamaz; idari para cezası riski | Veri ikametgâhı katmanı; yerinde açık ağırlıklı model yolu; kişisel veri ayıklama; A0'da hukuki görüş gelmeden gerçek veri işlenmez |
-| R10 | X'in kısıtlı kullanım kuralları (kullanıcı izleme, hassas olay izleme) aktör ve koordinasyon özelliklerini ya da siyasi danışanlarla çalışmayı sınırlıyor | Bazı özellikler daralır ya da kapanır; sözleşme ihlali riski | Konu odaklı tasarım; politika motoru; özel kişiler hesap tabanlı toplamaya alınmaz; X'ten yazılı teyit; siyasi danışanlarda özel kurallar |
-| R11 | Silme yükümlülüğü altın seti ve geçmiş olay kayıtlarını aşındırıyor | Ölçümler zamanla daha az temsilî | Kimlik + etiket saklama; aşınma takibi; dönemsel yeni set; kimliksiz kronoloji |
-| R12 | X Enterprise sözleşmesi alınamıyor ya da gecikiyor | Kapsam yalnız dolaylı ölçülür | Kapsam metriği "dolaylı tahmin" diye etiketlenir; ikinci toplayıcı olarak lisanslı aracı; kullandıkça öde ile geçiş |
-| R2 | Veri sağlayıcı kesintisi ya da iflası (pazarda örnekleri var) | Kör kalma | İki bağımsız toplayıcı; gözetim alarmı |
-| R3 | Altın set yetersiz ya da yanlı | Bütün ölçümler yanıltıcı | Bağımsız ekip, uyum eşiği, zaman bölmeli ve tabakalı örnekleme, düzenli yenileme |
-| R4 | Türkiye'de erişim kısıtlaması (platform yavaşlatma/engelleme) | Hacimde yapay düşüş, kitlenin görmediği içerik | Gözetimde "erişim olayı" sınıfı; "TR'de görünmüyor" işareti |
-| R5 | Model sürüm değişimi isabeti sessizce düşürür | Kayma | Sürüm sabitleme, regresyon kapısı |
-| R6 | Analist darboğazı (kriz anında kuyruk taşar) | Gecikme | Önceliklendirme, nöbet planında kriz kapasitesi, takip şirketiyle yedek analist sözleşmesi |
-| R7 | Ölçüm maliyeti (etiketleme) sürdürülemez hale gelir | Kalite ekranı eskir | Aktif öğrenme ile etiketlenecek örneğin akıllı seçimi; asgari haftalık örnek sabit |
-| R8 | Kullanıcı ölçülmüş belirsizliği "araç emin değil" diye okur | Güven kaybı | Arayüzde sade dil, kalite ekranının anlatımı, kabul testinde birlikte okuma |
+| R1 | Bir kaynağın sözleşmesi içeriğin yapay zekâya gönderilmesini yasaklıyor | O kaynakta bulut modeli kullanılamaz | Yazılı teyit; yerinde model; buluta yalnız türetilmiş veri |
+| R2 | KVKK aktarım şartları sağlayıcıyla karşılanamıyor | Bulut modeli yok; ceza riski | Veri ikametgâhı; yerinde model; imza + bildirim olmadan bulut yolu kapalı |
+| R3 | X'in kısıtlı kullanım kuralları özellikleri daraltıyor | Aktör/koordinasyon isimsiz; hesap listesi kapalı | Önceden kararlaştırılmış özellik tablosu (4.3b) |
+| R4 | X kurumsal erişimi alınamıyor ya da gecikiyor | Kapsam yalnız dolaylı | "Dolaylı tahmin" etiketi; hedef karşılanmamış sayılır; yedek aracı; kullanıcı kararı |
+| R5 | Veri sağlayıcı kesintisi, iflası ya da sözleşme değişikliği | Kör kalma | İki toplayıcı; kalp atışı ve kanarya; çıkış maddeleri; veri taşınabilirliği |
+| R6 | Altın set yetersiz ya da yanlı | Ölçümler yanıltıcı | Bağımsız ekip, yalnız insan etiketi, tabakalı/zaman bölmeli örnekleme, düzenli yenileme |
+| R7 | Silme yükümlülüğü altın seti ve arşivi aşındırıyor | Ölçümler daha az temsilî | Kimlik + etiket; aşınma takibi; dönemsel yeni set; kimliksiz kronoloji |
+| R8 | Türkiye'de erişim kısıtlaması | Hacimde yapay düşüş; toplama kesintisi | Erişim olayı takvimi; A0b sınaması; gerekirse röle |
+| R9 | Model sürüm ya da sağlayıcı değişimi isabeti sessizce düşürüyor | Kayma | Sürüm sabitleme; regresyon kapısı; kalite eğrisinde kırılma işareti |
+| R10 | Kriz anında analist kuyruğu taşıyor | Gecikme | Öncelik ve kısma kuralları; yedek havuz; A7 kriz tekrar oynatması |
+| R11 | Etiketleme yükü sürdürülemiyor | Kalite ekranı eskir | Portföy düzeyinde kapsam ölçümü; aktif öğrenmeyle etiket seçimi (ölçüm örneğinden ayrı) |
+| R12 | Kullanıcı ölçülmüş belirsizliği "araç emin değil" diye okuyor | Güven kaybı | Günlük dille hedefler; eğitim; rapor şablonu |
+| R13 | Platform koşulları değişiyor (X 2025 ve 2026'da değiştirdi; Telegram 2026) | Özellik ya da kaynak kapanır | Üç ayda bir koşul taraması; yanıt→özellik tablosu güncellenir |
+| R14 | Mevzuat ya da içtihat değişiyor (KVKK, Anayasa Mahkemesi 2026) | Hukuki dayanak değişir | Hukuk danışmanının dönemsel gözden geçirmesi |
+| R15 | Kilit kişi ayrılıyor (değerlendirme lideri, mühendislik lideri) | Bilgi kaybı | Kararların ve kapı sonuçlarının depoda yazılı olması; yedek kişi |
+| R16 | Maliyet aşımı | Kapsam daraltılır | Teklif bazlı bütçe (A0b); harcama ekranı; tavanlar |
+| R17 | Geliştirmede kullanılan model ekiplerinin kotası ya da erişimi kesiliyor | Takvim kayar | En çok 2–3 eşzamanlı model ekibi; işlerin depoda yazılı sözleşmelerle bölünmesi |
 
 ---
 
-## 10. Doğrulanmamış varsayımlar (A0'da kontrol edilecek)
+## 11. Doğrulanmamış varsayımlar (A0b'de birincil kaynaktan kontrol)
 
-Araştırmalar dış sitelerin tam metnine erişemedi; aşağıdakiler plan için önemlidir ve birincil kaynaktan
-doğrulanmalıdır:
-1. Hangi dinleme platformlarının X ile **bugün** geçerli resmî veri ortaklığı olduğu ve ham veriyi API ile
-   verip vermediği.
-2. X Enterprise'ın fiyatı, %10 örneklem akışının ve anlamsal işlecin Türkçede nasıl çalıştığı.
-3. X sözleşmesinin bir LLM'e analiz için göndermeye ve küçük sınıflandırıcı ince ayarına bakışı (açık hüküm
-   bulunamadı).
-4. Sayım ucunun silinen gönderileri düşüp düşmediği (yalnız eski belgede geçiyor).
-5. Türkiye'deki medya takip şirketlerinin verisinin üçüncü sisteme ve yapay zekâ sağlayıcısına
-   aktarılabilirliği; tiraj/reyting verisi.
-6. Yapay zekâ sağlayıcısının KVKK standart sözleşmesine yaklaşımı ve sıfır saklamanın kapsadığı modeller.
-7. Türkçe duruş, alay ve çoklu ortam yöntemlerinin ölçülmüş başarı rakamları (araştırmada çoğu özetten alındı).
-8. Ekşi Sözlük ve yerel forumlar için lisans olasılığı.
+1. Hangi dinleme platformlarının X ile **bugün** geçerli resmî veri ortaklığı olduğu ve ham veriyi API ile verip vermediği.
+2. X kurumsal erişiminin fiyatı; %10 örneklem akışının ve anlamsal işlecin Türkçe başarımı ve geçmişe uygulanabilirliği.
+3. X sözleşmesinin bir LLM'e gönderme, ince ayar, düzeltme kütüphanesi ve aktif öğrenmeye bakışı.
+4. Sayım ucunun silinen gönderileri düşüp düşmediği; `is:retweet` ile yeniden paylaşım sayımının davranışı.
+5. X aramasının Türkçe ekli biçimleri (ör. "Anadolu Süt'ün", "Anadolu Süt'e") nasıl eşleştirdiği.
+6. Türkiye'deki medya takip şirketlerinin verisinin aktarılabilirliği ve tiraj/reyting verisi.
+7. Yapay zekâ sağlayıcısının KVKK standart sözleşmesine yaklaşımı ve sıfır saklamanın kapsadığı modeller.
+8. Türkçe duruş, alay ve çoklu ortam yöntemlerinin ölçülmüş başarı rakamları (çoğu özetten alındı).
+9. Teyit kuruluşlarının veri paylaşımı ve ticari kullanım koşulları.
+10. Ekşi Sözlük ve yerel forumlar için lisans olasılığı.
+11. KVKK veri ihlali bildirim süresi (denetime göre 72 saat).
+12. Türkiye'deki erişim kısıtlamalarının API erişimini etkileyip etkilemediği.
 
 ---
 
-## 11. Kullanıcıdan gereken kararlar
+## 12. Sözlük
 
-1. **Eşikler:** bölüm 2'deki başlangıç hedefleri kabul mü? Hangisi sizin için pazarlık konusu değil?
-2. **İnsan modeli:** nöbetçi analistler kendi ekibiniz mi, Türkiye'deki bir medya takip şirketinin hizmeti mi,
-   karışık mı?
-3. **İlk danışanlar:** gölge işletimde hangi 2–3 danışanla çalışılacak?
-4. **Geçmiş olaylar:** ölçü aleti için hangi 5–10 Türkiye olayı (sizin bildiğiniz, sonucunu bildiğiniz olaylar
-   en değerlisidir)?
-5. **Nabız ve Pusula:** Rasat'ın parçaları olarak mı kalsın (Nabız'ın tutumlu tarama yaklaşımı, Pusula'nın
-   alan modeli), yoksa arşive mi alınsın?
-6. **Kule:** Kule planı Rasat'ın yorum düzlemine dönüştü; ayrı bir ürün olarak sürdürülmesine gerek yok — kabul mü?
-7. **Siyasi danışanlar:** siyasetçi ya da siyasi kurum danışanınız var mı, olacak mı? X'in hassas olay izleme
-   yasağı ve KVKK'nın özel nitelikli veri kuralları bu danışanlarda ek kısıt getirir; tasarım buna göre ayarlanır.
-8. **Veri ikametgâhı:** hukuki görüş geldiğinde üç yol (sağlayıcı sözleşmesi / kendi altyapımızda model /
-   kişisel veri ayıklama) arasında seçim; öneri, hukuki görüş elverdiği ölçüde yerinde model ağırlıklı
-   karma yol.
+| Terim | Sade anlamı |
+|---|---|
+| Kapsam (duyarlılık) | İlgili içeriğin ne kadarını gördüğümüz |
+| İlgililik (kesinlik) | Gördüğümüzün ne kadarının gerçekten danışanla ilgili olduğu |
+| Güven aralığı, taban | Ölçümün belirsizliği; "en kötü ihtimalle şu kadar" |
+| Altın set | Uzman insanların tek tek etiketlediği, doğrunun bilindiği örnek kümesi; her şey ona karşı ölçülür |
+| Krippendorff α | Etiketçilerin birbiriyle ne kadar anlaştığı; düşükse "doğru" bile tartışmalıdır |
+| Makro-F1 | Bütün duruş türlerinde ortalama isabet (hem kaçırmayı hem yanlış etiketlemeyi cezalandırır) |
+| Kalibrasyon | Modelin "%80 eminim" demesinin gerçekten 80 doğruya karşılık gelmesi |
+| Oran düzeltme (DSL/PPI) | Model etiketlerinin hatasını küçük bir insan örneğiyle düzelterek oranı doğru tahmin etme |
+| Elüzyon örneklemesi | "Dışarıda bıraktıklarımızdan" rastgele örnek alıp aralarında ilgili olanı arama |
+| Yakala-yeniden yakala | Birbirinden bağımsız yollarla yakalananların örtüşmesinden toplam sayıyı tahmin etme (yaban hayatı sayımından gelir) |
+| Bilinen-öğe testi | Başka yoldan bulduğumuz gönderilerin kaçının sistemde olduğu |
+| Tam akış (firehose), %10 örneklem akışı | X'in bütün herkese açık gönderileri; ya da bunların rastgele onda biri |
+| Geri-test | Sistemi geçmiş bir olayda, o ana kadarki veriyi bilerek çalıştırıp ne yapacağını görme |
+| Sıfır modeli | "Herhangi bir organizasyon olmasaydı" doğal kullanıcıların ne kadar benzer davranacağının ölçüsü |
+| Karantina okuyucu | Gönderileri okuyan ama hiçbir işlem yapamayan yapay zekâ adımı |
+| Kanarya | Ne zaman geleceğini bildiğimiz içerik; gelmezse sistem arızalı demektir |
+| Kırmızı takım | Sistemi kandırmaya çalışan ekip |
+| Regresyon seti | Her değişiklikten sonra çalıştırılan, eskisinden kötüleşme olup olmadığını gösteren sınama kümesi |
+| CUSUM, EARS | Salgın gözetiminden gelen, "olağandışı artış"ı yakalama yöntemleri |
+| Gömme | Metni anlamına göre sayılara çeviren yöntem; benzer anlamlı metinleri yakın gösterir |
+| SRE | Sistemi ayakta tutan, kesintiye müdahale eden işletim mühendisi |
+| Sıfır saklama (ZDR) | Yapay zekâ sağlayıcısının gönderilen veriyi hiç saklamaması |
+
+---
+
+## 13. Kullanıcıdan gereken kararlar
+
+1. **Yol:** karma (C) + köprü çözüm onaylanıyor mu? (bölüm 6)
+2. **Süre ve bütçe büyüklüğü:** 12–18 ay ve bölüm 7.3'teki büyüklükler kabul mü?
+3. **Doğruluk hedefleri:** bölüm 2.1'deki günlük dille yazılmış hedefler uygun mu? Hangisi sizin için pazarlık konusu değil?
+4. **Siyasi danışanlar:** olacak mı? (X'in hassas olay yasağı ve KVKK özel nitelikli veri kuralları ek kısıt getirir.)
+5. **Nöbetçi analistler:** kendi ekibiniz mi, dış hizmet mi, karışık mı? (Dış hizmette çıkar çatışması maddesi gerekir.)
+6. **Geçmiş olaylar:** ölçü aleti için hatırladığınız, sonucunu bildiğiniz 10 büyük Türkiye olayı.
+7. **İlk danışanlar:** gölge işletimde hangi 4–6 danışan?
+8. **Bağımsız teknik danışman:** kapı kararlarında size yardım edecek bir danışman istiyor musunuz? (Önerilir.)
+9. **Nabız ve Pusula:** Nabız köprü dönemde X sayımı için kalsın mı; Pusula'nın alan modeli Rasat'a temel olsun mu?
+10. **X'in yanıtı kısmi gelirse:** bölüm 4.3b'deki "en temkinli yorum" sütunu kabul mü?
+
+---
+
+## 14. Denetim izi: D-DENETIM bulgularının karşılığı
+
+| No | Önem | Karşılık (bölüm) |
+|---|---|---|
+| 1 | Kritik | Barındırma Türkiye'de, röle seçeneği, aktarım envanteri, bildirim içeriği kişisel veri taşımaz, geliştirme kimliksiz veriyle (3.9, 4.3a) |
+| 2 | Kritik | Hedef/taban ayrımı, 4 haftalık portföy penceresi, örnek sayıları tablosu, 40 olay havuzu, ön/kesin kabul, ardışık izleme ve çoklu karşılaştırma (2.1–2.4) |
+| 3 | Yüksek | Üç bağımsız yakalama yolu, bağımlılığı hesaba katan tahminci, satıcı yalnız yedek (2.2, 3.2) |
+| 4 | Yüksek | Kanal × içerik türü paydası, metinsiz medya kör nokta, çelişkide düşük değer, geri-test kapsamı ayrı (2.2) |
+| 5 | Yüksek | Hesap listesi X teyidine kadar kapalı; X'e yedi soru; yanıt→özellik tablosu; boykot, tüketici kuruluşu, GDPR (3.2, 4.3a–b) |
+| 6 | Yüksek | Silme yayılımı tablosu, sağlayıcıda sıfır saklama ön koşulu, K9 tanımı, kimliksiz koordinasyon kanıtı (4.3c) |
+| 7 | Yüksek | A0a/A0b ayrımı; gerçek veri A0a'dan sonra; bulut yolu imza + bildirim olmadan kapalı; kimliksiz geliştirme (8) |
+| 8 | Yüksek | Tek aşama şablonu; A6/A7 sayısal kapılar; kanarya ve yapay arıza; ölçen ≠ yapan (8, 3.2) |
+| 9 | Yüksek | α bantları; A2 durma koşulu "kaynak seti değişir"; R4 indirgeme kuralı; tek hafta düşüşü yalnız inceleme (2.4, 8, 4.2) |
+| 10 | Yüksek | Opak kimlik, yerleştirici, yapıştırılan içerik karantinada, genişletilmiş kırmızı takım, geliştirme kuralı (3.5, 3.9) |
+| 11 | Yüksek | Takvim ve kritik yol, kadro, maliyet büyüklüğü, köprü çözüm (7, 6) |
+| 12 | Yüksek | Kur/al/karma karşılaştırması; pazar cümleleri "bulunamadı" düzeyine indirildi (6, 1.2) |
+| 13 | Yüksek | Kapasite modeli, öncelik ve kısma, iki ayrı zamanlılık, dış analist sözleşme maddeleri, A7 kriz tekrar oynatması (3.6, 8) |
+| 14 | Yüksek | İnsan mühendislik lideri, proje yöneticisi, SRE, bağımsız teknik danışman, R17 (7.2, 10) |
+| 15 | Yüksek | Olay müdahale planı, danışan bazında ayrım, sızma testi A8 öncesi (3.9, 8) |
+| 16 | Orta | Harcama defteri ve ekranı, tavanlar, mutabakat (3.10, 3.7) |
+| 17 | Orta | İki alarm serisi, "viral an", uyarı birleştirme, portföy yanlış alarmı (3.4) |
+| 18 | Orta | Otomatik içerik payı ayrı sütun (3.3, 3.4) |
+| 19 | Orta | Tek eğitim kuralı; düzeltme ve aktif öğrenme kapsamda; olumsuz senaryoda A4 hedefi (4.3b, 8) |
+| 20 | Orta | Kodlayıcı üstünlüğü koşullu; A4'te karşılaştırma ve model yolu kararı (3.3, 8) |
+| 21 | Orta | Kademe 3 hukuki görüşe bağlı; kaynak bazında yapay zekâya gitme kuralı; WhatsApp sorusu (4.1) |
+| 22 | Orta | "TR'de görünmüyor" hukuki görüşe kadar yalnız sayım (4.3d) |
+| 23 | Orta | Görüntüleme ve paylaşım politikası; satıcı sorusu (4.3d, 4.4) |
+| 24 | Orta | KVKK yükümlülükleri ve yanıt→özellik tablosu; özel nitelikli çıkarım sınırı (4.3a, 3.3) |
+| 25 | Orta | Bağımlılık tablosu ve kritik yol; altın set aday havuzu (7.1, 8) |
+| 26 | Orta | Sözle nicelik yasağı; haftalık ≥ 200 cümlelik insan örneği (3.5) |
+| 27 | Orta | Altın set yalnız insan; sistemin model ailesi ölçüme katkı vermez (2.3, 3.6) |
+| 28 | Orta | Etiketleme yükü hesabı; portföy düzeyi; aktif öğrenme örneği ölçümden ayrı (7.2, 3.6) |
+| 29 | Orta | Çıkış planı soruları; sağlayıcı değişimi regresyondan geçer; yapay zekâ bozulmuş modu (4.4, 3.8, 3.5) |
+| 30 | Orta | Taslak kabul ölçütü; olay sonrası kayıt (8 A6, 3.6) |
+| 31 | Orta | "Kamuya hiç" kuralı; alternatif açıklamalar; p < 0,01 (1.4, 3.4) |
+| 32 | Orta | Sözlük, günlük dille hedefler, karar özeti, genişletilmiş kararlar (12, 2.1, 0, 13) |
+| 33 | Orta | Kullanıcı ve analist eğitimi; rapordaki zorunlu güven ve kapsam bölümü (8 A7, 3.7) |
+| 34 | Düşük | N5 anlatı kimliğine ve anlatı metriklerine bağlandı (5, 2.1) |
+| 35 | Düşük | Kod incelemesi A8 öncesi (8) |
+| 36 | Düşük | Varsayımlar listesine eklendi (11) |
+| 37 | Düşük | Düzeltildi: kapsam düşüşünün olası nedenleri; "imzalanana kadar"; DHA/İHA; YouTube; silme kapsamı (3.2, 4.1, 4.3c) |
+| 38 | Düşük | Kelime hata oranı, yorum tutarlılığı, anlatı metrikleri sözleşmede (2.1) |
+| 39 | Düşük | R13–R17 eklendi; numaralar sıralandı (10) |
