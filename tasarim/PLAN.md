@@ -333,6 +333,9 @@ profilinin çıkarılıp mesaj hedeflemesinde kullanılmasını kapsamaz (bu bir
 | **6** | **"Kimlerin takip ettiği" toplu yakınlık** | Bir çerçeveyi kullanan gönderilerin yazarlarının en çok takip ettiği **kamusal** hesaplar, kişiler saklanmadan toplu sayımla hesaplanır. Çıktı yalnız kamusal hesap listesi ve oranlar. | "Hangi ünlüler/kanallar bu kitleye ulaşıyor" | Pahalı (takip listesi okuma hesap başı 0,010 $, kişi başına yüzlerce kayıt); geçici işleme de siyasi çıkarıma yakın | **Gri** → avukat + X |
 | **7** | **X'ten yazılı onay** | Sözleşme "X'in yazılı onayı olmadan" diyor; belirli bir siyasi kullanım için başvurulabilir | Tek meşru "bireysel" yol | Onay olasılığı düşük; kurumsal paket gerekebilir | — |
 
+**Gri alan yöntemleri** (kimliksiz olaylar arası örtüşme ölçümü, ≥ 10 bin etkileyici haritası, "işle-istatistiğe
+çevir-unut", danışan başına "uyum profili"): `F-GRI-ALAN.md`.
+
 **Kurulmayacak olanlar:** olaylar arası kişi düzeyinde siyasi/etnik/dini kümeleme; böyle bir listeden benzer kitle
 (lookalike) ya da yeniden hedefleme; X hesaplarını rıza olmadan gerçek kişilerle eşleştirme; miting, protesto, eylem
 izleme ve uyarısı.
@@ -362,10 +365,13 @@ inceleyen yapay zekâ destekli bir kitle analizi sunumu (Temmuz–Ekim 2025). Be
 - **Belgede KVKK, rıza, saklama, kaynak ya da platform koşullarına dair tek cümle yok.** Doğruluk ya da güven beyanı da
   yok.
 
-**Değerlendirme:**
-- Sunum "toplu" görünüyor, ama segmentin her kişiye atanması ve reklam hedeflemesine taşınması, X'in (d) maddesinin ve
-  KVKK'nın özel nitelikli veri kuralının tam ortasında duruyor.
-- Bu belge bir "boşluk" değil, **henüz şikâyet almamış bir risk** örneği. Model alınmamalı.
+**Değerlendirme (düzeltilmiş — ayrıntı `F-GRI-ALAN.md` §1):**
+- Açıkça hukuka aykırı değil; savunma argümanları olan bir gri alan. Dayanabileceği argümanlar: KVKK 28/1-b anonim
+  istatistik istisnası, kamuya açık veri ve AYM'nin 27.01.2026 tarihli iptal kararı, "etkileyici" çerçevesi, hedeflemenin
+  platformda yapılması.
+- En zayıf noktaları: etnik kimlik segmenti (özel nitelikli veri), mikro etkileyicilerin adla listelenmesi,
+  anonimleştirmenin ne zaman yapıldığının belirsizliği.
+- X verisi kullanılıyorsa, segmentin kişilere atanması X'in "bireysel profilleme" yasağına takılır (sözleşme riski).
 
 **Alınabilecek iyi uygulamalar:**
 - Olayı fazlara bölen kronoloji anlatımı.
